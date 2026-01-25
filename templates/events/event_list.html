@@ -1,0 +1,247 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Events - Kilimanjaro Revival Temple{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Page Header -->
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold text-primary mb-3">Church Events</h1>
+        <p class="lead text-muted">Join us for our upcoming events, services, and special gatherings.</p>
+    </div>
+
+    <!-- Filter Controls -->
+    <div class="card shadow-sm mb-5">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h5 class="card-title mb-3 mb-md-0">Filter Events</h5>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex flex-wrap gap-2 justify-content-md-end">
+                        <a href="?filter=upcoming" class="btn btn-sm {% if filter == 'upcoming' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                            <i class="fas fa-calendar-alt me-1"></i> Upcoming
+                        </a>
+                        <a href="?filter=past" class="btn btn-sm {% if filter == 'past' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                            <i class="fas fa-history me-1"></i> Past Events
+                        </a>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-filter me-1"></i> Categories
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="?">All Categories</a></li>
+                                {% for cat in categories %}
+                                <li><a class="dropdown-item" href="?category={{ cat.slug }}">{{ cat.name }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Events Grid -->
+    {% if events %}
+    <div class="row g-4">
+        {% for event in events %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm border-0 event-card">
+                <!-- Event Image -->
+                {% if event.image %}
+                <img src="{{ event.image.url }}" class="card-img-top" alt="{{ event.title }}" style="height: 200px; object-fit: cover;">
+                {% else %}
+                <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                    <i class="fas fa-calendar-day fa-4x text-primary"></i>
+                </div>
+                {% endif %}
+                
+                <!-- Event Date Badge -->
+                <div class="position-absolute top-0 start-0 m-3">
+                    <div class="bg-primary text-white text-center p-2 rounded" style="width: 60px;">
+                        <div class="fw-bold fs-5">{{ event.start_date|date:"d" }}</div>
+                        <div class="small">{{ event.start_date|date:"M" }}</div>
+                    </div>
+                </div>
+                
+                <!-- Event Content -->
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="card-title fw-bold text-primary">{{ event.title }}</h5>
+                        {% if event.is_featured %}
+                        <span class="badge bg-warning text-dark">Featured</span>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Event Details -->
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center text-muted mb-2">
+                            <i class="fas fa-clock me-2"></i>
+                            <small>{{ event.start_time|time:"g:i A" }} 
+                                {% if event.end_time %} - {{ event.end_time|time:"g:i A" }}{% endif %}
+                            </small>
+                        </div>
+                        <div class="d-flex align-items-center text-muted mb-2">
+                            <i class="fas fa-map-marker-alt me-2"></i>
+                            <small>{{ event.location|default:"Church Premises" }}</small>
+                        </div>
+                        {% if event.category %}
+                        <div class="mb-2">
+                            <span class="badge bg-secondary">{{ event.category.name }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <p class="card-text text-muted">
+                        {{ event.short_description|default:event.description|truncatechars:120|safe }}
+                    </p>
+                    
+                    <!-- Registration Info -->
+                    {% if event.requires_registration %}
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <small class="text-muted">
+                            <i class="fas fa-user-check me-1"></i>
+                            Registration Required
+                        </small>
+                        {% if event.max_attendees > 0 %}
+                        <small class="text-muted">
+                            <i class="fas fa-users me-1"></i>
+                            {{ event.registrations.count }}/{{ event.max_attendees }}
+                        </small>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Card Footer -->
+                <div class="card-footer bg-transparent border-0 pt-0">
+                    <div class="d-grid">
+                        <a href="{% url 'core:event_detail' event.slug %}" class="btn btn-outline-primary">
+                            View Details <i class="fas fa-arrow-right ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <nav aria-label="Events pagination" class="mt-5">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if filter %}&filter={{ filter }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">
+                    <i class="fas fa-chevron-left me-1"></i> Previous
+                </a>
+            </li>
+            {% endif %}
+            
+            {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ num }}{% if filter %}&filter={{ filter }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">
+                    {{ num }}
+                </a>
+            </li>
+            {% endif %}
+            {% endfor %}
+            
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if filter %}&filter={{ filter }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">
+                    Next <i class="fas fa-chevron-right ms-1"></i>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+    
+    {% else %}
+    <!-- No Events Message -->
+    <div class="text-center py-5">
+        <div class="alert alert-info mx-auto" style="max-width: 500px;">
+            <i class="fas fa-calendar-times fa-3x mb-3 text-primary"></i>
+            <h4>No Events Found</h4>
+            <p class="mb-0">
+                {% if filter == 'past' %}
+                There are no past events to display.
+                {% else %}
+                There are no upcoming events scheduled at the moment.
+                {% endif %}
+            </p>
+            {% if filter != 'upcoming' %}
+            <div class="mt-3">
+                <a href="?filter=upcoming" class="btn btn-primary">
+                    View Upcoming Events
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Subscribe to Calendar -->
+    <div class="card bg-light border-0 mt-5">
+        <div class="card-body text-center py-5">
+            <i class="fas fa-calendar-plus fa-4x text-primary mb-4"></i>
+            <h3 class="fw-bold mb-3">Never Miss an Event</h3>
+            <p class="text-muted mb-4">Subscribe to our calendar to stay updated on all church events and activities.</p>
+            <a href="{% url 'core:contact' %}" class="btn btn-primary btn-lg">
+                <i class="fas fa-calendar-alt me-2"></i>Get Event Updates
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .event-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .event-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+    }
+    
+    .event-card .position-absolute {
+        z-index: 1;
+    }
+    
+    .badge {
+        font-size: 0.7rem;
+        padding: 0.4em 0.8em;
+    }
+    
+    .dropdown-menu {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add active class to current category filter
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentCategory = urlParams.get('category');
+        
+        if (currentCategory) {
+            document.querySelectorAll('.dropdown-item').forEach(item => {
+                if (item.getAttribute('href')?.includes(currentCategory)) {
+                    item.classList.add('active');
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

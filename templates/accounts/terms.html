@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Sheria na Masharti{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="text-center mb-5">
+                <h1 class="fw-bold text-primary mb-3">
+                    <i class="fas fa-file-contract me-2"></i>Sheria na Masharti
+                </h1>
+                <p class="text-muted">Tafadhali soma kwa makini kabla ya kutumia huduma zetu</p>
+                <div class="border-top pt-3 mt-3">
+                    <p class="text-muted small">
+                        Mwisho kusasishwa: {{ current_date|date:"F d, Y" }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Terms Content -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4 p-lg-5">
+                    
+                    <!-- Introduction -->
+                    <section class="mb-5">
+                        <h3 class="fw-bold mb-3">1. Utangulizi</h3>
+                        <p class="mb-3">
+                            Karibu kwenye wavuti yetu. Kwa kutumia huduma zetu, unakubali kufuata sheria na masharti haya. 
+                            Ikiwa hukubaliana na sehemu yoyote ya masharti haya, tafadhali usitumie huduma zetu.
+                        </p>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Sharti lote linakuwa nguvu tangu tarehe ya kujiandikisha kwako.
+                        </div>
+                    </section>
+
+                    <!-- User Account -->
+                    <section class="mb-5">
+                        <h3 class="fw-bold mb-3">2. Akaunti ya Mtumiaji</h3>
+                        <p class="mb-2">
+                            Wakati wa kujiandikisha, unakubali:
+                        </p>
+                        <ul class="list-group list-group-flush mb-3">
+                            <li class="list-group-item border-0 ps-0">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                Kutoa taarifa sahihi, ya sasa, na kamili
+                            </li>
+                            <li class="list-group-item border-0 ps-0">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                Kudumisha usalama wa akaunti yako na password
+                            </li>
+                            <li class="list-group-item border-0 ps-0">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                Kuchukua jukumu kwa shughuli zote zinazotokea chini ya akaunti yako
+                            </li>
+                            <li class="list-group-item border-0 ps-0">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                Kuwasiliana nasi mara moja ukigundua usalama wowote uliovunjwa
+                            </li>
+                        </ul>
+                    </section>
+
+                    <!-- Acceptable Use -->
+                    <section class="mb-5">
+                        <h3 class="fw-bold mb-3">3. Matumizi Yanayokubalika</h3>
+                        <p class="mb-2">
+                            Unakatazwa kutumia wavuti yetu kwa:
+                        </p>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="alert alert-danger">
+                                    <i class="fas fa-ban me-2"></i>
+                                    <strong>Vitu Visivyoruhusiwa:</strong>
+                                    <ul class="mb-0 mt-2">
+                                        <li>Uharibifu au uvunjaji wa sheria</li>
+                                        <li>Uchapishaji wa maudhui ya kihafidhina</li>
+                                        <li>Kutumia kwa madhumuni ya uhalifu</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    <strong>Vitendo Vya Kukataliwa:</strong>
+                                    <ul class="mb-0 mt-2">
+                                        <li>Kusambaza programu hatari</li>
+                                        <li>Kuharibu mfumo wa wavuti</li>
+                                        <li>Kuchapisha maudhui ya chuki</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Intellectual Property -->
+                    <section class="mb-5">
+                        <h3 class="fw-bold mb-3">4. Haki za Kinafsi na Miliki</h3>
+                        <p class="mb-3">
+                            Yote yaliyomo kwenye wavuti hii (pamoja na mifumo, muundo, msimbo, maudhui) 
+                            ni mali yetu au watoa huduma wetu na yanakamilishwa na sheria za haki za kinafsi.
+                        </p>
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h5 class="fw-bold">
+                                    <i class="fas fa-copyright me-2"></i>Mwelekeo wa Haki:
+                                </h5>
+                                <p class="mb-0">
+                                    Una ruhusa ya kutumia huduma zetu kwa matumizi binafsi, lakini 
+                                    hakuna ruhusa ya kunakili, kusambaza, au kutumia sehemu yoyote 
+                                    bila idhini yetu ya maandishi.
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Limitation of Liability -->
+                    <section class="mb-5">
+                        <h3 class="fw-bold mb-3">5. Kikomo cha Wajibu</h3>
+                        <p class="mb-3">
+                            Tutafanya bidii zetu kuwa wavuti yetu iwe sahihi na inayofanya kazi, 
+                            lakini hatutawajibika kwa hasara yoyote inayotokana na:
+                        </p>
+                        <ul class="list-group mb-3">
+                            <li class="list-group-item">
+                                <i class="fas fa-times-circle text-danger me-2"></i>
+                                Kutokuwepo kwa huduma (downtime)
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fas fa-times-circle text-danger me-2"></i>
+                                Hasara ya data au uharibifu
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fas fa-times-circle text-danger me-2"></i>
+                                Matumizi ya taarifa zilizotolewa
+                            </li>
+                        </ul>
+                    </section>
+
+                    <!-- Changes to Terms -->
+                    <section class="mb-5">
+                        <h3 class="fw-bold mb-3">6. Mabadiliko ya Masharti</h3>
+                        <p>
+                            Tuna haki ya kufanya mabadiliko ya masharti haya wakati wowote. 
+                            Tutawatangazia watumiaji kupitia barua pepe au ujumbe kwenye wavuti. 
+                            Kuendelea kutumia huduma baada ya mabadiliko kunamaanisha unakubali 
+                            masharti mapya.
+                        </p>
+                    </section>
+
+                    <!-- Contact Information -->
+                    <section class="mb-4">
+                        <h3 class="fw-bold mb-3">7. Mawasiliano</h3>
+                        <div class="card border-primary">
+                            <div class="card-body">
+                                <h5 class="fw-bold text-primary">
+                                    <i class="fas fa-headset me-2"></i>Wasiliana Nasi
+                                </h5>
+                                <p class="mb-2">
+                                    Kama una maswali kuhusu Sheria na Masharti, tafadhali wasiliana nasi:
+                                </p>
+                                <ul class="list-unstyled">
+                                    <li class="mb-2">
+                                        <i class="fas fa-envelope me-2"></i>
+                                        Email: <a href="mailto:support@example.com" class="text-decoration-none">support@example.com</a>
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-phone me-2"></i>
+                                        Simu: +255 XXX XXX XXX
+                                    </li>
+                                    <li>
+                                        <i class="fas fa-map-marker-alt me-2"></i>
+                                        Anwani: [Anwani Yako]
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="text-center">
+                <a href="{% url 'accounts:signup' %}" class="btn btn-primary btn-lg me-3">
+                    <i class="fas fa-check-circle me-2"></i>Nakubali Masharti
+                </a>
+                <a href="{% url 'accounts:privacy' %}" class="btn btn-outline-primary btn-lg">
+                    <i class="fas fa-shield-alt me-2"></i>Soma Sera ya Faragha
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

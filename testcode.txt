@@ -1,0 +1,55 @@
+vcct_website/
+├── manage.py
+├── requirements.txt
+├── .env
+├── .gitignore
+├── vcct/
+│   ├── __init__.py
+│   ├── settings.py
+│   ├── urls.py
+│   ├── wsgi.py
+│   └── asgi.py
+├── core/
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py
+│   ├── views.py
+│   ├── urls.py
+│   ├── forms.py
+│   └── templatetags/
+│       └── core_tags.py
+├── static/
+│   ├── css/
+│   │   ├── style.css
+│   │   └── dashboard.css
+│   ├── js/
+│   │   ├── main.js
+│   │   └── dashboard.js
+│   └── images/
+│       ├── logo.png
+│       ├── hero-bg.jpg
+│       └── default-profile.png
+├── media/
+│   ├── events/
+│   ├── ministries/
+│   ├── profiles/
+│   └── uploads/
+└── templates/
+    ├── base.html
+    ├── home.html
+    ├── core/
+    │   ├── about.html
+    │   ├── contact.html
+    │   └── services.html
+    ├── events/
+    │   ├── event_list.html
+    │   ├── event_detail.html
+    │   └── register.html
+    ├── ministries/
+    │   ├── ministry_list.html
+    │   └── ministry_detail.html
+    └── dashboard/
+        ├── index.html
+        ├── profile.html
+        └── manage_events.html

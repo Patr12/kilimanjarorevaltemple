@@ -1,0 +1,248 @@
+<!-- templates/core/about.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}About Us{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Hero Section -->
+    <div class="row align-items-center mb-5">
+        <div class="col-lg-8">
+            <h1 class="display-4 fw-bold text-primary mb-3">About Our Church</h1>
+            <p class="lead text-muted mb-4">Welcome to our church community where faith, love, and fellowship come together to create a welcoming environment for all.</p>
+        </div>
+        <div class="col-lg-4">
+            <img src="{% static 'images/WhatsApp Image 2025-12-30 at 8.57.57 PM.jpeg' %}" 
+                 alt="Our Church" 
+                 class="img-fluid rounded shadow">
+        </div>
+    </div>
+
+    <!-- Mission Statement -->
+    <div class="card border-0 shadow-lg mb-5 bg-primary text-white">
+        <div class="card-body p-5">
+            <div class="row align-items-center">
+                <div class="col-md-2 text-center mb-3 mb-md-0">
+                    <i class="bi-heart-fill display-4"></i>
+                </div>
+                <div class="col-md-10">
+                    <h2 class="card-title h3">Our Mission</h2>
+                    <p class="card-text mb-0">To spread God's love, nurture spiritual growth, and serve our community with compassion and dedication.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Section -->
+    <h2 class="text-center mb-5">Our Community at a Glance</h2>
+    <div class="row text-center mb-5">
+        <div class="col-md-4 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="text-primary mb-3">
+                        <i class="bi-people-fill display-4"></i>
+                    </div>
+                    <h3 class="h2 fw-bold text-primary">{{ total_members }}</h3>
+                    <p class="text-muted mb-0">Total Members</p>
+                    <small class="text-success">+5.2% from last month</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="text-primary mb-3">
+                        <i class="bi-house-heart-fill display-4"></i>
+                    </div>
+                    <h3 class="h2 fw-bold text-primary">{{ total_ministries }}</h3>
+                    <p class="text-muted mb-0">Active Ministries</p>
+                    <small class="text-success">Serving various community needs</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="text-primary mb-3">
+                        <i class="bi-calendar-event-fill display-4"></i>
+                    </div>
+                    <h3 class="h2 fw-bold text-primary">{{ upcoming_events }}</h3>
+                    <p class="text-muted mb-0">Upcoming Events</p>
+                    <small class="text-warning">Join us this week!</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core Values -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="text-center mb-4">Our Core Values</h2>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <i class="bi-heart-pulse-fill text-primary h1 mb-3"></i>
+                    <h5>Compassion</h5>
+                    <p class="small text-muted">Showing God's love through acts of kindness</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <i class="bi-book-fill text-primary h1 mb-3"></i>
+                    <h5>Faith</h5>
+                    <p class="small text-muted">Growing in spiritual wisdom and understanding</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <i class="bi-people-fill text-primary h1 mb-3"></i>
+                    <h5>Community</h5>
+                    <p class="small text-muted">Building strong, supportive relationships</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <i class="bi-hand-thumbs-up-fill text-primary h1 mb-3"></i>
+                    <h5>Service</h5>
+                    <p class="small text-muted">Serving others with humility and grace</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Testimonials -->
+    {% if testimonials %}
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="text-center mb-4">What People Say</h2>
+        </div>
+        <div class="col-12">
+            <div id="testimonialCarousel" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                    {% for testimonial in testimonials %}
+                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                        <div class="card border-0 shadow-lg mx-auto" style="max-width: 800px;">
+                            <div class="card-body p-5">
+                                <div class="text-center mb-4">
+                                    <i class="bi-chat-quote-fill display-4 text-primary"></i>
+                                </div>
+                                <blockquote class="blockquote text-center">
+                                    <p class="fst-italic fs-4 mb-4">"{{ testimonial.content }}"</p>
+                                    <footer class="blockquote-footer mt-3">
+                                        <strong>{{ testimonial.author }}</strong>
+                                        {% if testimonial.role %}
+                                        <span class="text-muted">, {{ testimonial.role }}</span>
+                                        {% endif %}
+                                    </footer>
+                                </blockquote>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% if testimonials|length > 1 %}
+                <button class="carousel-control-prev" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon bg-primary rounded-circle p-3" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon bg-primary rounded-circle p-3" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    <!-- uongazi wa kanisa una kaa hapa kwenye structure nzuri  -->
+    <section class="church-structure">
+    <h2 class="text-center">Uongozi wa Kanisa</h2>
+
+    {% regroup leaders by level as leader_levels %}
+
+    {% for group in leader_levels %}
+        <h3 class="text-center mt-4">
+            {{ group.list.0.get_level_display }}
+        </h3>
+
+        <div class="row justify-content-center">
+            {% for leader in group.list %}
+                <div class="col-md-6 col-lg-4 text-center mb-4">
+                    <div class="card shadow">
+                        <img src="{{ leader.photo.url }}" class="card-img-top" alt="{{ leader.full_name }}">
+                        <div class="card-body">
+                            <h5>{{ leader.full_name }}</h5>
+                            <p><strong>{{ leader.title }}</strong></p>
+
+                            {% if leader.vision_message %}
+                                <p class="fst-italic">
+                                    "{{ leader.vision_message }}"
+                                </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+</section>
+
+
+    <!-- Call to Action -->
+    <div class="card border-0 shadow-lg bg-light">
+        <div class="card-body p-5 text-center">
+            <h2 class="mb-4">Join Us This Sunday</h2>
+            <p class="lead mb-4">Experience the warmth of our community and grow in faith together.</p>
+            <div class="d-flex flex-wrap justify-content-center gap-3">
+                <a href="{% url 'core:events' %}" class="btn btn-primary btn-lg px-4">
+                    <i class="bi-calendar-check me-2"></i>View Events
+                </a>
+                <a href="{% url 'core:contact' %}" class="btn btn-outline-primary btn-lg px-4">
+                    <i class="bi-envelope me-2"></i>Contact Us
+                </a>
+                <a href="{% url 'core:ministries' %}" class="btn btn-outline-primary btn-lg px-4">
+                    <i class="bi-house-heart me-2"></i>Our Ministries
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+    
+    .carousel-control-prev,
+    .carousel-control-next {
+        width: auto;
+        opacity: 1;
+    }
+    
+    .carousel-control-prev-icon,
+    .carousel-control-next-icon {
+        background-size: 1.5rem;
+    }
+    
+    .blockquote-footer::before {
+        content: "— ";
+    }
+</style>
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+{% endblock %}

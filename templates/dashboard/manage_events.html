@@ -1,0 +1,589 @@
+// Main JavaScript file for VCCT Website
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Initialize popovers
+    var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+    var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+        return new bootstrap.Popover(popoverTriggerEl);
+    });
+
+    // Smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            const href = this.getAttribute('href');
+            
+            // Skip if it's just "#"
+            if (href === '#') return;
+            
+            // Check if it's a section on the same page
+            const targetElement = document.querySelector(href);
+            if (targetElement) {
+                e.preventDefault();
+                
+                // Calculate header height for offset
+                const headerHeight = document.querySelector('.navbar').offsetHeight;
+                const targetPosition = targetElement.offsetTop - headerHeight - 20;
+                
+                window.scrollTo({
+                    top: targetPosition,
+                    behavior: 'smooth'
+                });
+                
+                // Update URL without page reload
+                if (history.pushState) {
+                    history.pushState(null, null, href);
+                }
+            }
+        });
+    });
+
+    // Navbar background on scroll
+    const navbar = document.querySelector('.navbar');
+    if (navbar) {
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 100) {
+                navbar.classList.add('navbar-scrolled');
+            } else {
+                navbar.classList.remove('navbar_scrolled');
+            }
+        });
+    }
+
+    // Back to top button
+    const backToTopButton = document.getElementById('backToTop');
+    if (backToTopButton) {
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > 300) {
+                backToTopButton.style.display = 'block';
+            } else {
+                backToTopButton.style.display = 'none';
+            }
+        });
+
+        backToTopButton.addEventListener('click', function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    }
+
+    // Form validation enhancement
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
+        // Add Bootstrap validation styles
+        const inputs = form.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            input.addEventListener('invalid', function(e) {
+                e.preventDefault();
+                this.classList.add('is-invalid');
+                
+                // Show custom error message
+                const errorDiv = this.nextElementSibling;
+                if (errorDiv && errorDiv.classList.contains('invalid-feedback')) {
+                    errorDiv.style.display = 'block';
+                }
+            });
+
+            input.addEventListener('input', function() {
+                this.classList.remove('is-invalid');
+                
+                // Hide error message
+                const errorDiv = this.nextElementSibling;
+                if (errorDiv && errorDiv.classList.contains('invalid-feedback')) {
+                    errorDiv.style.display = 'none';
+                }
+            });
+        });
+
+        // Submit handler
+        form.addEventListener('submit', function(e) {
+            // Custom validation logic can be added here
+            let isValid = true;
+            
+            // Check required fields
+            const requiredFields = this.querySelectorAll('[required]');
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    isValid = false;
+                    field.classList.add('is-invalid');
+                    
+                    // Create error message if it doesn't exist
+                    if (!field.nextElementSibling || !field.nextElementSibling.classList.contains('invalid-feedback')) {
+                        const errorDiv = document.createElement('div');
+                        errorDiv.className = 'invalid-feedback';
+                        errorDiv.textContent = 'This field is required.';
+                        field.parentNode.appendChild(errorDiv);
+                    }
+                }
+            });
+
+            if (!isValid) {
+                e.preventDefault();
+                
+                // Scroll to first error
+                const firstError = this.querySelector('.is-invalid');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstError.focus();
+                }
+            }
+        });
+    });
+
+    // Image lazy loading enhancement
+    if ('IntersectionObserver' in window) {
+        const imageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    const src = img.getAttribute('data-src');
+                    if (src) {
+                        img.src = src;
+                        img.removeAttribute('data-src');
+                    }
+                    observer.unobserve(img);
+                }
+            });
+        });
+
+        document.querySelectorAll('img[data-src]').forEach(img => {
+            imageObserver.observe(img);
+        });
+    }
+
+    // Counter animation for statistics
+    function animateCounter(element, target, duration = 2000) {
+        let start = 0;
+        const increment = target / (duration / 16);
+        const timer = setInterval(() => {
+            start += increment;
+            if (start >= target) {
+                element.textContent = target;
+                clearInterval(timer);
+            } else {
+                element.textContent = Math.floor(start);
+            }
+        }, 16);
+    }
+
+    // Animate counters when they come into view
+    if ('IntersectionObserver' in window) {
+        const counterObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const counter = entry.target;
+                    const target = parseInt(counter.getAttribute('data-target') || counter.textContent);
+                    
+                    if (!counter.classList.contains('animated')) {
+                        counter.classList.add('animated');
+                        animateCounter(counter, target);
+                    }
+                }
+            });
+        });
+
+        document.querySelectorAll('.counter').forEach(counter => {
+            counterObserver.observe(counter);
+        });
+    }
+
+    // Gallery image lightbox
+    const galleryImages = document.querySelectorAll('.gallery-item img');
+    galleryImages.forEach(img => {
+        img.addEventListener('click', function() {
+            // Create lightbox
+            const lightbox = document.createElement('div');
+            lightbox.className = 'lightbox';
+            lightbox.innerHTML = `
+                <div class="lightbox-content">
+                    <img src="${this.src}" alt="${this.alt}">
+                    <div class="lightbox-caption">${this.alt}</div>
+                    <button class="lightbox-close">&times;</button>
+                    <button class="lightbox-prev">&lsaquo;</button>
+                    <button class="lightbox-next">&rsaquo;</button>
+                </div>
+            `;
+
+            document.body.appendChild(lightbox);
+            document.body.style.overflow = 'hidden'; // Prevent scrolling
+
+            // Close lightbox
+            const closeBtn = lightbox.querySelector('.lightbox-close');
+            closeBtn.addEventListener('click', () => {
+                document.body.removeChild(lightbox);
+                document.body.style.overflow = '';
+            });
+
+            // Close on background click
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) {
+                    document.body.removeChild(lightbox);
+                    document.body.style.overflow = '';
+                }
+            });
+
+            // Navigation
+            const prevBtn = lightbox.querySelector('.lightbox-prev');
+            const nextBtn = lightbox.querySelector('.lightbox-next');
+
+            // Get all gallery images
+            const allImages = Array.from(galleryImages);
+            let currentIndex = allImages.indexOf(this);
+
+            function showImage(index) {
+                const img = lightbox.querySelector('img');
+                img.src = allImages[index].src;
+                img.alt = allImages[index].alt;
+                lightbox.querySelector('.lightbox-caption').textContent = allImages[index].alt;
+                currentIndex = index;
+            }
+
+            prevBtn.addEventListener('click', () => {
+                let newIndex = currentIndex - 1;
+                if (newIndex < 0) newIndex = allImages.length - 1;
+                showImage(newIndex);
+            });
+
+            nextBtn.addEventListener('click', () => {
+                let newIndex = currentIndex + 1;
+                if (newIndex >= allImages.length) newIndex = 0;
+                showImage(newIndex);
+            });
+
+            // Keyboard navigation
+            document.addEventListener('keydown', function handleKeydown(e) {
+                if (document.body.contains(lightbox)) {
+                    switch(e.key) {
+                        case 'Escape':
+                            document.body.removeChild(lightbox);
+                            document.body.style.overflow = '';
+                            break;
+                        case 'ArrowLeft':
+                            prevBtn.click();
+                            break;
+                        case 'ArrowRight':
+                            nextBtn.click();
+                            break;
+                    }
+                }
+            });
+        });
+    });
+
+    // Add CSS for lightbox
+    const lightboxStyles = document.createElement('style');
+    lightboxStyles.textContent = `
+        .lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        
+        .lightbox-content {
+            position: relative;
+            max-width: 90%;
+            max-height: 90%;
+        }
+        
+        .lightbox-content img {
+            max-width: 100%;
+            max-height: 80vh;
+            object-fit: contain;
+        }
+        
+        .lightbox-caption {
+            color: white;
+            text-align: center;
+            padding: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .lightbox-close,
+        .lightbox-prev,
+        .lightbox-next {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            padding: 10px;
+            transition: background 0.3s;
+        }
+        
+        .lightbox-close:hover,
+        .lightbox-prev:hover,
+        .lightbox-next:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .lightbox-close {
+            top: 10px;
+            right: 10px;
+        }
+        
+        .lightbox-prev {
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .lightbox-next {
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+    `;
+    document.head.appendChild(lightboxStyles);
+
+    // Event calendar functionality
+    const calendarButtons = document.querySelectorAll('[data-calendar-view]');
+    calendarButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const view = this.getAttribute('data-calendar-view');
+            
+            // Remove active class from all buttons
+            calendarButtons.forEach(btn => btn.classList.remove('active'));
+            
+            // Add active class to clicked button
+            this.classList.add('active');
+            
+            // Load calendar view (this would typically be an AJAX request)
+            console.log(`Loading ${view} calendar view`);
+            
+            // Show loading state
+            const calendarContainer = document.getElementById('calendarContainer');
+            if (calendarContainer) {
+                calendarContainer.innerHTML = '<div class="text-center py-5"><i class="fas fa-spinner fa-spin fa-2x"></i></div>';
+                
+                // Simulate loading
+                setTimeout(() => {
+                    calendarContainer.innerHTML = `
+                        <div class="alert alert-info">
+                            Calendar view: ${view} (This would show actual calendar)
+                        </div>
+                    `;
+                }, 1000);
+            }
+        });
+    });
+
+    // Donation form amount buttons
+    const donationAmounts = document.querySelectorAll('.donation-amount');
+    const customAmountInput = document.getElementById('customAmount');
+    
+    donationAmounts.forEach(amountBtn => {
+        amountBtn.addEventListener('click', function() {
+            // Remove active class from all amount buttons
+            donationAmounts.forEach(btn => btn.classList.remove('active'));
+            
+            // Add active class to clicked button
+            this.classList.add('active');
+            
+            // Set custom amount input value
+            if (customAmountInput) {
+                const amount = this.getAttribute('data-amount');
+                customAmountInput.value = amount;
+                customAmountInput.focus();
+            }
+        });
+    });
+
+    // Custom amount input handling
+    if (customAmountInput) {
+        customAmountInput.addEventListener('input', function() {
+            // Remove active class from all amount buttons when custom amount is entered
+            donationAmounts.forEach(btn => btn.classList.remove('active'));
+        });
+    }
+
+    // Prayer request form character counter
+    const prayerTextarea = document.getElementById('prayerRequest');
+    if (prayerTextarea) {
+        const counter = document.createElement('div');
+        counter.className = 'form-text text-end';
+        counter.textContent = '0/500 characters';
+        prayerTextarea.parentNode.appendChild(counter);
+        
+        prayerTextarea.addEventListener('input', function() {
+            const length = this.value.length;
+            counter.textContent = `${length}/500 characters`;
+            
+            if (length > 500) {
+                counter.classList.add('text-danger');
+            } else {
+                counter.classList.remove('text-danger');
+            }
+        });
+    }
+
+    // Mobile menu enhancements
+    const navbarToggler = document.querySelector('.navbar-toggler');
+    if (navbarToggler) {
+        navbarToggler.addEventListener('click', function() {
+            const navbarCollapse = document.querySelector('.navbar-collapse');
+            if (navbarCollapse) {
+                navbarCollapse.classList.toggle('show');
+            }
+        });
+        
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.navbar')) {
+                const navbarCollapse = document.querySelector('.navbar-collapse.show');
+                if (navbarCollapse) {
+                    navbarCollapse.classList.remove('show');
+                }
+            }
+        });
+    }
+
+    // Initialize date pickers
+    const dateInputs = document.querySelectorAll('input[type="date"]');
+    dateInputs.forEach(input => {
+        // Set max date to today for date of birth, etc.
+        if (input.id.includes('birth') || input.name.includes('birth')) {
+            const today = new Date().toISOString().split('T')[0];
+            input.max = today;
+        }
+        
+        // Add calendar icon
+        if (!input.parentNode.querySelector('.input-group-text')) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'input-group';
+            
+            const iconSpan = document.createElement('span');
+            iconSpan.className = 'input-group-text';
+            iconSpan.innerHTML = '<i class="fas fa-calendar-alt"></i>';
+            
+            wrapper.appendChild(input.cloneNode(true));
+            wrapper.appendChild(iconSpan);
+            
+            input.parentNode.replaceChild(wrapper, input);
+        }
+    });
+
+    // Initialize time inputs
+    const timeInputs = document.querySelectorAll('input[type="time"]');
+    timeInputs.forEach(input => {
+        // Add clock icon
+        if (!input.parentNode.querySelector('.input-group-text')) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'input-group';
+            
+            const iconSpan = document.createElement('span');
+            iconSpan.className = 'input-group-text';
+            iconSpan.innerHTML = '<i class="fas fa-clock"></i>';
+            
+            wrapper.appendChild(input.cloneNode(true));
+            wrapper.appendChild(iconSpan);
+            
+            input.parentNode.replaceChild(wrapper, input);
+        }
+    });
+
+    // Toast notifications
+    window.showToast = function(message, type = 'success') {
+        const toastContainer = document.getElementById('toastContainer') || createToastContainer();
+        const toast = document.createElement('div');
+        toast.className = `toast align-items-center text-white bg-${type} border-0`;
+        toast.setAttribute('role', 'alert');
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} me-2"></i>
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        `;
+        
+        toastContainer.appendChild(toast);
+        const bsToast = new bootstrap.Toast(toast);
+        bsToast.show();
+        
+        // Remove toast after it's hidden
+        toast.addEventListener('hidden.bs.toast', function() {
+            toast.remove();
+        });
+    };
+
+    function createToastContainer() {
+        const container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container position-fixed top-0 end-0 p-3';
+        container.style.zIndex = '9999';
+        document.body.appendChild(container);
+        return container;
+    }
+
+    // Copy to clipboard functionality
+    document.querySelectorAll('[data-copy]').forEach(button => {
+        button.addEventListener('click', function() {
+            const textToCopy = this.getAttribute('data-copy') || this.previousElementSibling.value;
+            
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                const originalHTML = this.innerHTML;
+                this.innerHTML = '<i class="fas fa-check me-1"></i> Copied!';
+                
+                setTimeout(() => {
+                    this.innerHTML = originalHTML;
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                showToast('Failed to copy to clipboard', 'error');
+            });
+        });
+    });
+
+    // Add loading state to buttons on form submission
+    document.querySelectorAll('form').forEach(form => {
+        form.addEventListener('submit', function() {
+            const submitBtn = this.querySelector('button[type="submit"]');
+            if (submitBtn && !submitBtn.disabled) {
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Processing...';
+                submitBtn.disabled = true;
+            }
+        });
+    });
+
+    // Print functionality
+    document.querySelectorAll('[data-print]').forEach(button => {
+        button.addEventListener('click', function() {
+            const elementId = this.getAttribute('data-print');
+            const element = elementId ? document.getElementById(elementId) : document.body;
+            
+            if (element) {
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write(`
+                    <html>
+                        <head>
+                            <title>Print</title>
+                            <style>
+                                body { font-family: Arial, sans-serif; }
+                                @media print {
+                                    .no-print { display: none !important; }
+                                }
+                            </style>
+                        </head>
+                        <body>
+                            ${element.innerHTML}
+                        </body>
+                    </html>
+                `);
+                printWindow.document.close();
+                    } )}

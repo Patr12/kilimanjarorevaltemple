@@ -1,0 +1,573 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ ministry.name }} - {{ site_config.site_name|default:"VCCT Mbezi Beach" }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .ministry-hero {
+        background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+                    {% if ministry.banner_image %}
+                    url('{{ ministry.banner_image.url }}')
+                    {% else %}
+                    url('{% static "images/ministry-default.jpg" %}')
+                    {% endif %}
+                    center/cover no-repeat;
+        min-height: 40vh;
+    }
+    
+    .ministry-logo-large {
+        width: 150px;
+        height: 150px;
+        border: 6px solid white;
+        margin-top: -75px;
+    }
+    
+    .member-image {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+    }
+    
+    .role-badge {
+        font-size: 0.75rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="ministry-hero py-5 text-white">
+    <div class="container">
+        <div class="row align-items-center min-vh-40 py-5">
+            <div class="col-lg-8">
+                <!-- Ministry Status -->
+                <div class="mb-3">
+                    <span class="badge bg-success">
+                        {{ ministry.get_status_display|upper }}
+                    </span>
+                    {% if ministry.is_featured %}
+                    <span class="badge bg-warning text-dark ms-2">
+                        <i class="fas fa-star me-1"></i> Featured
+                    </span>
+                    {% endif %}
+                </div>
+                
+                <!-- Ministry Title -->
+                <h1 class="display-4 fw-bold mb-3">{{ ministry.name }}</h1>
+                
+                <!-- Ministry Tagline -->
+                {% if ministry.tagline %}
+                <p class="lead mb-4">{{ ministry.tagline }}</p>
+                {% endif %}
+                
+                <!-- Ministry Stats -->
+                <div class="d-flex flex-wrap gap-4">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-users fa-2x me-3"></i>
+                        <div>
+                            <div class="fs-4 fw-bold">{{ ministry.member_count }}</div>
+                            <div class="small">Members</div>
+                        </div>
+                    </div>
+                    
+                    {% if ministry.leader %}
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-user-tie fa-2x me-3"></i>
+                        <div>
+                            <div class="fw-bold">{{ ministry.leader.get_full_name }}</div>
+                            <div class="small">Leader</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Ministry Logo -->
+<div class="container">
+    <div class="text-center">
+        {% if ministry.logo %}
+        <img src="{{ ministry.logo.url }}" 
+             class="rounded-circle ministry-logo-large bg-white shadow-lg" 
+             alt="{{ ministry.name }} Logo">
+        {% else %}
+        <div class="rounded-circle ministry-logo-large bg-primary d-flex align-items-center justify-content-center mx-auto shadow-lg">
+            <i class="fas fa-hands-helping text-white fa-4x"></i>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Ministry Details -->
+<section class="py-5">
+    <div class="container">
+        <div class="row g-5">
+            <!-- Main Content -->
+            <div class="col-lg-8">
+                <!-- About Ministry -->
+                <div class="mb-5">
+                    <h2 class="h3 fw-bold mb-4 text-primary">About This Ministry</h2>
+                    <div class="ministry-description">
+                        {{ ministry.description|safe }}
+                    </div>
+                </div>
+                
+                <!-- Mission & Vision -->
+                <div class="row g-4 mb-5">
+                    {% if ministry.mission %}
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body p-4">
+                                <div class="text-center mb-4">
+                                    <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                                         style="width: 70px; height: 70px;">
+                                        <i class="fas fa-bullseye text-white fa-2x"></i>
+                                    </div>
+                                    <h3 class="h5 fw-bold mb-2">Our Mission</h3>
+                                </div>
+                                {{ ministry.mission|safe }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if ministry.vision %}
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body p-4">
+                                <div class="text-center mb-4">
+                                    <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                                         style="width: 70px; height: 70px;">
+                                        <i class="fas fa-eye text-white fa-2x"></i>
+                                    </div>
+                                    <h3 class="h5 fw-bold mb-2">Our Vision</h3>
+                                </div>
+                                {{ ministry.vision|safe }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Meeting Information -->
+                <div class="mb-5">
+                    <h2 class="h3 fw-bold mb-4 text-primary">Meeting Information</h2>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body p-4">
+                                    <h3 class="h5 fw-bold mb-3 text-primary">
+                                        <i class="fas fa-calendar-alt me-2"></i> Schedule
+                                    </h3>
+                                    <ul class="list-unstyled mb-0">
+                                        {% if ministry.meeting_days %}
+                                        <li class="mb-2">
+                                            <strong>Days:</strong><br>
+                                            {{ ministry.meeting_days }}
+                                        </li>
+                                        {% endif %}
+                                        {% if ministry.meeting_time %}
+                                        <li class="mb-2">
+                                            <strong>Time:</strong><br>
+                                            {{ ministry.meeting_time }}
+                                        </li>
+                                        {% endif %}
+                                        {% if ministry.meeting_location %}
+                                        <li>
+                                            <strong>Location:</strong><br>
+                                            {{ ministry.meeting_location }}
+                                        </li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body p-4">
+                                    <h3 class="h5 fw-bold mb-3 text-primary">
+                                        <i class="fas fa-info-circle me-2"></i> Quick Facts
+                                    </h3>
+                                    <ul class="list-unstyled mb-0">
+                                        <li class="mb-2">
+                                            <strong>Status:</strong>
+                                            <span class="badge bg-success ms-2">{{ ministry.get_status_display }}</span>
+                                        </li>
+                                        <li class="mb-2">
+                                            <strong>Members:</strong>
+                                            <span class="ms-2">{{ ministry.member_count }}</span>
+                                        </li>
+                                        {% if ministry.leader %}
+                                        <li class="mb-2">
+                                            <strong>Leader:</strong>
+                                            <span class="ms-2">{{ ministry.leader.get_full_name }}</span>
+                                        </li>
+                                        {% endif %}
+                                        {% if ministry.category %}
+                                        <li>
+                                            <strong>Category:</strong>
+                                            <span class="ms-2">{{ ministry.category.name }}</span>
+                                        </li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Active Members -->
+                {% if active_members %}
+                <div class="mb-5">
+                    <h2 class="h3 fw-bold mb-4 text-primary">Meet Our Team</h2>
+                    <div class="row g-3">
+                        {% for member in active_members|slice:":6" %}
+                        <div class="col-6 col-md-4">
+                            <div class="text-center p-3">
+                                {% if member.user.profile_picture %}
+                                <img src="{{ member.user.profile_picture.url }}" 
+                                     class="rounded-circle member-image mb-2" 
+                                     alt="{{ member.user.get_full_name }}">
+                                {% else %}
+                                <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center mx-auto mb-2 member-image">
+                                    <i class="fas fa-user text-white"></i>
+                                </div>
+                                {% endif %}
+                                <h4 class="h6 fw-bold mb-1">{{ member.user.get_full_name }}</h4>
+                                <span class="badge role-badge bg-primary">{{ member.get_role_display }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        
+                        {% if active_members.count > 6 %}
+                        <div class="col-12 text-center mt-3">
+                            <a href="#" class="btn btn-outline-primary btn-sm">
+                                View All {{ active_members.count }} Members
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Related Events -->
+                {% if related_events %}
+                <div>
+                    <h2 class="h3 fw-bold mb-4 text-primary">Upcoming Events</h2>
+                    <div class="row g-3">
+                        {% for event in related_events %}
+                        <div class="col-md-6">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="row g-0 h-100">
+                                    <div class="col-4">
+                                        {% if event.featured_image %}
+                                        <img src="{{ event.featured_image.url }}" 
+                                             class="img-fluid h-100 w-100" 
+                                             alt="{{ event.title }}"
+                                             style="object-fit: cover;">
+                                        {% else %}
+                                        <div class="bg-secondary h-100 d-flex align-items-center justify-content-center">
+                                            <i class="fas fa-calendar-alt text-white"></i>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-8">
+                                        <div class="card-body">
+                                            <h4 class="h6 fw-bold mb-2">{{ event.title|truncatechars:40 }}</h4>
+                                            <p class="small text-muted mb-2">
+                                                {{ event.start_date|date:"M d, Y" }} at {{ event.start_time|time:"g:i A" }}
+                                            </p>
+                                            <a href="{{ event.get_absolute_url }}" class="btn btn-sm btn-outline-primary">
+                                                View Event
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Contact Information -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h3 class="h5 fw-bold mb-3 text-primary">Contact Information</h3>
+                        
+                        {% if ministry.contact_person %}
+                        <div class="mb-3">
+                            <h6 class="fw-bold mb-1">
+                                <i class="fas fa-user me-2"></i> Contact Person
+                            </h6>
+                            <p class="mb-0">{{ ministry.contact_person }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if ministry.contact_email %}
+                        <div class="mb-3">
+                            <h6 class="fw-bold mb-1">
+                                <i class="fas fa-envelope me-2"></i> Email
+                            </h6>
+                            <p class="mb-0">
+                                <a href="mailto:{{ ministry.contact_email }}" class="text-decoration-none">
+                                    {{ ministry.contact_email }}
+                                </a>
+                            </p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if ministry.contact_phone %}
+                        <div class="mb-3">
+                            <h6 class="fw-bold mb-1">
+                                <i class="fas fa-phone me-2"></i> Phone
+                            </h6>
+                            <p class="mb-0">
+                                <a href="tel:{{ ministry.contact_phone }}" class="text-decoration-none">
+                                    {{ ministry.contact_phone }}
+                                </a>
+                            </p>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="mt-4">
+                            <a href="{% url 'core:contact' %}" class="btn btn-primary w-100">
+                                <i class="fas fa-envelope me-2"></i> Contact This Ministry
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Join Ministry -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h3 class="h5 fw-bold mb-3 text-primary">Join This Ministry</h3>
+                        <p class="small mb-4">
+                            Interested in joining {{ ministry.name }}? Fill out the form below and we'll get in touch with you.
+                        </p>
+                        
+                        <form>
+                            <div class="mb-3">
+                                <label for="joinName" class="form-label small">Full Name *</label>
+                                <input type="text" class="form-control form-control-sm" id="joinName" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="joinEmail" class="form-label small">Email *</label>
+                                <input type="email" class="form-control form-control-sm" id="joinEmail" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="joinPhone" class="form-label small">Phone Number</label>
+                                <input type="tel" class="form-control form-control-sm" id="joinPhone">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="joinMessage" class="form-label small">Why do you want to join?</label>
+                                <textarea class="form-control form-control-sm" id="joinMessage" rows="3"></textarea>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-paper-plane me-2"></i> Submit Interest
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Other Ministries -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <h3 class="h5 fw-bold mb-3 text-primary">Other Ministries</h3>
+                        <div class="list-group list-group-flush">
+                            {% for other_ministry in other_ministries|slice:":5" %}
+                            {% if other_ministry.id != ministry.id %}
+                            <a href="{{ other_ministry.get_absolute_url }}" 
+                               class="list-group-item list-group-item-action border-0 px-0 py-2">
+                                <div class="d-flex align-items-center">
+                                    {% if other_ministry.logo %}
+                                    <img src="{{ other_ministry.logo.url }}" 
+                                         class="rounded-circle me-3" 
+                                         alt="{{ other_ministry.name }}"
+                                         style="width: 40px; height: 40px; object-fit: cover;">
+                                    {% else %}
+                                    <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center me-3"
+                                         style="width: 40px; height: 40px;">
+                                        <i class="fas fa-hands-helping text-white"></i>
+                                    </div>
+                                    {% endif %}
+                                    <div>
+                                        <h6 class="mb-0">{{ other_ministry.name }}</h6>
+                                        <small class="text-muted">{{ other_ministry.member_count }} members</small>
+                                    </div>
+                                </div>
+                            </a>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                        <div class="mt-3 text-center">
+                            <a href="{% url 'core:ministries' %}" class="btn btn-outline-primary btn-sm">
+                                View All Ministries
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="py-5 bg-primary text-white">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h3 class="h2 mb-3">Ready to Make a Difference?</h3>
+                <p class="lead mb-4">
+                    Join {{ ministry.name }} today and use your gifts to serve God and our community.
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="#" class="btn btn-light btn-lg" data-bs-toggle="modal" data-bs-target="#joinModal">
+                        <i class="fas fa-user-plus me-2"></i> Join This Ministry
+                    </a>
+                    <a href="{% url 'core:ministries' %}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-hands-helping me-2"></i> Explore Other Ministries
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-4 text-center mt-4 mt-lg-0">
+                <i class="fas fa-hands-praying fa-4x opacity-75"></i>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Join Modal -->
+<div class="modal fade" id="joinModal" tabindex="-1" aria-labelledby="joinModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="joinModalLabel">Join {{ ministry.name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-4">Fill out this form to express your interest in joining {{ ministry.name }}.</p>
+                
+                <form id="ministryJoinForm">
+                    <div class="mb-3">
+                        <label class="form-label">Full Name *</label>
+                        <input type="text" class="form-control" name="name" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Email *</label>
+                        <input type="email" class="form-control" name="email" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Phone Number *</label>
+                        <input type="tel" class="form-control" name="phone" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Why do you want to join this ministry? *</label>
+                        <textarea class="form-control" name="reason" rows="3" required></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">What gifts or skills can you contribute?</label>
+                        <textarea class="form-control" name="skills" rows="2"></textarea>
+                    </div>
+                    
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="availability" required>
+                        <label class="form-check-label" for="availability">
+                            I am committed to attending ministry meetings regularly
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="ministryJoinForm" class="btn btn-primary">Submit Application</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Join form submission
+    document.addEventListener('DOMContentLoaded', function() {
+        const joinForm = document.getElementById('ministryJoinForm');
+        const modalJoinForm = document.querySelector('#joinModal form');
+        
+        if (joinForm) {
+            joinForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Simple validation
+                const requiredFields = this.querySelectorAll('[required]');
+                let isValid = true;
+                
+                requiredFields.forEach(field => {
+                    if (!field.value.trim()) {
+                        isValid = false;
+                        field.classList.add('is-invalid');
+                    } else {
+                        field.classList.remove('is-invalid');
+                    }
+                });
+                
+                if (isValid) {
+                    // Show success message
+                    alert('Thank you for your interest! We will contact you soon.');
+                    this.reset();
+                    
+                    // Close modal if open
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('joinModal'));
+                    if (modal) modal.hide();
+                }
+            });
+        }
+        
+        if (modalJoinForm) {
+            modalJoinForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Simple validation
+                const requiredFields = this.querySelectorAll('[required]');
+                let isValid = true;
+                
+                requiredFields.forEach(field => {
+                    if (!field.value.trim()) {
+                        isValid = false;
+                        field.classList.add('is-invalid');
+                    } else {
+                        field.classList.remove('is-invalid');
+                    }
+                });
+                
+                if (isValid) {
+                    // Show success message
+                    alert('Thank you for your interest in joining {{ ministry.name }}! We will contact you soon.');
+                    
+                    // Close modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('joinModal'));
+                    modal.hide();
+                    
+                    // Reset form
+                    this.reset();
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

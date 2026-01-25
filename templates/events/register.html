@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Register for {{ event.title }} - Kilimanjaro Revival Temple{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Back Button -->
+            <div class="mb-4">
+                <a href="{% url 'event_detail' event.slug %}" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Event
+                </a>
+            </div>
+
+            <!-- Event Info Card -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="card-title mb-0">Register for: {{ event.title }}</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-2">
+                                <strong><i class="fas fa-calendar-alt me-2"></i>Date:</strong><br>
+                                {{ event.start_date|date:"F j, Y" }}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-2">
+                                <strong><i class="fas fa-clock me-2"></i>Time:</strong><br>
+                                {{ event.start_time|time:"g:i A" }}
+                                {% if event.end_time %} - {{ event.end_time|time:"g:i A" }}{% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-12">
+                            <p class="mb-0">
+                                <strong><i class="fas fa-map-marker-alt me-2"></i>Location:</strong><br>
+                                {{ event.location|default:"Church Premises" }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Registration Form -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h4 class="card-title mb-0"><i class="fas fa-user-plus me-2"></i>Registration Form</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                            {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Pre-filled user info -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label class="form-label">Full Name</label>
+                                    <input type="text" class="form-control" 
+                                           value="{{ user.get_full_name }}" readonly>
+                                    <small class="text-muted">(Pre-filled from your account)</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control" 
+                                           value="{{ user.email }}" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Additional Information Fields -->
+                        <div class="row">
+                            {% for field in form %}
+                            {% if field.name not in 'event,user' %}
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="{{ field.id_for_label }}" class="form-label">
+                                        {{ field.label }}
+                                        {% if field.field.required %}
+                                        <span class="text-danger">*</span>
+                                        {% endif %}
+                                    </label>
+                                    {{ field }}
+                                    {% if field.help_text %}
+                                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                                    {% endif %}
+                                    {% if field.errors %}
+                                    <div class="text-danger small">
+                                        {% for error in field.errors %}
+                                        {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Terms and Conditions -->
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" id="terms" required>
+                            <label class="form-check-label" for="terms">
+                                I understand that by registering for this event, I agree to follow all church guidelines and safety protocols.
+                            </label>
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-check-circle me-2"></i>Complete Registration
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Event Policy -->
+            <div class="alert alert-info mt-4">
+                <h5 class="alert-heading"><i class="fas fa-info-circle me-2"></i>Event Policy</h5>
+                <ul class="mb-0">
+                    <li>Registration may be required for certain events with limited capacity.</li>
+                    <li>Your registration helps us plan better for seating, materials, and refreshments.</li>
+                    <li>If you need to cancel, please notify us at least 24 hours before the event.</li>
+                    <li>For events requiring payment, your registration is confirmed only after payment.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-control:read-only {
+        background-color: #f8f9fa;
+        cursor: not-allowed;
+    }
+    
+    .form-check-input:checked {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+    
+    .alert ul {
+        padding-left: 1.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add Bootstrap classes to form elements
+        const inputs = document.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            if (!input.classList.contains('form-control') && 
+                input.type !== 'checkbox' && 
+                input.type !== 'radio') {
+                input.classList.add('form-control');
+            }
+        });
+        
+        // Terms checkbox validation
+        const form = document.querySelector('form');
+        const termsCheckbox = document.getElementById('terms');
+        
+        form.addEventListener('submit', function(e) {
+            if (!termsCheckbox.checked) {
+                e.preventDefault();
+                alert('Please agree to the terms and conditions.');
+                termsCheckbox.focus();
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,286 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Jisajili | Signup{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <!-- Header Section -->
+            <div class="text-center mb-4">
+                <div class="mb-3">
+                    <i class="fas fa-user-plus fa-3x text-success"></i>
+                </div>
+                <h2 class="fw-bold mb-2">Anza Safari Yako</h2>
+                <p class="text-muted">Unda akaunti yako kwa sekunde chache</p>
+            </div>
+
+            <div class="card auth-card border-0">
+                <div class="card-body p-4 p-lg-5">
+                    <!-- Success Message -->
+                    {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle me-2"></i>
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+
+                    <form method="post" novalidate id="signupForm">
+                        {% csrf_token %}
+
+                        <!-- Username -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">
+                                <i class="fas fa-user me-2"></i>Jina la Mtumiaji
+                            </label>
+                            <input type="text" 
+                                   name="username" 
+                                   class="form-control form-control-lg" 
+                                   placeholder="Chagua jina la mtumiaji"
+                                   required
+                                   value="{{ form.username.value|default:'' }}"
+                                   id="usernameInput">
+                            <div class="form-text text-muted small mt-1">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Herufi, nambari na @/./+/-/_ pekee (kwa upeo wa 150)
+                            </div>
+                            {% if form.username.errors %}
+                            <div class="error-message mt-2">
+                                <i class="fas fa-exclamation-circle me-1"></i>
+                                {{ form.username.errors|striptags }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">
+                                <i class="fas fa-envelope me-2"></i>Barua Pepe
+                            </label>
+                            <input type="email" 
+                                   name="email" 
+                                   class="form-control form-control-lg" 
+                                   placeholder="example@email.com"
+                                   required
+                                   value="{{ form.email.value|default:'' }}">
+                            <div class="form-text text-muted small mt-1">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Tutatumia hii kukuruhusu kurudia password
+                            </div>
+                            {% if form.email.errors %}
+                            <div class="error-message mt-2">
+                                <i class="fas fa-exclamation-circle me-1"></i>
+                                {{ form.email.errors|striptags }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Password 1 -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">
+                                <i class="fas fa-lock me-2"></i>Password
+                            </label>
+                            <div class="input-group">
+                                <input type="password" 
+                                       name="password1" 
+                                       class="form-control form-control-lg" 
+                                       placeholder="Weka password imara"
+                                       required
+                                       id="password1Input">
+                                <button class="btn btn-outline-secondary" type="button" id="togglePassword1">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            
+                            <!-- Password Strength Indicator -->
+                            <div class="password-strength mt-2">
+                                <div class="strength-bar" id="strengthBar"></div>
+                            </div>
+                            
+                            <div class="form-text text-muted small mt-1">
+                                <i class="fas fa-shield-alt me-1"></i>
+                                Angalau herufi 8, sio ya kawaida, sio nambari pekee
+                            </div>
+                            {% if form.password1.errors %}
+                            <div class="error-message mt-2">
+                                <i class="fas fa-exclamation-circle me-1"></i>
+                                {{ form.password1.errors|striptags }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Password 2 -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">
+                                <i class="fas fa-lock me-2"></i>Thibitisha Password
+                            </label>
+                            <div class="input-group">
+                                <input type="password" 
+                                       name="password2" 
+                                       class="form-control form-control-lg" 
+                                       placeholder="Andika password tena"
+                                       required
+                                       id="password2Input">
+                                <button class="btn btn-outline-secondary" type="button" id="togglePassword2">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="form-text text-muted small mt-1">
+                                <i class="fas fa-check-circle me-1"></i>
+                                Hakikisha unalinganisha password uliyoweka hapo juu
+                            </div>
+                            {% if form.password2.errors %}
+                            <div class="error-message mt-2">
+                                <i class="fas fa-exclamation-circle me-1"></i>
+                                {{ form.password2.errors|striptags }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Terms and Conditions Section - Updated -->
+<div class="mb-4 form-check">
+    <input type="checkbox" class="form-check-input" id="termsCheck" required>
+    <label class="form-check-label" for="termsCheck">
+        Nakubali 
+        <a href="{% url 'accounts:terms' %}" class="auth-link" target="_blank">
+            Sheria na Masharti
+        </a> 
+        na 
+        <a href="{% url 'accounts:privacy' %}" class="auth-link" target="_blank">
+            Sera ya Faragha
+        </a>
+    </label>
+</div>
+
+                        <!-- Submit Button -->
+                        <div class="d-grid mb-3">
+                            <button type="submit" class="btn btn-success btn-lg fw-semibold">
+                                <i class="fas fa-user-plus me-2"></i>Jisajili Sasa
+                            </button>
+                        </div>
+
+                        <!-- Divider -->
+                        <div class="position-relative my-4">
+                            <hr>
+                            <div class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted">
+                                au jisajili kwa
+                            </div>
+                        </div>
+
+                        <!-- Social Signup -->
+                        <div class="social-login">
+                            <button type="button" class="btn btn-outline-primary w-100 mb-2 social-btn">
+                                <i class="fab fa-google text-danger"></i>
+                                Google
+                            </button>
+                            <button type="button" class="btn btn-outline-dark w-100 social-btn">
+                                <i class="fab fa-github"></i>
+                                GitHub
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Login Link -->
+                    <div class="text-center mt-4 pt-3 border-top">
+                        <p class="mb-0">
+                            Tayari una akaunti?
+                            <a href="{% url 'accounts:login' %}" class="auth-link fw-semibold">
+                                Ingia Hapa
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for enhanced signup -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Password toggle functionality
+    const togglePassword1 = document.getElementById('togglePassword1');
+    const togglePassword2 = document.getElementById('togglePassword2');
+    const password1Input = document.getElementById('password1Input');
+    const password2Input = document.getElementById('password2Input');
+    
+    function setupPasswordToggle(toggleBtn, inputField) {
+        if (toggleBtn && inputField) {
+            toggleBtn.addEventListener('click', function() {
+                const type = inputField.getAttribute('type') === 'password' ? 'text' : 'password';
+                inputField.setAttribute('type', type);
+                this.querySelector('i').classList.toggle('fa-eye');
+                this.querySelector('i').classList.toggle('fa-eye-slash');
+            });
+        }
+    }
+    
+    setupPasswordToggle(togglePassword1, password1Input);
+    setupPasswordToggle(togglePassword2, password2Input);
+    
+    // Password strength indicator
+    if (password1Input) {
+        const strengthBar = document.getElementById('strengthBar');
+        
+        password1Input.addEventListener('input', function() {
+            const password = this.value;
+            let strength = 0;
+            
+            if (password.length >= 8) strength += 25;
+            if (/[A-Z]/.test(password)) strength += 25;
+            if (/[0-9]/.test(password)) strength += 25;
+            if (/[^A-Za-z0-9]/.test(password)) strength += 25;
+            
+            strengthBar.style.width = strength + '%';
+            
+            // Change color based on strength
+            if (strength < 50) {
+                strengthBar.style.backgroundColor = '#dc3545';
+            } else if (strength < 75) {
+                strengthBar.style.backgroundColor = '#ffc107';
+            } else {
+                strengthBar.style.backgroundColor = '#198754';
+            }
+        });
+    }
+    
+    // Real-time password match check
+    if (password1Input && password2Input) {
+        function checkPasswordMatch() {
+            const password1 = password1Input.value;
+            const password2 = password2Input.value;
+            
+            if (password2.length === 0) return;
+            
+            if (password1 !== password2) {
+                password2Input.style.borderColor = '#dc3545';
+                password2Input.style.boxShadow = '0 0 0 0.25rem rgba(220, 53, 69, 0.25)';
+            } else {
+                password2Input.style.borderColor = '#198754';
+                password2Input.style.boxShadow = '0 0 0 0.25rem rgba(25, 135, 84, 0.25)';
+            }
+        }
+        
+        password1Input.addEventListener('input', checkPasswordMatch);
+        password2Input.addEventListener('input', checkPasswordMatch);
+    }
+    
+    // Username availability check (simulated)
+    if (document.getElementById('usernameInput')) {
+        const usernameInput = document.getElementById('usernameInput');
+        
+        usernameInput.addEventListener('blur', function() {
+            const username = this.value;
+            if (username.length >= 3) {
+                // Simulate check - in real app, you'd make AJAX request
+                console.log('Checking username:', username);
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

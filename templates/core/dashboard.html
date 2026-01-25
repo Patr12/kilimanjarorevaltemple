@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+
+    <!-- Welcome -->
+    <div class="mb-4">
+       <h2 class="fw-bold">
+    {{ greeting }}, {{ user.username }} 👋
+</h2>
+
+        <p class="text-muted mb-0">
+    May your day be filled with grace and purpose.
+</p>
+
+    </div>
+
+    <div class="row g-4">
+
+        <!-- My Ministries -->
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3">
+                        <i class="fas fa-users me-2 text-primary"></i>
+                        My Ministries
+                    </h5>
+
+                    {% if user_ministries %}
+                        <ul class="list-group list-group-flush">
+                            {% for m in user_ministries %}
+                                <li class="list-group-item px-0">
+                                    {{ m.ministry.name }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted small mb-0">
+                            You are not part of any ministry yet.
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Events -->
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3">
+                        <i class="fas fa-calendar-alt me-2 text-success"></i>
+                        Upcoming Events
+                    </h5>
+
+                    {% if upcoming_events %}
+                        <ul class="list-group list-group-flush">
+                            {% for event in upcoming_events %}
+                                <li class="list-group-item px-0">
+                                    <strong>{{ event.title }}</strong><br>
+                                    <small class="text-muted">
+                                        {{ event.start_date }} • {{ event.start_time }}
+                                    </small>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted small mb-0">
+                            No upcoming events.
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- My Registrations -->
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3">
+                        <i class="fas fa-ticket-alt me-2 text-warning"></i>
+                        My Registrations
+                    </h5>
+
+                    {% if user_registrations %}
+                        <ul class="list-group list-group-flush">
+                            {% for reg in user_registrations %}
+                                <li class="list-group-item px-0">
+                                    {{ reg.event.title }}<br>
+                                    <small class="text-muted">
+                                        Registered on {{ reg.registered_at|date:"M d, Y" }}
+                                    </small>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted small mb-0">
+                            You haven’t registered for any events.
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

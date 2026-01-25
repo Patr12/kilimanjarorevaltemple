@@ -1,0 +1,12 @@
+Django==4.2.8
+Pillow
+django-ckeditor==6.7.0
+django-crispy-forms==2.1
+crispy-bootstrap5==0.7
+django-resized
+django-cleanup==8.0.0
+python-decouple==3.8
+django-widget-tweaks==1.5.0
+python-magic==0.4.27
+whitenoise==6.6.0
+gunicorn==21.2.0

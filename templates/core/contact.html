@@ -1,0 +1,376 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Contact Us - {{ site_config.site_name|default:"KRT Moshi Kilimanjaro" }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .contact-hero {
+        background: linear-gradient(rgba(44, 62, 80, 0.9), rgba(44, 62, 80, 0.9)), 
+                    url('{% static "images/contact-hero.jpg" %}') center/cover no-repeat;
+        min-height: 30vh;
+    }
+    
+    .contact-info-card {
+        border-left: 4px solid var(--bs-primary);
+    }
+    
+    .map-container {
+        height: 400px;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="contact-hero py-5 text-white">
+    <div class="container">
+        <div class="row align-items-center min-vh-30 py-5">
+            <div class="col-lg-8">
+                <h1 class="display-4 fw-bold mb-3">Contact Us</h1>
+                <p class="lead mb-0">We'd love to hear from you. Get in touch with us today!</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Information & Form -->
+<section class="py-5">
+    <div class="container">
+        <div class="row g-5">
+            <!-- Contact Information -->
+            <div class="col-lg-4">
+                <h2 class="h3 fw-bold mb-4 text-primary">Get in Touch</h2>
+                <p class="mb-4">We're here to help and answer any questions you might have.</p>
+                
+                <!-- Contact Details -->
+                <div class="mb-5">
+                    <div class="contact-info-card bg-light p-4 rounded mb-4">
+                        <div class="d-flex align-items-start mb-3">
+                            <i class="fas fa-map-marker-alt text-primary mt-1 me-3"></i>
+                            <div>
+                                <h4 class="h6 fw-bold mb-1">Our Location</h4>
+                                <p class="mb-0">{{ site_config.address|default:"Vijana Street,SIDO Road Moshi, Kilimanjaro, Tanzania" }}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex align-items-start mb-3">
+                            <i class="fas fa-phone text-primary mt-1 me-3"></i>
+                            <div>
+                                <h4 class="h6 fw-bold mb-1">Phone Number</h4>
+                                <p class="mb-0">{{ site_config.contact_phone|default:"+255 784 344 079" }}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-envelope text-primary mt-1 me-3"></i>
+                            <div>
+                                <h4 class="h6 fw-bold mb-1">Email Address</h4>
+                                <p class="mb-0">{{ site_config.contact_email|default:"info@tagkrt.or.tz" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Service Times -->
+                    <div class="bg-primary text-white p-4 rounded">
+                        <h4 class="h5 fw-bold mb-3">Service Times</h4>
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2">
+                                <div class="d-flex justify-content-between">
+                                    <span>Sunday Morning</span>
+                                    <span>7:00 AM, 9:30 AM, 11:30 AM</span>
+                                </div>
+                            </li>
+                            <li class="mb-2">
+                                <div class="d-flex justify-content-between">
+                                    <span>Wednesday Prayer</span>
+                                    <span>6:00 PM</span>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="d-flex justify-content-between">
+                                    <span>Friday Bible Study</span>
+                                    <span>5:00 PM</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Social Media -->
+                <div>
+                    <h4 class="h5 fw-bold mb-3 text-primary">Connect With Us</h4>
+                    <div class="d-flex flex-wrap gap-2">
+                        {% if site_config.facebook_url %}
+                        <a href="{{ site_config.facebook_url }}" 
+                           target="_blank" 
+                           class="btn btn-primary btn-sm rounded-pill px-3">
+                            <i class="fab fa-facebook-f me-2"></i> Facebook
+                        </a>
+                        {% endif %}
+                        
+                        {% if site_config.instagram_url %}
+                        <a href="{{ site_config.instagram_url }}" 
+                           target="_blank" 
+                           class="btn btn-danger btn-sm rounded-pill px-3">
+                            <i class="fab fa-instagram me-2"></i> Instagram
+                        </a>
+                        {% endif %}
+                        
+                        {% if site_config.youtube_url %}
+                        <a href="{{ site_config.youtube_url }}" 
+                           target="_blank" 
+                           class="btn btn-danger btn-sm rounded-pill px-3">
+                            <i class="fab fa-youtube me-2"></i> YouTube
+                        </a>
+                        {% endif %}
+                        
+                        {% if site_config.whatsapp_number %}
+                        <a href="https://wa.me/{{ site_config.whatsapp_number }}" 
+                           target="_blank" 
+                           class="btn btn-success btn-sm rounded-pill px-3">
+                            <i class="fab fa-whatsapp me-2"></i> WhatsApp
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Contact Form -->
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4 p-md-5">
+                        <h2 class="h3 fw-bold mb-4 text-primary">Send Us a Message</h2>
+                        <p class="text-muted mb-4">Fill out the form below and we'll get back to you as soon as possible.</p>
+                        
+                        <form method="post" novalidate>
+                            {% csrf_token %}
+                            
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    {{ form.name|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.email|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.phone|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.subject|as_crispy_field }}
+                                </div>
+                                <div class="col-12">
+                                    {{ form.message|as_crispy_field }}
+                                </div>
+                                
+                                <div class="col-12">
+                                    <div class="form-check mb-4">
+                                        <input class="form-check-input" type="checkbox" id="newsletter" checked>
+                                        <label class="form-check-label small" for="newsletter">
+                                            I'd like to receive updates about church events and services
+                                        </label>
+                                    </div>
+                                    
+                                    <button type="submit" class="btn btn-primary btn-lg px-5">
+                                        <i class="fas fa-paper-plane me-2"></i> Send Message
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Map Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="h3 fw-bold mb-4 text-primary text-center">Find Our Location</h2>
+        <p class="text-center text-muted mb-5">Visit us at our church in Moshi, Vijana, Street Sido Road, Kilimanjaro</p>
+        
+        <div class="map-container shadow">
+            <!-- Google Maps Embed -->
+            <iframe 
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3964.056783374786!2d39.2057229!3d-6.6950001!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNsKwNDEnNDIuMCJTIDM5wrAxMicyMC42IkU!5e0!3m2!1sen!2stz!4v1626789012345!5m2!1sen!2stz" 
+                width="100%" 
+                height="100%" 
+                style="border:0;" 
+                allowfullscreen="" 
+                loading="lazy"
+                title="KRT Moshi, Vijana Street, SIDO Road Location">
+            </iframe>
+        </div>
+        
+        <!-- Transportation Info -->
+        <div class="row g-4 mt-5">
+            <div class="col-md-4">
+                <div class="text-center p-4 border rounded bg-white">
+                    <div class="mb-3">
+                        <i class="fas fa-bus text-primary fa-2x"></i>
+                    </div>
+                    <h4 class="h5 fw-bold mb-2">By Bus</h4>
+                    <p class="mb-0 small">Take any bus heading to Mbezi Beach and alight at VCCT stop.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center p-4 border rounded bg-white">
+                    <div class="mb-3">
+                        <i class="fas fa-car text-primary fa-2x"></i>
+                    </div>
+                    <h4 class="h5 fw-bold mb-2">By Car</h4>
+                    <p class="mb-0 small">Ample parking available on church premises.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center p-4 border rounded bg-white">
+                    <div class="mb-3">
+                        <i class="fas fa-bicycle text-primary fa-2x"></i>
+                    </div>
+                    <h4 class="h5 fw-bold mb-2">Other Transport</h4>
+                    <p class="mb-0 small">Bodaboda and taxi services available in the area.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQs Section -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="h3 fw-bold mb-4 text-primary text-center">Frequently Asked Questions</h2>
+        <p class="text-center text-muted mb-5">Find answers to common questions about our church</p>
+        
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="accordion" id="faqAccordion">
+                    <!-- FAQ Item 1 -->
+                    <div class="accordion-item border-0 shadow-sm mb-3">
+                        <h3 class="accordion-header" id="headingOne">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
+                                What time are your Sunday services?
+                            </button>
+                        </h3>
+                        <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                We have three Sunday services: 7:00 AM (English), 9:30 AM (English), and 11:30 AM (Swahili). Each service lasts about 90 minutes.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- FAQ Item 2 -->
+                    <div class="accordion-item border-0 shadow-sm mb-3">
+                        <h3 class="accordion-header" id="headingTwo">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">
+                                Is there a dress code for services?
+                            </button>
+                        </h3>
+                        <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                There is no strict dress code. We welcome you to come as you are. Most people dress in smart casual attire.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- FAQ Item 3 -->
+                    <div class="accordion-item border-0 shadow-sm mb-3">
+                        <h3 class="accordion-header" id="headingThree">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree">
+                                Do you have programs for children?
+                            </button>
+                        </h3>
+                        <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Yes! We have Sunday School for children aged 3-12 during all Sunday services. We also have a nursery for infants and toddlers.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- FAQ Item 4 -->
+                    <div class="accordion-item border-0 shadow-sm mb-3">
+                        <h3 class="accordion-header" id="headingFour">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour">
+                                How can I get involved in ministries?
+                            </button>
+                        </h3>
+                        <div id="collapseFour" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Visit our Ministries page to see all available opportunities. You can also talk to any ministry leader after service or contact the church office.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- FAQ Item 5 -->
+                    <div class="accordion-item border-0 shadow-sm">
+                        <h3 class="accordion-header" id="headingFive">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive">
+                                Do you offer counseling services?
+                            </button>
+                        </h3>
+                        <div id="collapseFive" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Yes, we offer pastoral counseling by appointment. Please contact the church office to schedule a session with one of our pastors.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="py-5 bg-primary text-white">
+    <div class="container">
+        <div class="row align-items-center text-center">
+            <div class="col-lg-8 mx-auto">
+                <h3 class="h2 mb-3">Still Have Questions?</h3>
+                <p class="lead mb-4">
+                    Don't hesitate to reach out to us. We're here to help!
+                </p>
+                <div class="d-flex flex-wrap justify-content-center gap-3">
+                    <a href="tel:{{ site_config.contact_phone|default:'+255762441719' }}" class="btn btn-light btn-lg">
+                        <i class="fas fa-phone me-2"></i> Call Us Now
+                    </a>
+                    <a href="mailto:{{ site_config.contact_email|default:'info@vcct.or.tz' }}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-envelope me-2"></i> Email Us
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Form validation enhancement
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const requiredFields = form.querySelectorAll('[required]');
+                let isValid = true;
+                
+                requiredFields.forEach(field => {
+                    if (!field.value.trim()) {
+                        isValid = false;
+                        field.classList.add('is-invalid');
+                    } else {
+                        field.classList.remove('is-invalid');
+                    }
+                });
+                
+                if (!isValid) {
+                    e.preventDefault();
+                    alert('Please fill in all required fields.');
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

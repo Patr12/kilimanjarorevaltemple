@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Sera ya Faragha{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="text-center mb-5">
+                <h1 class="fw-bold text-primary mb-3">
+                    <i class="fas fa-shield-alt me-2"></i>Sera ya Faragha
+                </h1>
+                <p class="text-muted">Sera yetu ya ulinzi na usimamizi wa taarifa za kibinafsi</p>
+                <div class="border-top pt-3 mt-3">
+                    <p class="text-muted small">
+                        Sera hii inatumika kuanzia {{ current_date|date:"F d, Y" }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Privacy Content -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4 p-lg-5">
+                    
+                    <!-- Introduction -->
+                    <section class="mb-5">
+                        <h3 class="fw-bold mb-3">1. Utangulizi</h3>
+                        <p class="mb-3">
+                            Tunathamini faragha yako na tunachukua ulinzi wa taarifa zako za kibinafsi kwa uzito. 
+                            Sera hii inaeleza jinsi tunavyokusanya, kutumia, na kulinda taarifa zako.
+                        </p>
+                        <div class="alert alert-info">
+                            <i class="fas fa-user-shield me-2"></i>
+                            Sera hii inatumika kwa taarifa zote tunazokusanya kupitia wavuti yetu.
+                        </div>
+                    </section>
+
+                    <!-- Information We Collect -->
+                    <section class="mb-5">
+                        <h3 class="fw-bold mb-3">2. Taarifa Tunazokusanya</h3>
+                        
+                        <h5 class="fw-bold mt-4">Taarifa za Kibinafsi:</h5>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="card h-100 border">
+                                    <div class="card-body">
+                                        <h6 class="fw-bold text-primary">
+                                            <i class="fas fa-user me-2"></i>Wakati wa Kujiandikisha:
+                                        </h6>
+                                        <ul class="mb-0">
+                                            <li>Jina la mtumiaji</li>
+                                            <li>Anwani ya barua pepe</li>
+                                            <li>Password (iliyohifadhiwa kwa usalama)</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card h-100 border">
+                                    <div class="card-body">
+                                        <h6 class="fw-bold text-primary">
+                                            <i class="fas fa-chart-line me-2"></i>Kiotomatiki:
+                                        </h6>
+                                        <ul class="mb-0">
+                                            <li>Anwani ya IP</li>
+                                            <li>Kifaa na programu tumizi</li>
+                                            <li>Vitendo unavyofanya kwenye wavuti</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- How We Use Information -->
+                    <section class="mb-5">
+                        <h3 class="fw-bold mb-3">3. Tunatumiaje Taarifa Zako</h3>
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <div class="d-flex">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-cogs fa-2x text-primary"></i>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h5>Kuboresha Huduma</h5>
+                                        <p class="small">Kukusaidia kufikia mahitaji yako kwa ufanisi zaidi</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-envelope fa-2x text-success"></i>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h5>Mawasiliano</h5>
+                                        <p class="small">Kutuma arifa, visasisho, na matangazo muhimu</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-shield-alt fa-2x text-warning"></i>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h5>Usalama</h5>
+                                        <p class="small">Kuzuia udanganyifu na vitendo visivyoruhusiwa</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-chart-bar fa-2x text-info"></i>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h5>Uchambuzi</h5>
+                                        <p class="small">Kuchambua matumizi ya wavuti na kuboresha ubora</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Data Protection -->
+                    <section class="mb-5">
+                        <h3 class="fw-bold mb-3">4. Ulinzi wa Taarifa</h3>
+                        <p class="mb-3">Tunatumia hatua zifuatazo za usalama:</p>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4 mb-3">
+                                <div class="card text-center h-100 border-success">
+                                    <div class="card-body">
+                                        <i class="fas fa-lock fa-3x text-success mb-3"></i>
+                                        <h5>Usimbaji Fiche</h5>
+                                        <p class="small">Taarifa zote zinahifadhiwa kwa usimbaji fiche</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="card text-center h-100 border-warning">
+                                    <div class="card-body">
+                                        <i class="fas fa-user-lock fa-3x text-warning mb-3"></i>
+                                        <h5>Udhibiti wa Ufikiaji</h5>
+                                        <p class="small">Wafanyakazi wana ufikiaji mdogo tu wa taarifa</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="card text-center h-100 border-info">
+                                    <div class="card-body">
+                                        <i class="fas fa-shield-check fa-3x text-info mb-3"></i>
+                                        <h5>Usalama wa Mtandao</h5>
+                                        <p class="small">TLS/SSL encryption kwa usalama wa maambukizi</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Your Rights -->
+                    <section class="mb-5">
+                        <h3 class="fw-bold mb-3">5. Haki Zako</h3>
+                        <p>Kama mtumiaji, una haki za:</p>
+                        
+                        <div class="accordion" id="privacyRights">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#right1">
+                                        <i class="fas fa-eye me-2"></i>Haki ya Kuona
+                                    </button>
+                                </h2>
+                                <div id="right1" class="accordion-collapse collapse show" data-bs-parent="#privacyRights">
+                                    <div class="accordion-body">
+                                        Unaweza kuomba kuona taarifa zako za kibinafsi tulizonazo.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#right2">
+                                        <i class="fas fa-edit me-2"></i>Haki ya Kusahihisha
+                                    </button>
+                                </h2>
+                                <div id="right2" class="accordion-collapse collapse" data-bs-parent="#privacyRights">
+                                    <div class="accordion-body">
+                                        Unaweza kusahihisha taarifa zako zisizo sahihi.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#right3">
+                                        <i class="fas fa-trash-alt me-2"></i>Haki ya Kufuta
+                                    </button>
+                                </h2>
+                                <div id="right3" class="accordion-collapse collapse" data-bs-parent="#privacyRights">
+                                    <div class="accordion-body">
+                                        Unaweza kuomba kufutwa kwa taarifa zako, isipokuwa kwa sheria.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Cookies -->
+                    <section class="mb-5">
+                        <h3 class="fw-bold mb-3">6. Kuki (Cookies)</h3>
+                        <p class="mb-3">
+                            Tunatumia kuki kuboresha uzoefi wako. Kuki ni faili ndogo zinazowekwa kwenye kifaa chako.
+                        </p>
+                        <div class="alert alert-warning">
+                            <i class="fas fa-cookie-bite me-2"></i>
+                            Kwa kutumia wavuti yetu, unakubali matumizi ya kuki kulingana na sera hii.
+                        </div>
+                    </section>
+
+                    <!-- Contact -->
+                    <section class="mb-4">
+                        <h3 class="fw-bold mb-3">7. Mawasiliano</h3>
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <p class="mb-3">
+                                    Kama una maswali kuhusu Sera ya Faragha au unahitaji kufanya ombi lolote 
+                                    kuhusu taarifa zako, tafadhali wasiliana nasi:
+                                </p>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <i class="fas fa-envelope fa-lg text-primary me-3"></i>
+                                            <div>
+                                                <h6 class="mb-0">Barua Pepe</h6>
+                                                <a href="mailto:privacy@example.com" class="text-decoration-none">privacy@example.com</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <i class="fas fa-phone fa-lg text-success me-3"></i>
+                                            <div>
+                                                <h6 class="mb-0">Simu</h6>
+                                                <p class="mb-0">+255 XXX XXX XXX</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="text-center">
+                <a href="{% url 'accounts:terms' %}" class="btn btn-outline-primary btn-lg me-3">
+                    <i class="fas fa-file-contract me-2"></i>Rudi kwa Sheria na Masharti
+                </a>
+                <a href="{% url 'accounts:signup' %}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-user-plus me-2"></i>Endelea na Usajili
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
