@@ -12,7 +12,7 @@
             <p class="lead text-muted mb-4">Welcome to our church community where faith, love, and fellowship come together to create a welcoming environment for all.</p>
         </div>
         <div class="col-lg-4">
-            <img src="{% static 'images/WhatsApp Image 2025-12-30 at 8.57.57 PM.jpeg' %}" 
+            <img src="{% static 'images/logos.jpeg' %}" 
                  alt="Our Church" 
                  class="img-fluid rounded shadow">
         </div>
@@ -164,37 +164,36 @@
     </div>
     {% endif %}
     <!-- uongazi wa kanisa una kaa hapa kwenye structure nzuri  -->
-    <section class="church-structure">
-    <h2 class="text-center">Uongozi wa Kanisa</h2>
+ <section class="church-structure py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">Uongozi wa Kanisa</h2>
 
-    {% regroup leaders by level as leader_levels %}
+        {% regroup leaders by level as leader_levels %}
 
-    {% for group in leader_levels %}
-        <h3 class="text-center mt-4">
-            {{ group.list.0.get_level_display }}
-        </h3>
-
-        <div class="row justify-content-center">
-            {% for leader in group.list %}
-                <div class="col-md-6 col-lg-4 text-center mb-4">
-                    <div class="card shadow">
-                        <img src="{{ leader.photo.url }}" class="card-img-top" alt="{{ leader.full_name }}">
-                        <div class="card-body">
-                            <h5>{{ leader.full_name }}</h5>
-                            <p><strong>{{ leader.title }}</strong></p>
-
-                            {% if leader.vision_message %}
-                                <p class="fst-italic">
-                                    "{{ leader.vision_message }}"
-                                </p>
-                            {% endif %}
-                        </div>
+        <div class="tree">
+            {% for group in leader_levels %}
+                <div class="tree-level mb-5 text-center">
+                    <h3 class="level-title">{{ group.list.0.get_level_display }}</h3>
+                    <div class="d-flex flex-wrap justify-content-center gap-4">
+                        {% for leader in group.list %}
+                            <div class="tree-node card shadow position-relative" style="width: 200px;">
+                                <img src="{{ leader.photo.url }}" class="card-img-top" alt="{{ leader.full_name }}">
+                                <div class="card-body">
+                                    <h5 class="mb-1">{{ leader.full_name }}</h5>
+                                    <p class="text-muted mb-1"><small>{{ leader.title }}</small></p>
+                                    {% if leader.vision_message %}
+                                    <p class="fst-italic small text-primary" title="{{ leader.vision_message }}">💡 Vision</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
                     </div>
                 </div>
             {% endfor %}
         </div>
-    {% endfor %}
+    </div>
 </section>
+
 
 
     <!-- Call to Action -->
@@ -241,6 +240,58 @@
     .blockquote-footer::before {
         content: "— ";
     }
+    .tree {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+.tree-level {
+    position: relative;
+}
+
+.tree-level .level-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 2rem;
+}
+
+/* Lines kati ya levels */
+.tree-level:not(:first-child)::before {
+    content: '';
+    position: absolute;
+    top: -2.5rem;
+    left: 50%;
+    width: 2px;
+    height: 2.5rem;
+    background-color: #3498db;
+}
+
+/* Lines kati ya nodes */
+.tree-node {
+    position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.tree-node:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+}
+
+/* Optional connecting lines between nodes */
+.tree-level > .d-flex > .tree-node:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: -50%;
+    width: 100%;
+    height: 2px;
+    background-color: #3498db;
+    z-index: -1;
+}
+
 </style>
 
 <!-- Bootstrap Icons -->

@@ -10,7 +10,7 @@
                     {% if site_config.hero_bg_image %}
                     url('{{ site_config.hero_bg_image.url }}')
                     {% else %}
-                    url('{% static "images/WhatsApp Image 2025-12-30 at 8.57.57 PM.jpeg" %}')
+                    url('{% static "images/logos.jpeg" %}')
                     {% endif %}
                     center/cover no-repeat;
         min-height: 80vh;
@@ -455,12 +455,12 @@
 {% endif %}
 
 <!-- Call to Action -->
-<section class="py-5 bg-dark text-white">
+<section class="py-5 bg-light text-white">
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-8">
-                <h3 class="h2 mb-3">Join Us This Sunday</h3>
-                <p class="lead mb-4">
+                <h3 class="h2 mb-3 text-dark">Join Us This Sunday</h3>
+                <p class="lead mb-4 text-dark">
                     Experience uplifting worship, inspiring messages, and warm fellowship. 
                     We welcome everyone regardless of where you are on your spiritual journey.
                 </p>
@@ -468,7 +468,7 @@
                     <a href="{% url 'core:services' %}" class="btn btn-light btn-lg">
                         <i class="fas fa-church me-2"></i> Service Times
                     </a>
-                    <a href="{% url 'core:contact' %}" class="btn btn-outline-light btn-lg">
+                    <a href="{% url 'core:contact' %}" class="btn btn-outline-dark btn-lg">
                         <i class="fas fa-directions me-2"></i> Get Directions
                     </a>
                 </div>
