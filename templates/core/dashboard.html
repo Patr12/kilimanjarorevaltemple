@@ -1,110 +1,522 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Dashboard{% endblock %}
+{% block title %}Dashboard - Church Management System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stat-card {
+        transition: all 0.3s ease;
+        border-radius: 15px;
+        border: none;
+        overflow: hidden;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15) !important;
+    }
+    
+    .stat-icon {
+        font-size: 2.5rem;
+        opacity: 0.3;
+        position: absolute;
+        right: 20px;
+        bottom: 20px;
+    }
+    
+    .list-item-hover:hover {
+        background-color: #f8f9fc;
+        border-radius: 10px;
+    }
+    
+    .progress-sm {
+        height: 8px;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 2rem 1rem;
+    }
+    
+    .empty-state i {
+        font-size: 3rem;
+        color: #d1d3e2;
+        margin-bottom: 1rem;
+    }
+    
+    .badge-ministry {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 5px 10px;
+        border-radius: 50px;
+        font-size: 0.75rem;
+    }
+    
+    .quick-action-btn {
+        border-radius: 10px;
+        padding: 1rem;
+        transition: all 0.3s ease;
+        border: 1px solid #e3e6f0;
+        background: white;
+    }
+    
+    .quick-action-btn:hover {
+        background: #4e73df;
+        color: white;
+        border-color: #4e73df;
+    }
+    
+    .quick-action-btn:hover i {
+        color: white !important;
+    }
+    
+    .greeting-banner {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 2rem;
+    }
+    
+    @media (max-width: 768px) {
+        .stat-card {
+            margin-bottom: 1rem;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-
-    <!-- Welcome -->
-    <div class="mb-4">
-       <h2 class="fw-bold">
-    {{ greeting }}, {{ user.username }} 👋
-</h2>
-
-        <p class="text-muted mb-0">
-    May your day be filled with grace and purpose.
-</p>
-
+<div class="container-fluid py-4">
+    <!-- Greeting Banner -->
+    <div class="greeting-banner mb-4 shadow-sm">
+        <div class="row align-items-center">
+            <div class="col">
+                <h1 class="h2 fw-bold mb-2">{{ greeting }}, {{ user.get_full_name|default:user.username }}! 👋</h1>
+                <p class="mb-0 opacity-75">
+                    <i class="fas fa-calendar-day me-2"></i>
+                    {% now "l, F j, Y" %}
+                </p>
+            </div>
+            <div class="col-auto">
+                {% if profile and profile.photo %}
+                    <img src="{{ profile.photo.url }}" alt="Profile" class="rounded-circle" width="60" height="60" style="object-fit: cover; border: 3px solid rgba(255,255,255,0.3);">
+                {% else %}
+                    <div class="bg-white text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; border: 3px solid rgba(255,255,255,0.3);">
+                        <i class="fas fa-user fa-2x"></i>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
     </div>
 
-    <div class="row g-4">
-
-        <!-- My Ministries -->
-        <div class="col-md-4">
-            <div class="card shadow-sm border-0 h-100">
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card card bg-primary text-white h-100">
                 <div class="card-body">
-                    <h5 class="fw-bold mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-white-50 mb-2">Total Tithe</h6>
+                            <h2 class="mb-0 fw-bold">${{ total_tithe|floatformat:2 }}</h2>
+                            <small class="text-white-50">Lifetime contributions</small>
+                        </div>
+                        <i class="fas fa-hand-holding-heart stat-icon"></i>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-0">
+                    <div class="progress progress-sm bg-white-50">
+                        <div class="progress-bar bg-white" style="width: 75%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card card bg-success text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-white-50 mb-2">Active Ministries</h6>
+                            <h2 class="mb-0 fw-bold">{{ user_ministries|length }}</h2>
+                            <small class="text-white-50">Current memberships</small>
+                        </div>
+                        <i class="fas fa-users stat-icon"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card card bg-info text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-white-50 mb-2">Upcoming Events</h6>
+                            <h2 class="mb-0 fw-bold">{{ upcoming_events|length }}</h2>
+                            <small class="text-white-50">Next 7 days</small>
+                        </div>
+                        <i class="fas fa-calendar-alt stat-icon"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card card bg-warning text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-white-50 mb-2">Registrations</h6>
+                            <h2 class="mb-0 fw-bold">{{ user_registrations|length }}</h2>
+                            <small class="text-white-50">Recent activities</small>
+                        </div>
+                        <i class="fas fa-ticket-alt stat-icon"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Row -->
+    <div class="row g-4">
+        <!-- Left Column -->
+        <div class="col-lg-4">
+            <!-- Profile Card -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-user-circle me-2 text-primary"></i>
+                        Profile Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if profile %}
+                        <div class="d-flex align-items-center mb-3">
+                            {% if profile.photo %}
+                                <img src="{{ profile.photo.url }}" alt="Profile" class="rounded-circle me-3" width="60" height="60" style="object-fit: cover;">
+                            {% else %}
+                                <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 60px; height: 60px;">
+                                    <i class="fas fa-user fa-2x text-secondary"></i>
+                                </div>
+                            {% endif %}
+                            <div>
+                                <h6 class="mb-1">{{ user.get_full_name|default:user.username }}</h6>
+                                <p class="small text-muted mb-0">{{ user.email }}</p>
+                            </div>
+                        </div>
+                        
+                        <ul class="list-unstyled">
+                            {% if profile.phone %}
+                                <li class="mb-2">
+                                    <i class="fas fa-phone-alt me-2 text-muted" style="width: 20px;"></i>
+                                    {{ profile.phone }}
+                                </li>
+                            {% endif %}
+                            {% if profile.zone %}
+                                <li class="mb-2">
+                                    <i class="fas fa-map-marker-alt me-2 text-muted" style="width: 20px;"></i>
+                                    {{ profile.zone.name }}
+                                </li>
+                            {% endif %}
+                            {% if profile.ministry_role %}
+                                <li class="mb-2">
+                                    <i class="fas fa-tag me-2 text-muted" style="width: 20px;"></i>
+                                    {{ profile.ministry_role.name }}
+                                </li>
+                            {% endif %}
+                            <li>
+                                <i class="fas fa-calendar-check me-2 text-muted" style="width: 20px;"></i>
+                                Joined: {{ user.date_joined|date:"M Y" }}
+                            </li>
+                        </ul>
+                        
+                        <a href="{% url 'core:profile' %}" class="btn btn-outline-primary btn-sm w-100">
+                            <i class="fas fa-edit me-2"></i>Edit Profile
+                        </a>
+                    {% else %}
+                        <p class="text-muted text-center mb-3">Complete your profile to get started</p>
+                        <a href="{% url 'core:create_profile' %}" class="btn btn-primary btn-sm w-100">
+                            <i class="fas fa-plus-circle me-2"></i>Create Profile
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-bolt me-2 text-warning"></i>
+                        Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <a href="" class="quick-action-btn d-block text-center text-decoration-none">
+                                <i class="fas fa-hand-holding-heart fa-2x mb-2" style="color: #4e73df;"></i>
+                                <small class="d-block">Record Tithe</small>
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a href="{% url 'core:events' %}" class="quick-action-btn d-block text-center text-decoration-none">
+                                <i class="fas fa-calendar-plus fa-2x mb-2" style="color: #1cc88a;"></i>
+                                <small class="d-block">Browse Events</small>
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a href="{% url 'core:ministries' %}" class="quick-action-btn d-block text-center text-decoration-none">
+                                <i class="fas fa-users fa-2x mb-2" style="color: #36b9cc;"></i>
+                                <small class="d-block">Join Ministry</small>
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a href="" class="quick-action-btn d-block text-center text-decoration-none">
+                                <i class="fas fa-donate fa-2x mb-2" style="color: #f6c23e;"></i>
+                                <small class="d-block">Make Donation</small>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Middle Column - My Ministries -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold">
                         <i class="fas fa-users me-2 text-primary"></i>
                         My Ministries
                     </h5>
-
+                    <span class="badge bg-primary rounded-pill">{{ user_ministries|length }}</span>
+                </div>
+                <div class="card-body">
                     {% if user_ministries %}
-                        <ul class="list-group list-group-flush">
+                        <div class="list-group list-group-flush">
                             {% for m in user_ministries %}
-                                <li class="list-group-item px-0">
-                                    {{ m.ministry.name }}
-                                </li>
+                                <div class="list-group-item px-0 py-3 border-0 border-bottom list-item-hover">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6 class="mb-1 fw-bold">{{ m.ministry.name }}</h6>
+                                            {% if m.role %}
+                                                <small class="text-muted">
+                                                    <i class="fas fa-user-tag me-1"></i>{{ m.role }}
+                                                </small>
+                                            {% endif %}
+                                            <br>
+                                            <small class="text-muted">
+                                                <i class="fas fa-clock me-1"></i>Since {{ m.joined_date|date:"M Y" }}
+                                            </small>
+                                        </div>
+                                        <span class="badge-ministry">
+                                            <i class="fas fa-check-circle me-1"></i>Active
+                                        </span>
+                                    </div>
+                                </div>
                             {% endfor %}
-                        </ul>
+                        </div>
+                        {% if user_ministries.count > 3 %}
+                            <div class="text-center mt-3">
+                                <a href="{% url 'core:ministries' %}" class="btn btn-link">View All Ministries</a>
+                            </div>
+                        {% endif %}
                     {% else %}
-                        <p class="text-muted small mb-0">
-                            You are not part of any ministry yet.
-                        </p>
+                        <div class="empty-state">
+                            <i class="fas fa-users-slash"></i>
+                            <p class="text-muted mb-2">You are not part of any ministry yet.</p>
+                            <a href="{% url 'core:ministries' %}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-plus-circle me-2"></i>Browse Ministries
+                            </a>
+                        </div>
                     {% endif %}
                 </div>
             </div>
         </div>
 
-        <!-- Upcoming Events -->
-        <div class="col-md-4">
-            <div class="card shadow-sm border-0 h-100">
+        <!-- Right Column - Recent Tithes -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-hand-holding-heart me-2 text-danger"></i>
+                        Recent Tithes
+                    </h5>
+                    <span class="badge bg-danger rounded-pill">{{ tithes|length }}</span>
+                </div>
                 <div class="card-body">
-                    <h5 class="fw-bold mb-3">
+                    {% if tithes %}
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Period</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for tithe in tithes %}
+                                        <tr>
+                                            <td>
+                                                <strong>{{ tithe.get_month_display }}</strong><br>
+                                                <small class="text-muted">{{ tithe.year }}</small>
+                                            </td>
+                                            <td>
+                                                <span class="fw-bold text-success">${{ tithe.amount|floatformat:2 }}</span>
+                                            </td>
+                                            <td>
+                                                {% if tithe.status == 'paid' %}
+                                                    <span class="badge bg-success">Paid</span>
+                                                {% else %}
+                                                    <span class="badge bg-warning">Pending</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-3">
+                            <a href="{% url 'core:tithe_history' %}" class="btn btn-outline-primary btn-sm w-100">
+                                <i class="fas fa-history me-2"></i>View Full History
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-hand-holding-heart"></i>
+                            <p class="text-muted mb-2">No tithe records found.</p>
+                            <a href="{% url 'core:add_tithe' %}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-plus-circle me-2"></i>Record First Tithe
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Row - Events -->
+    <div class="row g-4 mt-2">
+        <!-- Upcoming Events -->
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold">
                         <i class="fas fa-calendar-alt me-2 text-success"></i>
                         Upcoming Events
                     </h5>
-
+                    <span class="badge bg-success rounded-pill">{{ upcoming_events|length }}</span>
+                </div>
+                <div class="card-body">
                     {% if upcoming_events %}
-                        <ul class="list-group list-group-flush">
+                        <div class="row g-3">
                             {% for event in upcoming_events %}
-                                <li class="list-group-item px-0">
-                                    <strong>{{ event.title }}</strong><br>
-                                    <small class="text-muted">
-                                        {{ event.start_date }} • {{ event.start_time }}
-                                    </small>
-                                </li>
+                                <div class="col-md-6">
+                                    <div class="card border-0 bg-light h-100">
+                                        <div class="card-body">
+                                            <h6 class="fw-bold mb-2">{{ event.title }}</h6>
+                                            <div class="small text-muted mb-2">
+                                                <i class="fas fa-calendar-day me-1"></i>{{ event.start_date|date:"D, M d" }}<br>
+                                                <i class="fas fa-clock me-1"></i>{{ event.start_time|time:"g:i A" }}
+                                            </div>
+                                            {% if event.location %}
+                                                <small class="text-muted">
+                                                    <i class="fas fa-map-marker-alt me-1"></i>{{ event.location }}
+                                                </small>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
                             {% endfor %}
-                        </ul>
+                        </div>
+                        <div class="mt-3">
+                            <a href="{% url 'core:events' %}" class="btn btn-outline-success btn-sm w-100">
+                                <i class="fas fa-calendar-plus me-2"></i>View All Events
+                            </a>
+                        </div>
                     {% else %}
-                        <p class="text-muted small mb-0">
-                            No upcoming events.
-                        </p>
+                        <div class="empty-state">
+                            <i class="fas fa-calendar-times"></i>
+                            <p class="text-muted mb-2">No upcoming events at this time.</p>
+                            <a href="{% url 'core:events' %}" class="btn btn-success btn-sm">
+                                <i class="fas fa-search me-2"></i>Browse Events
+                            </a>
+                        </div>
                     {% endif %}
                 </div>
             </div>
         </div>
 
         <!-- My Registrations -->
-        <div class="col-md-4">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-body">
-                    <h5 class="fw-bold mb-3">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold">
                         <i class="fas fa-ticket-alt me-2 text-warning"></i>
                         My Registrations
                     </h5>
-
+                    <span class="badge bg-warning rounded-pill">{{ user_registrations|length }}</span>
+                </div>
+                <div class="card-body">
                     {% if user_registrations %}
-                        <ul class="list-group list-group-flush">
+                        <div class="list-group list-group-flush">
                             {% for reg in user_registrations %}
-                                <li class="list-group-item px-0">
-                                    {{ reg.event.title }}<br>
-                                    <small class="text-muted">
-                                        Registered on {{ reg.registered_at|date:"M d, Y" }}
-                                    </small>
-                                </li>
+                                <div class="list-group-item px-0 py-3 border-0 border-bottom">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6 class="fw-bold mb-1">{{ reg.event.title }}</h6>
+                                            <small class="text-muted">
+                                                <i class="fas fa-calendar-check me-1"></i>
+                                                Registered: {{ reg.registered_at|date:"M d, Y" }}
+                                            </small>
+                                        </div>
+                                        {% if reg.status == 'confirmed' %}
+                                            <span class="badge bg-success">Confirmed</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">Pending</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
                             {% endfor %}
-                        </ul>
+                        </div>
+                        <div class="mt-3">
+                            <a href="{% url 'core:my_registrations' %}" class="btn btn-outline-warning btn-sm w-100">
+                                <i class="fas fa-ticket-alt me-2"></i>View All Registrations
+                            </a>
+                        </div>
                     {% else %}
-                        <p class="text-muted small mb-0">
-                            You haven’t registered for any events.
-                        </p>
+                        <div class="empty-state">
+                            <i class="fas fa-ticket-alt"></i>
+                            <p class="text-muted mb-2">You haven't registered for any events.</p>
+                            <a href="{% url 'core:events' %}" class="btn btn-warning btn-sm">
+                                <i class="fas fa-calendar-plus me-2"></i>Register for Events
+                            </a>
+                        </div>
                     {% endif %}
                 </div>
             </div>
         </div>
-
     </div>
-
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Optional: Add any interactive features
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-hide alerts after 5 seconds
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                alert.style.transition = 'opacity 0.5s ease';
+                alert.style.opacity = '0';
+                setTimeout(function() {
+                    alert.remove();
+                }, 500);
+            });
+        }, 5000);
+    });
+</script>
 {% endblock %}

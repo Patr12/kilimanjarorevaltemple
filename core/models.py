@@ -438,3 +438,75 @@ class Testimonial(models.Model):
     
     def __str__(self):
         return self.author
+    
+class Tithe(models.Model):
+    """Tithe records"""
+
+    PAYMENT_METHODS = [
+        ('cash', 'Cash'),
+        ('mpesa', 'M-Pesa'),
+        ('bank', 'Bank'),
+        ('other', 'Other'),
+    ]
+    
+    STATUS_CHOICES = [
+        ('paid', 'Paid'),
+        ('pending', 'Pending'),
+        ('cancelled', 'Cancelled'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tithes')
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+
+    # muhimu kwa statistics
+    month = models.PositiveSmallIntegerField()  # 1–12
+    year = models.PositiveIntegerField()
+
+    payment_method = models.CharField(
+        max_length=20, choices=PAYMENT_METHODS, default='cash'
+    )
+    
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default='paid'
+    )
+
+    reference = models.CharField(max_length=100, blank=True, null=True)
+    notes = models.TextField(blank=True, null=True)
+
+    date_paid = models.DateTimeField(default=timezone.now)
+    
+    # Add recorded_by field
+    recorded_by = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        related_name='recorded_tithes'
+    )
+
+    class Meta:
+        ordering = ['-year', '-month', '-date_paid']
+        unique_together = ('user', 'month', 'year')  # mtu asilipa mara 2 kwa mwezi huohuo
+        indexes = [
+            models.Index(fields=['year', 'month']),
+            models.Index(fields=['user']),
+            models.Index(fields=['status']),
+            models.Index(fields=['date_paid']),
+        ]
+
+    def __str__(self):
+        return f"{self.user.get_full_name()} - {self.amount} ({self.month}/{self.year})"
+
+    @property
+    def period(self):
+        return f"{self.month}/{self.year}"
+        
+    @property
+    def get_month_display(self):
+        """Return month name"""
+        months = {
+            1: 'January', 2: 'February', 3: 'March', 4: 'April',
+            5: 'May', 6: 'June', 7: 'July', 8: 'August',
+            9: 'September', 10: 'October', 11: 'November', 12: 'December'
+        }
+        return months.get(self.month, '')

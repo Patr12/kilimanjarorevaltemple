@@ -1,7 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout
 from django.contrib.auth.forms import AuthenticationForm
-
 from core.models import SiteConfig
 from .forms import SignupForm
 from core.mixins import SiteConfigMixin

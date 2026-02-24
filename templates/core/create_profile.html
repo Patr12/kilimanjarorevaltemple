@@ -1,0 +1,426 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Create Profile - Church Management System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-form-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .form-card {
+        border-radius: 20px;
+        border: none;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    }
+    
+    .form-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 20px 20px 0 0;
+        padding: 2rem;
+    }
+    
+    .form-section {
+        background: #f8f9fc;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-section-title {
+        color: #4e73df;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #e3e6f0;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #5a5c69;
+        font-size: 0.9rem;
+        margin-bottom: 0.3rem;
+    }
+    
+    .form-control, .form-select {
+        border-radius: 10px;
+        border: 1px solid #d1d3e2;
+        padding: 0.6rem 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #4e73df;
+        box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+    }
+    
+    .photo-upload-area {
+        border: 2px dashed #d1d3e2;
+        border-radius: 15px;
+        padding: 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .photo-upload-area:hover {
+        border-color: #4e73df;
+        background-color: #f8f9fc;
+    }
+    
+    .photo-upload-area i {
+        font-size: 3rem;
+        color: #d1d3e2;
+        margin-bottom: 1rem;
+    }
+    
+    .photo-preview {
+        max-width: 150px;
+        max-height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin: 0 auto 1rem;
+        display: none;
+    }
+    
+    .btn-submit {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 0.8rem 2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .required-field::after {
+        content: "*";
+        color: #e74a3b;
+        margin-left: 4px;
+    }
+    
+    .progress {
+        height: 5px;
+        border-radius: 10px;
+        margin-top: 1rem;
+    }
+    
+    .step-indicator {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+        padding: 0 1rem;
+    }
+    
+    .step {
+        text-align: center;
+        flex: 1;
+        position: relative;
+    }
+    
+    .step:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        top: 20px;
+        right: -50%;
+        width: 100%;
+        height: 2px;
+        background: #e3e6f0;
+        z-index: 1;
+    }
+    
+    .step.active .step-number {
+        background: #4e73df;
+        color: white;
+        border-color: #4e73df;
+    }
+    
+    .step.completed .step-number {
+        background: #1cc88a;
+        color: white;
+        border-color: #1cc88a;
+    }
+    
+    .step-number {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: white;
+        border: 2px solid #e3e6f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.5rem;
+        font-weight: 600;
+        position: relative;
+        z-index: 2;
+        transition: all 0.3s ease;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="profile-form-container">
+        <!-- Progress Indicator -->
+        <div class="step-indicator mb-4">
+            <div class="step active">
+                <div class="step-number">1</div>
+                <small>Personal Info</small>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <small>Contact Details</small>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <small>Additional Info</small>
+            </div>
+        </div>
+        
+        <!-- Main Form Card -->
+        <div class="card form-card">
+            <div class="form-header text-center">
+                <h3 class="fw-bold mb-2">Create Your Profile</h3>
+                <p class="mb-0 opacity-75">Tell us more about yourself to get started</p>
+            </div>
+            
+            <div class="card-body p-4">
+                <form method="POST" enctype="multipart/form-data" id="profileForm">
+                    {% csrf_token %}
+                    
+                    <!-- Personal Information Section -->
+                    <div class="form-section">
+                        <h5 class="form-section-title">
+                            <i class="fas fa-user-circle me-2"></i>Personal Information
+                        </h5>
+                        
+                        <div class="row g-4">
+                            <!-- Photo Upload -->
+                            <div class="col-12">
+                                <label class="form-label">Profile Photo</label>
+                                <div class="photo-upload-area" onclick="document.getElementById('photoInput').click()">
+                                    <img id="photoPreview" class="photo-preview" src="#" alt="Preview">
+                                    <i id="uploadIcon" class="fas fa-cloud-upload-alt"></i>
+                                    <p id="uploadText" class="mb-0">Click to upload or drag and drop</p>
+                                    <small class="text-muted">JPG, PNG or GIF (Max. 5MB)</small>
+                                    <input type="file" id="photoInput" name="photo" accept="image/*" style="display: none;" onchange="previewImage(this)">
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label required-field">Full Name</label>
+                                <input type="text" class="form-control" name="full_name" value="{{ user.get_full_name }}" placeholder="Enter your full name" required>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label required-field">Date of Birth</label>
+                                <input type="date" class="form-control" name="date_of_birth" required>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label required-field">Gender</label>
+                                <select class="form-select" name="gender" required>
+                                    <option value="">Select Gender</option>
+                                    <option value="M">Male</option>
+                                    <option value="F">Female</option>
+                                    <option value="O">Other</option>
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label">Marital Status</label>
+                                <select class="form-select" name="marital_status">
+                                    <option value="">Select Status</option>
+                                    <option value="single">Single</option>
+                                    <option value="married">Married</option>
+                                    <option value="divorced">Divorced</option>
+                                    <option value="widowed">Widowed</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Contact Information Section -->
+                    <div class="form-section">
+                        <h5 class="form-section-title">
+                            <i class="fas fa-address-card me-2"></i>Contact Information
+                        </h5>
+                        
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label class="form-label required-field">Phone Number</label>
+                                <input type="tel" class="form-control" name="phone" placeholder="+255 XXX XXX XXX" required>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label">Email Address</label>
+                                <input type="email" class="form-control" value="{{ user.email }}" readonly disabled>
+                                <small class="text-muted">Email cannot be changed</small>
+                            </div>
+                            
+                            <div class="col-12">
+                                <label class="form-label">Address</label>
+                                <textarea class="form-control" name="address" rows="2" placeholder="Your physical address"></textarea>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label">City</label>
+                                <input type="text" class="form-control" name="city" placeholder="Your city">
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label">Zone</label>
+                                <select class="form-select" name="zone">
+                                    <option value="">Select Zone</option>
+                                    {% for zone in zones %}
+                                        <option value="{{ zone.id }}">{{ zone.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Additional Information Section -->
+                    <div class="form-section">
+                        <h5 class="form-section-title">
+                            <i class="fas fa-info-circle me-2"></i>Additional Information
+                        </h5>
+                        
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Occupation</label>
+                                <input type="text" class="form-control" name="occupation" placeholder="Your occupation">
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label">Ministry Role</label>
+                                <select class="form-select" name="ministry_role">
+                                    <option value="">Select Role</option>
+                                    {% for role in ministry_roles %}
+                                        <option value="{{ role.id }}">{{ role.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="col-12">
+                                <label class="form-label">Bio / Testimony</label>
+                                <textarea class="form-control" name="bio" rows="4" placeholder="Share a little about yourself and your faith journey..."></textarea>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label">Emergency Contact Name</label>
+                                <input type="text" class="form-control" name="emergency_contact_name" placeholder="Emergency contact person">
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label">Emergency Contact Phone</label>
+                                <input type="tel" class="form-control" name="emergency_contact_phone" placeholder="Emergency contact phone">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Form Progress -->
+                    <div class="progress">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: 33%" id="formProgress"></div>
+                    </div>
+                    
+                    <!-- Form Actions -->
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{% url 'core:dashboard' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-submit">
+                            <i class="fas fa-save me-2"></i>Create Profile
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Image preview function
+    function previewImage(input) {
+        const preview = document.getElementById('photoPreview');
+        const uploadIcon = document.getElementById('uploadIcon');
+        const uploadText = document.getElementById('uploadText');
+        
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                uploadIcon.style.display = 'none';
+                uploadText.textContent = 'Change photo';
+            }
+            
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+    
+    // Form progress calculator
+    document.getElementById('profileForm').addEventListener('input', function() {
+        const inputs = this.querySelectorAll('input:not([disabled]), select, textarea');
+        let filled = 0;
+        let total = 0;
+        
+        inputs.forEach(input => {
+            if (input.type !== 'file') {
+                total++;
+                if (input.value.trim() !== '') {
+                    filled++;
+                }
+            }
+        });
+        
+        const progress = (filled / total) * 100;
+        document.getElementById('formProgress').style.width = Math.round(progress) + '%';
+    });
+    
+    // Multi-step form navigation (optional enhancement)
+    let currentStep = 1;
+    
+    function showStep(step) {
+        const sections = document.querySelectorAll('.form-section');
+        sections.forEach((section, index) => {
+            if (index === step - 1) {
+                section.style.display = 'block';
+            } else {
+                section.style.display = 'none';
+            }
+        });
+        
+        // Update step indicators
+        const steps = document.querySelectorAll('.step');
+        steps.forEach((s, index) => {
+            if (index + 1 < step) {
+                s.classList.add('completed');
+                s.classList.remove('active');
+            } else if (index + 1 === step) {
+                s.classList.add('active');
+                s.classList.remove('completed');
+            } else {
+                s.classList.remove('active', 'completed');
+            }
+        });
+    }
+    
+    // Initially show first step
+    // Uncomment below for multi-step form
+    // showStep(1);
+</script>
+{% endblock %}

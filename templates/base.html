@@ -113,6 +113,25 @@
                     </button>
                 </form>
             </li>
+            {% if user.is_staff or user.is_superuser %}
+<li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+        <i class="fas fa-shield-alt me-1"></i>Admin
+    </a>
+    <ul class="dropdown-menu">
+        <li>
+            <a class="dropdown-item" href="{% url 'core:admin_tithe_list' %}">
+                <i class="fas fa-chart-line me-2"></i>All Tithes
+            </a>
+        </li>
+        <li>
+            <a class="dropdown-item" href="{% url 'core:add_tithe' %}">
+                <i class="fas fa-plus-circle me-2"></i>Record Tithe (Admin)
+            </a>
+        </li>
+    </ul>
+</li>
+{% endif %}
         {% else %}
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'accounts:login' %}">

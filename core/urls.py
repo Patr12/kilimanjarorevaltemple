@@ -28,4 +28,16 @@ urlpatterns = [
     
     # Dashboard
     path('dashboard/', views.dashboard, name='dashboard'),
+    # Profile URLs
+    path('profile/', views.profile_view, name='profile'),
+    path('profile/create/', views.create_profile, name='create_profile'),
+    path('profile/edit/', views.edit_profile, name='edit_profile'),
+    
+    # Tithe URLs
+    path('tithes/', views.tithe_history, name='tithe_history'),
+    path('tithes/add/', views.add_tithe, name='add_tithe'),
+    path('tithes/<int:tithe_id>/', views.tithe_detail, name='tithe_detail'),
+      # Admin/Staff URLs
+    path('staff/tithes/', views.admin_tithe_list, name='admin_tithe_list'),
+    path('search-users/', views.search_users_api, name='search_users'),
 ]

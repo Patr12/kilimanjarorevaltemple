@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Admin - All Tithes{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-chart-line me-2"></i>All Tithe Records</h2>
+        <a href="{% url 'core:add_tithe' %}" class="btn btn-primary">
+            <i class="fas fa-plus-circle me-2"></i>Record New Tithe
+        </a>
+    </div>
+    
+    <!-- Filter Form -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Member</label>
+                    <select name="user_id" class="form-select">
+                        <option value="">All Members</option>
+                        {% for user in users %}
+                            <option value="{{ user.id }}" {% if selected_user == user.id|stringformat:"s" %}selected{% endif %}>
+                                {{ user.get_full_name|default:user.username }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Year</label>
+                    <select name="year" class="form-select">
+                        <option value="">All Years</option>
+                        {% for y in years %}
+                            <option value="{{ y }}" {% if selected_year == y|stringformat:"s" %}selected{% endif %}>{{ y }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Month</label>
+                    <select name="month" class="form-select">
+                        <option value="">All Months</option>
+                        <option value="1" {% if selected_month == '1' %}selected{% endif %}>January</option>
+                        <option value="2" {% if selected_month == '2' %}selected{% endif %}>February</option>
+                        <option value="3" {% if selected_month == '3' %}selected{% endif %}>March</option>
+                        <option value="4" {% if selected_month == '4' %}selected{% endif %}>April</option>
+                        <option value="5" {% if selected_month == '5' %}selected{% endif %}>May</option>
+                        <option value="6" {% if selected_month == '6' %}selected{% endif %}>June</option>
+                        <option value="7" {% if selected_month == '7' %}selected{% endif %}>July</option>
+                        <option value="8" {% if selected_month == '8' %}selected{% endif %}>August</option>
+                        <option value="9" {% if selected_month == '9' %}selected{% endif %}>September</option>
+                        <option value="10" {% if selected_month == '10' %}selected{% endif %}>October</option>
+                        <option value="11" {% if selected_month == '11' %}selected{% endif %}>November</option>
+                        <option value="12" {% if selected_month == '12' %}selected{% endif %}>December</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="">All</option>
+                        <option value="paid" {% if selected_status == 'paid' %}selected{% endif %}>Paid</option>
+                        <option value="pending" {% if selected_status == 'pending' %}selected{% endif %}>Pending</option>
+                        <option value="cancelled" {% if selected_status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-filter me-2"></i>Apply Filters
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Tithes Table -->
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Member</th>
+                            <th>Period</th>
+                            <th>Amount</th>
+                            <th>Payment Method</th>
+                            <th>Recorded By</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tithe in tithes %}
+                        <tr>
+                            <td>{{ tithe.date_paid|date:"M d, Y" }}</td>
+                            <td>
+                                <strong>{{ tithe.user.get_full_name|default:tithe.user.username }}</strong>
+                                <br>
+                                <small class="text-muted">{{ tithe.user.email }}</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-info">
+                                    {{ tithe.get_month_display }} {{ tithe.year }}
+                                </span>
+                            </td>
+                            <td class="text-success fw-bold">${{ tithe.amount|floatformat:2 }}</td>
+                            <td>
+                                {% if tithe.payment_method == 'cash' %}
+                                    <i class="fas fa-money-bill-wave text-success me-1"></i>Cash
+                                {% elif tithe.payment_method == 'mpesa' %}
+                                    <i class="fas fa-mobile-alt text-primary me-1"></i>M-Pesa
+                                {% elif tithe.payment_method == 'bank' %}
+                                    <i class="fas fa-university text-info me-1"></i>Bank
+                                {% else %}
+                                    <i class="fas fa-credit-card text-secondary me-1"></i>Other
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if tithe.recorded_by %}
+                                    {{ tithe.recorded_by.get_full_name|default:tithe.recorded_by.username }}
+                                    {% if tithe.recorded_by.is_staff %}
+                                        <span class="badge bg-warning text-dark">Staff</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-muted">
+                                        <i class="fas fa-user-check me-1"></i>Self
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if tithe.status == 'paid' %}
+                                    <span class="badge bg-success">Paid</span>
+                                {% elif tithe.status == 'pending' %}
+                                    <span class="badge bg-warning">Pending</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Cancelled</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'core:tithe_detail' tithe.id %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center py-5">
+                                <i class="fas fa-hand-holding-heart fa-4x text-muted mb-3"></i>
+                                <h5 class="fw-bold mb-2">No Tithe Records Found</h5>
+                                <p class="text-muted mb-3">No tithe records match your filters.</p>
+                                <a href="{% url 'core:add_tithe' %}" class="btn btn-primary">
+                                    <i class="fas fa-plus-circle me-2"></i>Record New Tithe
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            {% if tithes.has_other_pages %}
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if tithes.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ tithes.previous_page_number }}{% if selected_user %}&user_id={{ selected_user }}{% endif %}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_month %}&month={{ selected_month }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for i in tithes.paginator.page_range %}
+                        {% if tithes.number == i %}
+                            <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                        {% elif i > tithes.number|add:'-3' and i < tithes.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ i }}{% if selected_user %}&user_id={{ selected_user }}{% endif %}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_month %}&month={{ selected_month }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}">{{ i }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if tithes.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ tithes.next_page_number }}{% if selected_user %}&user_id={{ selected_user }}{% endif %}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_month %}&month={{ selected_month }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
