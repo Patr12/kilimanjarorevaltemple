@@ -1,9 +1,9 @@
-vcct_website/
+krt/
 ├── manage.py
 ├── requirements.txt
 ├── .env
 ├── .gitignore
-├── vcct/
+├── krt/
 │   ├── __init__.py
 │   ├── settings.py
 │   ├── urls.py
@@ -53,3 +53,155 @@ vcct_website/
         ├── index.html
         ├── profile.html
         └── manage_events.html
+
+---
+
+## 🧩 NJIA YA KAWAIDA (SALAMA):
+
+**Dump data → badilisha DB → Restore data**
+
+---
+
+## 1️⃣ Install PostgreSQL
+
+Kama bado huja-install:
+
+```bash
+sudo apt install postgresql postgresql-contrib
+```
+
+Au Windows:
+➡ Pakua PostgreSQL installer
+
+---
+
+## 2️⃣ Tengeneza Database mpya (PostgreSQL)
+
+```bash
+psql -U postgres
+```
+
+Kisha:
+
+```sql
+CREATE DATABASE church_db;
+CREATE USER church_user WITH PASSWORD 'password123';
+ALTER ROLE church_user SET client_encoding TO 'utf8';
+ALTER ROLE church_user SET default_transaction_isolation TO 'read committed';
+ALTER ROLE church_user SET timezone TO 'Africa/Dar_es_Salaam';
+GRANT ALL PRIVILEGES ON DATABASE church_db TO church_user;
+```
+
+---
+
+## 3️⃣ Export data kutoka SQLite (dumpdata)
+
+Kwenye project yako:
+
+```bash
+python manage.py dumpdata --natural-primary --natural-foreign --exclude auth.permission --exclude contenttypes > data.json
+```
+
+Hii:
+✅ inatoa data zote
+✅ bila permissions duplicates
+✅ salama kwa kuhamisha DB
+
+---
+
+## 4️⃣ Badilisha `settings.py` (SQLite → PostgreSQL)
+
+```python
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'church_db',
+        'USER': 'church_user',
+        'PASSWORD': 'password123',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    }
+}
+```
+
+Kisha install driver:
+
+```bash
+pip install psycopg2-binary
+```
+
+---
+
+## 5️⃣ Run migrations kwenye PostgreSQL
+
+```bash
+python manage.py migrate
+```
+
+Hii inatengeneza tables mpya PostgreSQL.
+
+---
+
+## 6️⃣ Rudisha data (loaddata)
+
+```bash
+python manage.py loaddata data.json
+```
+
+🎉 Data zako zote (waumini, zaka, ministries, zones, n.k) zinarudi.
+
+---
+
+## 7️⃣ Hakiki
+
+```bash
+python manage.py runserver
+```
+
+Angalia:
+✔ users bado wapo
+✔ tithe records zipo
+✔ profiles zipo
+✔ dashboard inafanya
+
+---
+
+## ⚠️ MAKOSA YA KAWAIDA
+
+### ❌ Error: psycopg2 not found
+
+👉 `pip install psycopg2-binary`
+
+### ❌ timezone error
+
+👉 hakikisha una:
+
+```python
+USE_TZ = True
+TIME_ZONE = 'Africa/Dar_es_Salaam'
+```
+
+---
+
+## 🏛️ Kwa mfumo wako wa kanisa
+
+Hii itakupa:
+✔ DB imara
+✔ performance nzuri
+✔ tayari kwa users wengi
+✔ salama kwa pesa (zaka)
+✔ rahisi kufanya reports kubwa
+
+---
+
+## 🔥 NJIA YA PILI (KAMA UNATAKA HARAKA SANA)
+
+Unaweza kutumia:
+
+```bash
+pip install django-pgloader
+```
+
+Lakini **njia ya dump/restore** ndiyo salama zaidi.
+
+---

@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
 from datetime import date
-
 from core.models import Ministry
 
 class Zone(models.Model):
@@ -20,8 +19,6 @@ class ChurchBranch(models.Model):
 
 
 class UserProfile(models.Model):
-
-
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     phone = models.CharField(max_length=20, blank=True)
     church_branch = models.CharField(max_length=100, blank=True)

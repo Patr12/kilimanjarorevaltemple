@@ -71,6 +71,7 @@ class HomeView(TemplateView):
         context.update({
             'site_config': site_config,
             'hero_slides': hero_slides,
+            'hero_items': hero_slides,
             'service_times': service_times,
             'featured_ministries': featured_ministries,
             'upcoming_events': upcoming_events,

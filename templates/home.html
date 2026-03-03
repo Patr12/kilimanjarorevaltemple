@@ -5,84 +5,816 @@
 
 {% block extra_css %}
 <style>
-    .hero-section {
-        background: linear-gradient(rgba(44, 62, 80, 0.85), rgba(52, 152, 219, 0.9)),
-                    {% if site_config.hero_bg_image %}
-                    url('{{ site_config.hero_bg_image.url }}')
-                    {% else %}
-                    url('{% static "images/logos.jpeg" %}')
-                    {% endif %}
-                    center/cover no-repeat;
-        min-height: 80vh;
-        display: flex;
-        align-items: center;
+    /* Custom Properties */
+    :root {
+        --primary-color: #2c3e50;
+        --secondary-color: #3498db;
+        --accent-color: #e74c3c;
+        --text-light: #ecf0f1;
+        --text-dark: #2c3e50;
+        --transition: all 0.3s ease;
+    }
+
+    /* Hero Carousel */
+    .hero-carousel {
+        position: relative;
+        min-height: 100vh;
+        overflow: hidden;
+    }
+
+    .hero-carousel .carousel,
+    .hero-carousel .carousel-inner,
+    .hero-carousel .carousel-item {
+        height: 100vh;
+        min-height: 600px;
+    }
+
+    .hero-carousel .carousel-item {
+        position: relative;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+
+    .hero-carousel .carousel-item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(44, 62, 80, 0.9), rgba(52, 152, 219, 0.8));
+        z-index: 1;
+    }
+
+    .hero-carousel .carousel-item {
+        background-attachment: fixed;
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 10;
+        padding: 4rem 0;
+        color: white;
+    }
+
+    .hero-title {
+        font-size: clamp(2.5rem, 6vw, 5rem);
+        font-weight: 800;
+        line-height: 1.2;
+        margin-bottom: 1.5rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        animation: fadeInUp 1s ease;
+    }
+
+    .hero-subtitle {
+        font-size: clamp(1.1rem, 2vw, 1.5rem);
+        opacity: 0.95;
+        margin-bottom: 2.5rem;
+        animation: fadeInUp 1s ease 0.2s both;
+    }
+
+    .hero-description {
+        font-size: clamp(1rem, 1.5vw, 1.2rem);
+        margin-bottom: 2rem;
+        line-height: 1.8;
+        animation: fadeInUp 1s ease 0.3s both;
+    }
+
+    .hero-buttons {
+        animation: fadeInUp 1s ease 0.4s both;
+    }
+
+    .hero-buttons .btn {
+        padding: 0.8rem 2rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border-radius: 50px;
+        transition: var(--transition);
         position: relative;
         overflow: hidden;
     }
-    
-    .hero-content {
+
+    .hero-buttons .btn::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .hero-buttons .btn:hover::before {
+        width: 300px;
+        height: 300px;
+    }
+
+    .hero-buttons .btn-primary {
+        background: var(--secondary-color);
+        border: none;
+        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+    }
+
+    .hero-buttons .btn-primary:hover {
+        background: #2980b9;
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+    }
+
+    .hero-buttons .btn-outline-light {
+        border: 2px solid rgba(255, 255, 255, 0.5);
+        backdrop-filter: blur(5px);
+    }
+
+    .hero-buttons .btn-outline-light:hover {
+        background: white;
+        color: var(--primary-color);
+        border-color: white;
+        transform: translateY(-3px);
+    }
+
+    .hero-buttons .btn-light {
+        background: white;
+        color: var(--primary-color);
+        border: none;
+    }
+
+    .hero-buttons .btn-light:hover {
+        background: var(--secondary-color);
+        color: white;
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(255, 255, 255, 0.4);
+    }
+
+    /* Hero Image */
+    .hero-image {
         position: relative;
-        z-index: 2;
+        animation: float 6s ease-in-out infinite;
     }
-    
-    .hero-title {
-        font-size: 3.5rem;
+
+    .hero-image img {
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        transform: perspective(1000px) rotateY(-15deg);
+        transition: var(--transition);
+        max-height: 500px;
+        width: 100%;
+        object-fit: cover;
+    }
+
+    .hero-image:hover img {
+        transform: perspective(1000px) rotateY(0);
+    }
+
+    .hero-image::after {
+        content: '';
+        position: absolute;
+        bottom: -20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80%;
+        height: 20px;
+        background: rgba(0, 0, 0, 0.2);
+        filter: blur(10px);
+        border-radius: 50%;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-20px); }
+    }
+
+    /* Carousel Controls */
+    .hero-carousel .carousel-control-prev,
+    .hero-carousel .carousel-control-next {
+        width: 60px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(5px);
+        border-radius: 50%;
+        top: 50%;
+        transform: translateY(-50%);
+        opacity: 0;
+        transition: var(--transition);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .hero-carousel:hover .carousel-control-prev,
+    .hero-carousel:hover .carousel-control-next {
+        opacity: 1;
+    }
+
+    .hero-carousel .carousel-control-prev {
+        left: 30px;
+    }
+
+    .hero-carousel .carousel-control-next {
+        right: 30px;
+    }
+
+    .hero-carousel .carousel-control-prev:hover,
+    .hero-carousel .carousel-control-next:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    /* Carousel Indicators */
+    .hero-carousel .carousel-indicators {
+        bottom: 30px;
+        z-index: 20;
+    }
+
+    .hero-carousel .carousel-indicators button {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.5);
+        border: 2px solid transparent;
+        transition: var(--transition);
+        margin: 0 5px;
+    }
+
+    .hero-carousel .carousel-indicators button.active {
+        background: var(--secondary-color);
+        transform: scale(1.3);
+        border-color: white;
+    }
+
+    /* Floating Elements */
+    .floating-element {
+        position: absolute;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(5px);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 5;
+    }
+
+    .floating-1 {
+        width: 200px;
+        height: 200px;
+        top: 10%;
+        left: 5%;
+        animation: floatElement 8s ease-in-out infinite;
+    }
+
+    .floating-2 {
+        width: 150px;
+        height: 150px;
+        bottom: 10%;
+        right: 5%;
+        animation: floatElement 10s ease-in-out infinite reverse;
+    }
+
+    .floating-3 {
+        width: 100px;
+        height: 100px;
+        top: 50%;
+        right: 10%;
+        animation: floatElement 7s ease-in-out infinite 1s;
+    }
+
+    @keyframes floatElement {
+        0%, 100% { transform: translate(0, 0); }
+        25% { transform: translate(20px, -20px); }
+        50% { transform: translate(40px, 0); }
+        75% { transform: translate(20px, 20px); }
+    }
+
+    /* Section Titles */
+    .section-title {
+        font-size: clamp(2rem, 4vw, 2.5rem);
         font-weight: 700;
+        position: relative;
+        padding-bottom: 1rem;
         margin-bottom: 1.5rem;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
     }
-    
+
+    .section-title span {
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 4px;
+        background: var(--secondary-color);
+        border-radius: 2px;
+    }
+
+    .section-title-left span {
+        left: 0;
+        transform: none;
+    }
+
+    /* Service Cards */
+    .service-card {
+        transition: var(--transition);
+        border-radius: 15px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .service-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: linear-gradient(90deg, var(--secondary-color), var(--accent-color));
+        transform: scaleX(0);
+        transition: var(--transition);
+    }
+
+    .service-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .service-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    .service-icon {
+        width: 70px;
+        height: 70px;
+        background: linear-gradient(135deg, var(--secondary-color), #2980b9);
+        transition: var(--transition);
+    }
+
+    .service-card:hover .service-icon {
+        transform: rotate(360deg) scale(1.1);
+    }
+
+    /* Event Cards */
+    .event-card {
+        transition: var(--transition);
+        border-radius: 15px;
+        overflow: hidden;
+    }
+
+    .event-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    .event-date {
+        background: linear-gradient(135deg, var(--secondary-color), #2980b9);
+        min-width: 70px;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+    }
+
+    .event-image {
+        transition: transform 0.6s ease;
+    }
+
+    .event-card:hover .event-image {
+        transform: scale(1.1);
+    }
+
+    /* Ministry Cards */
+    .ministry-card {
+        transition: var(--transition);
+        border-radius: 15px;
+        overflow: hidden;
+    }
+
+    .ministry-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    .ministry-image {
+        transition: transform 0.6s ease;
+    }
+
+    .ministry-card:hover .ministry-image {
+        transform: scale(1.1);
+    }
+
+    /* Testimonial Cards */
+    .testimonial-card {
+        transition: var(--transition);
+        border-radius: 15px;
+        background: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .testimonial-card::before {
+        content: '"';
+        position: absolute;
+        top: -20px;
+        left: 20px;
+        font-size: 150px;
+        color: rgba(52, 152, 219, 0.1);
+        font-family: serif;
+        z-index: 1;
+    }
+
+    .testimonial-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    .testimonial-card img {
+        border: 3px solid var(--secondary-color);
+        transition: var(--transition);
+    }
+
+    .testimonial-card:hover img {
+        transform: scale(1.1);
+    }
+
+    /* Gallery Items */
+    .gallery-item {
+        position: relative;
+        border-radius: 10px;
+        overflow: hidden;
+        cursor: pointer;
+    }
+
+    .gallery-item img {
+        transition: transform 0.6s ease;
+    }
+
+    .gallery-item:hover img {
+        transform: scale(1.1);
+    }
+
+    .gallery-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        opacity: 0;
+        transition: var(--transition);
+        color: white;
+        padding: 20px;
+    }
+
+    .gallery-item:hover .gallery-overlay {
+        opacity: 1;
+    }
+
+    /* Bible Verse Section */
+    .bible-verse-section {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        position: relative;
+        overflow: hidden;
+    }
+
+    .bible-verse-section::before {
+        content: '“';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 300px;
+        color: rgba(255, 255, 255, 0.1);
+        font-family: serif;
+        line-height: 1;
+    }
+
+    /* Call to Action */
+    .cta-section {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .cta-circle {
+        background: linear-gradient(135deg, var(--secondary-color), #2980b9);
+        animation: pulse 2s ease infinite;
+        box-shadow: 0 10px 30px rgba(52, 152, 219, 0.4);
+    }
+
+    @keyframes pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.7);
+        }
+        70% {
+            box-shadow: 0 0 0 20px rgba(52, 152, 219, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(52, 152, 219, 0);
+        }
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes fadeInRight {
+        from {
+            opacity: 0;
+            transform: translateX(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 992px) {
+        .hero-carousel .carousel-item {
+            height: auto;
+            min-height: 100vh;
+        }
+
+        .hero-carousel .carousel,
+        .hero-carousel .carousel-inner {
+            height: auto;
+        }
+
+        .hero-content {
+            text-align: center;
+            padding: 6rem 0;
+        }
+
+        .hero-buttons {
+            justify-content: center;
+        }
+
+        .hero-image {
+            margin-top: 3rem;
+            max-width: 80%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-image img {
+            transform: none;
+        }
+
+        .floating-1, .floating-2, .floating-3 {
+            display: none;
+        }
+
+        .hero-carousel .carousel-control-prev,
+        .hero-carousel .carousel-control-next {
+            width: 40px;
+            height: 40px;
+            opacity: 0.5;
+        }
+    }
+
     @media (max-width: 768px) {
-        .hero-title {
-            font-size: 2.5rem;
+        .hero-content {
+            padding: 4rem 0;
         }
-        .hero-section {
-            min-height: 60vh;
+
+        .hero-buttons .btn {
+            width: 100%;
+            margin: 0.5rem 0;
+        }
+
+        .section-title {
+            font-size: 2rem;
+        }
+
+        .hero-carousel .carousel-indicators {
+            bottom: 15px;
         }
     }
-    
+
     @media (max-width: 576px) {
+        .hero-content {
+            padding: 3rem 0;
+        }
+
         .hero-title {
             font-size: 2rem;
         }
+
+        .hero-subtitle {
+            font-size: 1rem;
+        }
+    }
+
+    /* Loading Animation */
+    .loading-animation {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: var(--primary-color);
+        z-index: 9999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: opacity 0.5s ease;
+    }
+
+    .loading-animation.fade-out {
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .loader {
+        width: 50px;
+        height: 50px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
-<section class="hero-section text-white py-5">
-    <div class="container">
-        <div class="row align-items-center min-vh-50 py-5">
-            <div class="col-lg-6">
-                <h1 class="hero-title animate__animated animate__fadeInUp">
-                    Welcome to {{ site_config.site_name|default:"Kilimanjaro Revival Temple" }}
-                </h1>
-                <p class="lead mb-4 animate__animated animate__fadeInUp animate__delay-1s">
-                    A vibrant Christian community dedicated to worship, fellowship, and spiritual growth. 
-                    Join us as we grow in faith and serve our community.
-                </p>
-                <div class="d-flex flex-wrap gap-3 animate__animated animate__fadeInUp animate__delay-2s">
-                    <a href="{% url 'core:services' %}" class="btn btn-light btn-lg px-4">
-                        <i class="fas fa-church me-2"></i> Our Services
-                    </a>
-                    <a href="{% url 'core:events' %}" class="btn btn-outline-light btn-lg px-4">
-                        <i class="fas fa-calendar-alt me-2"></i> Upcoming Events
-                    </a>
-                    <a href="{% url 'core:contact' %}" class="btn btn-primary btn-lg px-4">
-                        <i class="fas fa-map-marker-alt me-2"></i> Visit Us
-                    </a>
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <div class="text-center mt-5 mt-lg-0">
-                    <img src="{% static 'images/ideogram-v3.0_A_warm_and_inviting_church_interior_with_a_wooden_cross_at_the_altar_soft_natura-0.jpg' %}" 
-                         alt="Welcome to KRT" 
-                         class="img-fluid rounded shadow-lg"
-                         style="max-height: 400px; object-fit: cover;">
-                </div>
-            </div>
+<!-- Floating Elements -->
+<div class="floating-element floating-1"></div>
+<div class="floating-element floating-2"></div>
+<div class="floating-element floating-3"></div>
+
+<!-- Hero Carousel -->
+<section class="hero-carousel">
+    <div id="heroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="6000">
+        <!-- Carousel Indicators -->
+        <div class="carousel-indicators">
+            {% for slide in hero_slides %}
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="{{ forloop.counter0 }}" 
+                    {% if forloop.first %}class="active" aria-current="true"{% endif %} 
+                    aria-label="Slide {{ forloop.counter }}"></button>
+            {% empty %}
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+            {% endfor %}
         </div>
+
+        <!-- Carousel Inner -->
+        <div class="carousel-inner">
+            {% for slide in hero_slides %}
+            <div class="carousel-item {% if forloop.first %}active{% endif %}" 
+                 style="background-image: url('{% if slide.image %}{{ slide.image.url }}{% elif slide.image_static %}{% static slide.image_static %}{% else %}https://picsum.photos/1920/1080?random={{ forloop.counter }}{% endif %}');">
+                <div class="container h-100">
+                    <div class="row align-items-center h-100">
+                        <div class="col-lg-6">
+                            <div class="hero-content">
+                                {% if slide.title %}
+                                <h1 class="hero-title">{{ slide.title }}</h1>
+                                {% endif %}
+                                
+                                {% if slide.subtitle %}
+                                <p class="hero-subtitle">{{ slide.subtitle }}</p>
+                                {% endif %}
+                                
+                                {% if slide.description %}
+                                <p class="hero-description">{{ slide.description }}</p>
+                                {% endif %}
+                                
+                                <div class="hero-buttons d-flex flex-wrap gap-3">
+                                    {% if slide.button1_link and slide.button1_text %}
+                                    <a href="{{ slide.button1_link }}" class="btn btn-primary btn-lg">
+                                        <i class="fas {% if slide.button1_icon %}{{ slide.button1_icon }}{% else %}fa-church{% endif %} me-2"></i> 
+                                        {{ slide.button1_text }}
+                                    </a>
+                                    {% endif %}
+                                    
+                                    {% if slide.button2_link and slide.button2_text %}
+                                    <a href="{{ slide.button2_link }}" class="btn btn-outline-light btn-lg">
+                                        <i class="fas {% if slide.button2_icon %}{{ slide.button2_icon }}{% else %}fa-calendar-alt{% endif %} me-2"></i> 
+                                        {{ slide.button2_text }}
+                                    </a>
+                                    {% endif %}
+                                    
+                                    {% if slide.button3_link and slide.button3_text %}
+                                    <a href="{{ slide.button3_link }}" class="btn btn-light btn-lg">
+                                        <i class="fas {% if slide.button3_icon %}{{ slide.button3_icon }}{% else %}fa-map-marker-alt{% endif %} me-2"></i> 
+                                        {{ slide.button3_text }}
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            {% if slide.image_secondary %}
+                            <div class="hero-image">
+                                <img src="{{ slide.image_secondary.url }}" 
+                                     alt="{{ slide.title }}" 
+                                     class="img-fluid rounded shadow-lg"
+                                     loading="lazy">
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <!-- Default slides if no hero items -->
+            <div class="carousel-item active" style="background-image: url('{% static "images/ideogram-v3.0_A_warm_and_inviting_church_interior_with_a_wooden_cross_at_the_altar_soft_natura-0.jpg" %}');">
+                <div class="container h-100">
+                    <div class="row align-items-center h-100">
+                        <div class="col-lg-6">
+                            <div class="hero-content">
+                                <h1 class="hero-title">
+                                    Welcome to 
+                                    <span style="color: var(--secondary-color);">
+                                        {{ site_config.site_name|default:"Kilimanjaro Revival Temple" }}
+                                    </span>
+                                </h1>
+                                <p class="hero-subtitle">
+                                    A vibrant Christian community dedicated to worship, fellowship, and spiritual growth.
+                                </p>
+                                <p class="hero-description">
+                                    Join us as we grow in faith and serve our community with love and compassion.
+                                </p>
+                                <div class="hero-buttons d-flex flex-wrap gap-3">
+                                    <a href="{% url 'core:services' %}" class="btn btn-primary btn-lg">
+                                        <i class="fas fa-church me-2"></i> Our Services
+                                    </a>
+                                    <a href="{% url 'core:events' %}" class="btn btn-outline-light btn-lg">
+                                        <i class="fas fa-calendar-alt me-2"></i> Upcoming Events
+                                    </a>
+                                    <a href="{% url 'core:contact' %}" class="btn btn-light btn-lg">
+                                        <i class="fas fa-map-marker-alt me-2"></i> Visit Us
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="hero-image">
+                                <img src="{% static 'images/ideogram-v3.0_A_warm_and_inviting_church_interior_with_a_wooden_cross_at_the_altar_soft_natura-0.jpg' %}" 
+                                     alt="Welcome to KRT" 
+                                     class="img-fluid rounded shadow-lg"
+                                     loading="lazy">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="carousel-item" style="background-image: url('https://picsum.photos/1920/1080?random=1');">
+                <div class="container h-100">
+                    <div class="row align-items-center h-100">
+                        <div class="col-lg-6">
+                            <div class="hero-content">
+                                <h1 class="hero-title">Join Our Worship Services</h1>
+                                <p class="hero-subtitle">Experience the presence of God</p>
+                                <p class="hero-description">
+                                    Join us every Sunday for uplifting worship and inspiring messages that will transform your life.
+                                </p>
+                                <div class="hero-buttons d-flex flex-wrap gap-3">
+                                    <a href="{% url 'core:services' %}" class="btn btn-primary btn-lg">
+                                        <i class="fas fa-church me-2"></i> Service Times
+                                    </a>
+                                    <a href="{% url 'core:events' %}" class="btn btn-outline-light btn-lg">
+                                        <i class="fas fa-calendar-alt me-2"></i> Events
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Carousel Controls -->
+        <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
     </div>
 </section>
 
@@ -90,17 +822,16 @@
 <section id="services" class="py-5 bg-light">
     <div class="container">
         <div class="text-center mb-5">
-            <h2 class="section-title position-relative d-inline-block pb-3">
+            <h2 class="section-title">
                 Service Times
-                <span class="position-absolute bottom-0 start-50 translate-middle-x bg-primary" 
-                      style="width: 60px; height: 3px;"></span>
+                <span></span>
             </h2>
-            <p class="text-muted">Join us for worship and fellowship at our services</p>
+            <p class="lead text-muted">Join us for worship and fellowship at our services</p>
         </div>
         
         <div class="row g-4">
             {% for service in service_times|slice:":6" %}
-            <div class="col-md-6 col-lg-4">
+            <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{ forloop.counter|add:'100' }}">
                 <div class="card service-card h-100 border-0 shadow-sm">
                     {% if service.image %}
                     <img src="{{ service.image.url }}" 
@@ -110,8 +841,7 @@
                     {% endif %}
                     <div class="card-body p-4">
                         <div class="d-flex align-items-center mb-3">
-                            <div class="service-icon bg-primary rounded-circle d-flex align-items-center justify-content-center me-3"
-                                 style="width: 60px; height: 60px;">
+                            <div class="service-icon rounded-circle d-flex align-items-center justify-content-center me-3">
                                 <i class="{{ service.icon|default:'fas fa-church' }} text-white fs-4"></i>
                             </div>
                             <div>
@@ -160,7 +890,7 @@
         
         {% if service_times.count > 6 %}
         <div class="text-center mt-5">
-            <a href="{% url 'core:services' %}" class="btn btn-primary btn-lg px-4">
+            <a href="{% url 'core:services' %}" class="btn btn-primary btn-lg px-5">
                 <i class="fas fa-list me-2"></i> View All Services
             </a>
         </div>
@@ -171,41 +901,40 @@
 <!-- Upcoming Events -->
 <section class="py-5">
     <div class="container">
-        <div class="d-flex justify-content-between align-items-center mb-5">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-5">
             <div>
-                <h2 class="section-title position-relative d-inline-block pb-3">
+                <h2 class="section-title section-title-left">
                     Upcoming Events
-                    <span class="position-absolute bottom-0 start-0 bg-primary" 
-                          style="width: 60px; height: 3px;"></span>
+                    <span></span>
                 </h2>
-                <p class="text-muted mb-0">Join us for these exciting church events</p>
+                <p class="lead text-muted mb-0">Join us for these exciting church events</p>
             </div>
-            <a href="{% url 'core:events' %}" class="btn btn-outline-primary">
-                View All <i class="fas fa-arrow-right ms-1"></i>
+            <a href="{% url 'core:events' %}" class="btn btn-outline-primary btn-lg mt-3 mt-md-0">
+                View All <i class="fas fa-arrow-right ms-2"></i>
             </a>
         </div>
         
         <div class="row g-4">
             {% for event in upcoming_events|slice:":4" %}
-            <div class="col-md-6 col-lg-3">
+            <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="{{ forloop.counter|add:'100' }}">
                 <div class="card event-card h-100 border-0 shadow-sm">
                     <div class="position-relative overflow-hidden">
                         {% if event.featured_image %}
                         <img src="{{ event.featured_image.url }}" 
                              class="card-img-top event-image" 
                              alt="{{ event.title }}"
-                             style="height: 180px; object-fit: cover;">
+                             style="height: 200px; object-fit: cover;">
                         {% else %}
                         <div class="bg-secondary d-flex align-items-center justify-content-center" 
-                             style="height: 180px;">
-                            <i class="fas fa-calendar-alt text-white fa-3x"></i>
+                             style="height: 200px;">
+                            <i class="fas fa-calendar-alt text-white fa-4x"></i>
                         </div>
                         {% endif %}
                         
-                        <div class="event-date position-absolute top-0 start-0 bg-primary text-white p-2 m-3 rounded">
+                        <div class="event-date position-absolute top-0 start-0 text-white p-2 m-3">
                             <div class="text-center">
-                                <div class="fs-4 fw-bold">{{ event.start_date|date:"d" }}</div>
-                                <div class="small">{{ event.start_date|date:"M" }}</div>
+                                <div class="fs-3 fw-bold">{{ event.start_date|date:"d" }}</div>
+                                <div class="small text-uppercase">{{ event.start_date|date:"M" }}</div>
                             </div>
                         </div>
                         
@@ -221,15 +950,15 @@
                         
                         <div class="mb-3">
                             <p class="small text-muted mb-1">
-                                <i class="fas fa-calendar me-1"></i>
+                                <i class="fas fa-calendar me-2"></i>
                                 {{ event.start_date|date:"F d, Y" }}
                             </p>
                             <p class="small text-muted mb-2">
-                                <i class="fas fa-clock me-1"></i>
+                                <i class="fas fa-clock me-2"></i>
                                 {{ event.start_time|time:"g:i A" }}
                             </p>
                             <p class="small text-muted mb-0">
-                                <i class="fas fa-map-marker-alt me-1"></i>
+                                <i class="fas fa-map-marker-alt me-2"></i>
                                 {{ event.location|truncatechars:30 }}
                             </p>
                         </div>
@@ -260,28 +989,27 @@
 <section class="py-5 bg-light">
     <div class="container">
         <div class="text-center mb-5">
-            <h2 class="section-title position-relative d-inline-block pb-3">
+            <h2 class="section-title">
                 Our Ministries
-                <span class="position-absolute bottom-0 start-50 translate-middle-x bg-primary" 
-                      style="width: 60px; height: 3px;"></span>
+                <span></span>
             </h2>
-            <p class="text-muted">Get involved and grow with our church ministries</p>
+            <p class="lead text-muted">Get involved and grow with our church ministries</p>
         </div>
         
         <div class="row g-4">
             {% for ministry in featured_ministries|slice:":3" %}
-            <div class="col-md-6 col-lg-4">
+            <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{ forloop.counter|add:'100' }}">
                 <div class="card ministry-card h-100 border-0 shadow-sm">
-                    <div class="position-relative">
+                    <div class="position-relative overflow-hidden">
                         {% if ministry.banner_image %}
                         <img src="{{ ministry.banner_image.url }}" 
                              class="card-img-top ministry-image" 
                              alt="{{ ministry.name }}"
-                             style="height: 200px; object-fit: cover;">
+                             style="height: 220px; object-fit: cover;">
                         {% else %}
                         <div class="bg-primary d-flex align-items-center justify-content-center" 
-                             style="height: 200px;">
-                            <i class="fas fa-hands-helping text-white fa-3x"></i>
+                             style="height: 220px;">
+                            <i class="fas fa-hands-helping text-white fa-4x"></i>
                         </div>
                         {% endif %}
                         
@@ -290,12 +1018,12 @@
                             <img src="{{ ministry.logo.url }}" 
                                  class="rounded-circle border border-4 border-white shadow" 
                                  alt="{{ ministry.name }} Logo"
-                                 style="width: 80px; height: 80px; object-fit: cover;">
+                                 style="width: 90px; height: 90px; object-fit: cover;">
                         </div>
                         {% endif %}
                     </div>
                     
-                    <div class="card-body pt-5 pb-3 text-center">
+                    <div class="card-body pt-5 pb-4 text-center">
                         <h3 class="h5 fw-bold mt-3 mb-2">{{ ministry.name }}</h3>
                         
                         {% if ministry.tagline %}
@@ -331,7 +1059,7 @@
         
         {% if featured_ministries.count > 3 %}
         <div class="text-center mt-5">
-            <a href="{% url 'core:ministries' %}" class="btn btn-primary btn-lg px-4">
+            <a href="{% url 'core:ministries' %}" class="btn btn-primary btn-lg px-5">
                 <i class="fas fa-hands-helping me-2"></i> View All Ministries
             </a>
         </div>
@@ -341,18 +1069,18 @@
 
 <!-- Bible Verse of the Day -->
 {% if todays_verse %}
-<section class="py-5 bg-primary text-white">
+<section class="py-5 bible-verse-section text-white">
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-lg-8 text-center">
                 <div class="mb-4">
-                    <i class="fas fa-bible fa-3x opacity-75"></i>
+                    <i class="fas fa-bible fa-4x opacity-75"></i>
                 </div>
-                <h3 class="h4 mb-4">Daily Bible Verse</h3>
-                <blockquote class="fs-5 fst-italic mb-4 px-4">
+                <h3 class="h4 mb-4 text-uppercase letter-spacing-2">Daily Bible Verse</h3>
+                <blockquote class="fs-3 fst-italic mb-4 px-4">
                     "{{ todays_verse.verse }}"
                 </blockquote>
-                <p class="fw-bold mb-0">{{ todays_verse.reference }}</p>
+                <p class="fw-bold h5 mb-0">— {{ todays_verse.reference }}</p>
             </div>
         </div>
     </div>
@@ -364,27 +1092,26 @@
 <section class="py-5">
     <div class="container">
         <div class="text-center mb-5">
-            <h2 class="section-title position-relative d-inline-block pb-3">
+            <h2 class="section-title">
                 What Our Members Say
-                <span class="position-absolute bottom-0 start-50 translate-middle-x bg-primary" 
-                      style="width: 60px; height: 3px;"></span>
+                <span></span>
             </h2>
-            <p class="text-muted">Hear from members of our church family</p>
+            <p class="lead text-muted">Hear from members of our church family</p>
         </div>
         
         <div class="row g-4">
             {% for testimonial in testimonials|slice:":3" %}
-            <div class="col-md-6 col-lg-4">
-                <div class="testimonial-card h-100 border-0 shadow-sm p-4 rounded">
+            <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{ forloop.counter|add:'100' }}">
+                <div class="testimonial-card h-100 border-0 shadow-sm p-4">
                     <div class="d-flex align-items-center mb-4">
                         {% if testimonial.image %}
                         <img src="{{ testimonial.image.url }}" 
                              class="rounded-circle me-3" 
                              alt="{{ testimonial.author }}"
-                             style="width: 60px; height: 60px; object-fit: cover;">
+                             style="width: 70px; height: 70px; object-fit: cover;">
                         {% else %}
                         <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center me-3"
-                             style="width: 60px; height: 60px;">
+                             style="width: 70px; height: 70px;">
                             <i class="fas fa-user text-white fa-2x"></i>
                         </div>
                         {% endif %}
@@ -396,10 +1123,9 @@
                         </div>
                     </div>
                     <div class="mb-4">
-                        <i class="fas fa-quote-left text-primary fa-2x float-start me-2"></i>
                         <p class="mb-0">{{ testimonial.content|truncatechars:200 }}</p>
                     </div>
-                    <div class="text-primary">
+                    <div class="text-warning">
                         <i class="fas fa-star"></i>
                         <i class="fas fa-star"></i>
                         <i class="fas fa-star"></i>
@@ -418,32 +1144,31 @@
 {% if gallery_images %}
 <section class="py-5 bg-light">
     <div class="container">
-        <div class="d-flex justify-content-between align-items-center mb-5">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-5">
             <div>
-                <h2 class="section-title position-relative d-inline-block pb-3">
+                <h2 class="section-title section-title-left">
                     Church Gallery
-                    <span class="position-absolute bottom-0 start-0 bg-primary" 
-                          style="width: 60px; height: 3px;"></span>
+                    <span></span>
                 </h2>
-                <p class="text-muted mb-0">Moments from our church family</p>
+                <p class="lead text-muted mb-0">Moments from our church family</p>
             </div>
-            <a href="{% url 'core:gallery' %}" class="btn btn-outline-primary">
-                View Gallery <i class="fas fa-arrow-right ms-1"></i>
+            <a href="{% url 'core:gallery' %}" class="btn btn-outline-primary btn-lg mt-3 mt-md-0">
+                View Gallery <i class="fas fa-arrow-right ms-2"></i>
             </a>
         </div>
         
-        <div class="row g-3">
+        <div class="row g-4">
             {% for image in gallery_images|slice:":8" %}
-            <div class="col-6 col-md-3">
-                <div class="gallery-item rounded overflow-hidden shadow-sm">
+            <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="{{ forloop.counter|add:'50' }}">
+                <div class="gallery-item">
                     <img src="{{ image.image.url }}" 
                          class="img-fluid w-100" 
                          alt="{{ image.title }}"
-                         style="height: 200px; object-fit: cover;">
-                    <div class="gallery-overlay bg-dark bg-opacity-75 text-white p-3">
-                        <h5 class="h6 mb-0">{{ image.title|truncatechars:30 }}</h5>
+                         style="height: 220px; object-fit: cover;">
+                    <div class="gallery-overlay">
+                        <h5 class="h6 mb-2">{{ image.title|truncatechars:30 }}</h5>
                         {% if image.description %}
-                        <p class="small mb-0 mt-1">{{ image.description|truncatechars:40 }}</p>
+                        <p class="small mb-0">{{ image.description|truncatechars:40 }}</p>
                         {% endif %}
                     </div>
                 </div>
@@ -455,53 +1180,90 @@
 {% endif %}
 
 <!-- Call to Action -->
-<section class="py-5 bg-light text-white">
+<section class="py-5 cta-section">
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-8">
-                <h3 class="h2 mb-3 text-dark">Join Us This Sunday</h3>
+                <h2 class="display-4 fw-bold mb-3 text-dark">Join Us This Sunday</h2>
                 <p class="lead mb-4 text-dark">
                     Experience uplifting worship, inspiring messages, and warm fellowship. 
                     We welcome everyone regardless of where you are on your spiritual journey.
                 </p>
                 <div class="d-flex flex-wrap gap-3">
-                    <a href="{% url 'core:services' %}" class="btn btn-light btn-lg">
+                    <a href="{% url 'core:services' %}" class="btn btn-primary btn-lg px-5">
                         <i class="fas fa-church me-2"></i> Service Times
                     </a>
-                    <a href="{% url 'core:contact' %}" class="btn btn-outline-dark btn-lg">
+                    <a href="{% url 'core:contact' %}" class="btn btn-outline-primary btn-lg px-5">
                         <i class="fas fa-directions me-2"></i> Get Directions
                     </a>
                 </div>
             </div>
             <div class="col-lg-4 text-center mt-4 mt-lg-0">
-                <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center"
-                     style="width: 150px; height: 150px;">
-                    <i class="fas fa-hands-praying fa-3x"></i>
+                <div class="cta-circle bg-primary rounded-circle d-inline-flex align-items-center justify-content-center"
+                     style="width: 180px; height: 180px;">
+                    <i class="fas fa-hands-praying text-white fa-4x"></i>
                 </div>
             </div>
         </div>
     </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
 <script>
-       // Auto-advance hero carousel every 5 seconds
     document.addEventListener('DOMContentLoaded', function() {
-        var heroCarousel = document.getElementById('heroCarousel');
+        // Initialize AOS (Animate on Scroll)
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true,
+            mirror: false
+        });
+        
+        // Loading animation
+        const loadingAnimation = document.createElement('div');
+        loadingAnimation.className = 'loading-animation';
+        loadingAnimation.innerHTML = '<div class="loader"></div>';
+        document.body.appendChild(loadingAnimation);
+        
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                loadingAnimation.classList.add('fade-out');
+                setTimeout(function() {
+                    loadingAnimation.remove();
+                }, 500);
+            }, 500);
+        });
+        
+        // Initialize hero carousel
+        const heroCarousel = document.getElementById('heroCarousel');
         if (heroCarousel) {
-            var carousel = new bootstrap.Carousel(heroCarousel, {
-                interval: 5000,  // 5 seconds
+            const carousel = new bootstrap.Carousel(heroCarousel, {
+                interval: 6000,
                 ride: 'carousel',
-                wrap: true
+                wrap: true,
+                pause: 'hover'
             });
             
             // Pause on hover
-            heroCarousel.addEventListener('mouseenter', function() {
-                carousel.pause();
-            });
-            
-            heroCarousel.addEventListener('mouseleave', function() {
-                carousel.cycle();
-            });
+            heroCarousel.addEventListener('mouseenter', () => carousel.pause());
+            heroCarousel.addEventListener('mouseleave', () => carousel.cycle());
         }
+        
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
     });
 </script>
 {% endblock %}
