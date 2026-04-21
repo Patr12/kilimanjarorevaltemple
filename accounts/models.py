@@ -16,8 +16,6 @@ class ChurchBranch(models.Model):
     def __str__(self):
         return self.name  
           
-
-
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     phone = models.CharField(max_length=20, blank=True)
@@ -28,10 +26,14 @@ class UserProfile(models.Model):
     joined_at = models.DateField(auto_now_add=True)
 
     def age(self):
+        if not self.date_of_birth:
+            return None
         today = date.today()
         return today.year - self.date_of_birth.year - ((today.month, today.day) < (self.date_of_birth.month, self.date_of_birth.day))
     def age_group(self):
         age = self.age()
+        if age is None:
+            return "Unknown"
         if age < 13:
             return "Child"
         elif age < 20:

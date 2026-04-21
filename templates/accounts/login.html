@@ -1,177 +1,92 @@
 {% extends "base.html" %}
-{% load static %}
 
-{% block title %}Ingia | Login{% endblock %}
+{% block title %}Login - {{ site_config.site_name|default:"KRT" }}{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-5 col-lg-4">
-            <!-- Logo/Brand Section -->
-            <div class="text-center mb-4">
-                <div class="mb-3">
-                    <i class="fas fa-user-circle fa-3x text-primary"></i>
-                </div>
-                <h2 class="fw-bold mb-2">Karibu Tena</h2>
-                <p class="text-muted">Ingia kwenye akaunti yako</p>
-            </div>
-
-            <div class="card auth-card border-0">
-                <div class="card-body p-4 p-lg-5">
-                    <!-- Error Messages -->
-                    {% if form.errors %}
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="fas fa-exclamation-circle me-2"></i>
-                        Username au password si sahihi. Tafadhali jaribu tena.
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                    {% endif %}
-
-                    <form method="post" novalidate>
-                        {% csrf_token %}
-
-                        <!-- Username Field -->
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">
-                                <i class="fas fa-user me-2"></i>Jina la Mtumiaji
-                            </label>
-                            <input type="text" 
-                                   name="username" 
-                                   class="form-control form-control-lg" 
-                                   placeholder="Weka jina lako la mtumiaji"
-                                   required
-                                   value="{{ form.username.value|default:'' }}">
-                            {% if form.username.errors %}
-                            <div class="error-message mt-2">
-                                <i class="fas fa-exclamation-circle me-1"></i>
-                                {{ form.username.errors|striptags }}
-                            </div>
-                            {% endif %}
-                        </div>
-
-                        <!-- Password Field -->
-                        <div class="mb-4">
-                            <label class="form-label fw-semibold">
-                                <i class="fas fa-lock me-2"></i>Password
-                            </label>
-                            <div class="input-group">
-                                <input type="password" 
-                                       name="password" 
-                                       class="form-control form-control-lg" 
-                                       placeholder="Weka password yako"
-                                       required
-                                       id="passwordInput">
-                                <button class="btn btn-outline-secondary" type="button" id="togglePassword">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                            </div>
-                            {% if form.password.errors %}
-                            <div class="error-message mt-2">
-                                <i class="fas fa-exclamation-circle me-1"></i>
-                                {{ form.password.errors|striptags }}
-                            </div>
-                            {% endif %}
-                            
-                            <!-- Forgot Password Link -->
-                            <div class="text-end mt-2">
-                                <a href="#" class="auth-link small">
-                                    <i class="fas fa-key me-1"></i>Umesahau password?
-                                </a>
+<section class="auth-shell py-5">
+    <div class="container">
+        <div class="row g-4 justify-content-center align-items-stretch">
+            <div class="col-lg-10">
+                <div class="card auth-card">
+                    <div class="row g-0">
+                        <div class="col-lg-5 d-none d-lg-block">
+                            <div class="auth-visual">
+                                <span class="eyebrow mb-3"><i class="fas fa-door-open"></i> Welcome Back</span>
+                                <h1 class="h2 text-white mb-3">Karibu tena kwenye mfumo wa KRT</h1>
+                                <p class="text-white-50 mb-4">Ingia ili kuona dashboard yako, historia ya tithe, ministries ulizojiunga nazo na matukio yajayo.</p>
+                                <div class="info-list">
+                                    <div class="info-row">
+                                        <div class="info-icon bg-white text-primary"><i class="fas fa-chart-line"></i></div>
+                                        <div><strong>Dashboard safi</strong><div class="small text-white-50">Muonekano wa kisasa kwa taarifa zako muhimu.</div></div>
+                                    </div>
+                                    <div class="info-row">
+                                        <div class="info-icon bg-white text-primary"><i class="fas fa-shield-heart"></i></div>
+                                        <div><strong>Secure access</strong><div class="small text-white-50">Taarifa zako zinabaki salama ndani ya mfumo.</div></div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <!-- Terms and Conditions Section - Updated -->
-<div class="mb-4 form-check">
-    <input type="checkbox" class="form-check-input" id="termsCheck" required>
-    <label class="form-check-label" for="termsCheck">
-        Nakubali 
-        <a href="{% url 'accounts:terms' %}" class="auth-link" target="_blank">
-            Sheria na Masharti
-        </a> 
-        na 
-        <a href="{% url 'accounts:privacy' %}" class="auth-link" target="_blank">
-            Sera ya Faragha
-        </a>
-    </label>
-</div>
+                        <div class="col-lg-7">
+                            <div class="p-4 p-md-5">
+                                <div class="section-heading mb-4">
+                                    <span class="eyebrow"><i class="fas fa-user-lock"></i> Member Login</span>
+                                    <h2>Ingia kwenye akaunti yako</h2>
+                                    <p>Tumia jina la mtumiaji na password yako kuendelea.</p>
+                                </div>
 
-                        <!-- Remember Me Checkbox -->
-                        <div class="mb-4 form-check">
-                            <input type="checkbox" class="form-check-input" id="rememberMe">
-                            <label class="form-check-label" for="rememberMe">
-                                Nikumbuke kwenye kifaa hiki
-                            </label>
-                        </div>
+                                {% if form.errors %}
+                                <div class="alert alert-danger">Username au password si sahihi. Tafadhali jaribu tena.</div>
+                                {% endif %}
 
-                        <!-- Submit Button -->
-                        <div class="d-grid mb-3">
-                            <button type="submit" class="btn btn-primary btn-lg fw-semibold">
-                                <i class="fas fa-sign-in-alt me-2"></i>Ingia
-                            </button>
-                        </div>
+                                <form method="post" novalidate>
+                                    {% csrf_token %}
+                                    <div class="mb-3">
+                                        <label class="form-label">Jina la mtumiaji</label>
+                                        <input type="text" name="username" class="form-control" value="{{ form.username.value|default:'' }}" placeholder="mfano: krtmember" required>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="form-label">Password</label>
+                                        <div class="input-group">
+                                            <input type="password" name="password" class="form-control" placeholder="Weka password yako" id="passwordInput" required>
+                                            <button class="btn btn-outline-secondary" type="button" id="togglePassword"><i class="fas fa-eye"></i></button>
+                                        </div>
+                                    </div>
+                                    <div class="form-check mb-4">
+                                        <input type="checkbox" class="form-check-input" id="termsCheck" required>
+                                        <label class="form-check-label" for="termsCheck">
+                                            Nakubali <a href="{% url 'accounts:terms' %}" class="auth-link" target="_blank">Sheria na Masharti</a> na <a href="{% url 'accounts:privacy' %}" class="auth-link" target="_blank">Sera ya Faragha</a>
+                                        </label>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100">Ingia</button>
+                                </form>
 
-                        <!-- Divider -->
-                        <div class="position-relative my-4">
-                            <hr>
-                            <div class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted">
-                                au
+                                <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                                    <span class="text-muted">Huna akaunti bado?</span>
+                                    <a href="{% url 'accounts:signup' %}" class="auth-link">Jisajili hapa</a>
+                                </div>
                             </div>
                         </div>
-
-                        <!-- Social Login (Optional) -->
-                        <div class="social-login">
-                            <p class="text-muted mb-3">Ingia kwa haraka na</p>
-                            <button type="button" class="btn btn-outline-primary w-100 mb-2 social-btn">
-                                <i class="fab fa-google text-danger"></i>
-                                Google
-                            </button>
-                            <button type="button" class="btn btn-outline-dark w-100 social-btn">
-                                <i class="fab fa-github"></i>
-                                GitHub
-                            </button>
-                        </div>
-                    </form>
-
-                    <!-- Signup Link -->
-                    <div class="text-center mt-4 pt-3 border-top">
-                        <p class="mb-0">
-                            Huna akaunti bado?
-                            <a href="{% url 'accounts:signup' %}" class="auth-link fw-semibold">
-                                Jisajili Hapa
-                            </a>
-                        </p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+</section>
+{% endblock %}
 
-<!-- JavaScript for password toggle -->
+{% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const togglePassword = document.getElementById('togglePassword');
     const passwordInput = document.getElementById('passwordInput');
-    
     if (togglePassword && passwordInput) {
-        togglePassword.addEventListener('click', function() {
+        togglePassword.addEventListener('click', function () {
             const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
             passwordInput.setAttribute('type', type);
             this.querySelector('i').classList.toggle('fa-eye');
             this.querySelector('i').classList.toggle('fa-eye-slash');
         });
     }
-    
-    // Add focus effects
-    const inputs = document.querySelectorAll('.form-control');
-    inputs.forEach(input => {
-        input.addEventListener('focus', function() {
-            this.parentElement.classList.add('focused');
-        });
-        
-        input.addEventListener('blur', function() {
-            this.parentElement.classList.remove('focused');
-        });
-    });
 });
 </script>
 {% endblock %}

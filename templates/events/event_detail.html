@@ -1,244 +1,71 @@
 {% extends 'base.html' %}
-{% load static %}
 
-{% block title %}{{ event.title }} - Kilimanjaro Revival Temple{% endblock %}
+{% block title %}{{ event.title }} - {{ site_config.site_name|default:"KRT" }}{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <!-- Back Button -->
-    <div class="mb-4">
-        <a href="{% url 'core:events' %}" class="btn btn-outline-primary">
-            <i class="fas fa-arrow-left me-2"></i>Back to Events
-        </a>
-    </div>
-
-    <!-- Event Header -->
-    <div class="row mb-5">
-        <div class="col-lg-8">
-            <div class="d-flex align-items-center mb-3">
-                <div class="bg-primary text-white text-center p-3 rounded me-3" style="width: 80px;">
-                    <div class="fw-bold fs-3">{{ event.start_date|date:"d" }}</div>
-                    <div class="small">{{ event.start_date|date:"M Y" }}</div>
+<section class="page-hero">
+    <div class="container">
+        <a href="{% url 'core:events' %}" class="btn btn-outline-light btn-sm mb-4">Back to Events</a>
+        <div class="row g-4 align-items-center">
+            <div class="col-lg-8">
+                <span class="eyebrow"><i class="fas fa-calendar-day"></i> Event Detail</span>
+                <h1 class="display-5 text-white mt-3">{{ event.title }}</h1>
+                <p class="lead text-white-50">{{ event.short_description|default:event.description|striptags|truncatechars:180 }}</p>
+                <div class="d-flex flex-wrap gap-3 mt-4">
+                    <span class="hero-chip"><i class="fas fa-calendar"></i>{{ event.start_date|date:"d M Y" }}</span>
+                    <span class="hero-chip"><i class="fas fa-clock"></i>{{ event.start_time|time:"g:i A" }} - {{ event.end_time|time:"g:i A" }}</span>
+                    <span class="hero-chip"><i class="fas fa-location-dot"></i>{{ event.location|default:"Church premises" }}</span>
                 </div>
-                <div>
-                    <h1 class="display-5 fw-bold text-primary">{{ event.title }}</h1>
-                    <div class="d-flex flex-wrap gap-2 align-items-center">
-                        {% if event.category %}
-                        <span class="badge bg-secondary">{{ event.category.name }}</span>
-                        {% endif %}
-                        {% if event.is_featured %}
-                        <span class="badge bg-warning text-dark">Featured Event</span>
-                        {% endif %}
-                    </div>
-                </div>
+            </div>
+            <div class="col-lg-4">
+                {% if event.featured_image %}
+                <div class="image-frame"><img src="{{ event.featured_image.url }}" alt="{{ event.title }}" class="media-cover" style="height: 280px;"></div>
+                {% endif %}
             </div>
         </div>
     </div>
+</section>
 
-    <div class="row">
-        <!-- Left Column - Event Details -->
-        <div class="col-lg-8">
-            <!-- Event Image -->
-            {% if event.image %}
-            <div class="card mb-4">
-                <img src="{{ event.image.url }}" class="card-img-top" alt="{{ event.title }}" style="max-height: 400px; object-fit: cover;">
-            </div>
-            {% endif %}
-
-            <!-- Event Description -->
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h4 class="card-title fw-bold mb-3">About This Event</h4>
-                    <div class="event-description">
-                        {{ event.description|safe }}
-                    </div>
+<section class="site-section">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="content-panel">
+                    <span class="eyebrow mb-3"><i class="fas fa-circle-info"></i> About This Event</span>
+                    <div class="text-muted">{{ event.description|safe }}</div>
                 </div>
             </div>
-
-            <!-- Additional Information -->
-            {% if event.additional_info %}
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h4 class="card-title fw-bold mb-3">Additional Information</h4>
-                    <div class="event-additional-info">
-                        {{ event.additional_info|safe }}
-                    </div>
-                </div>
-            </div>
-            {% endif %}
-        </div>
-
-        <!-- Right Column - Event Info & Registration -->
-        <div class="col-lg-4">
-            <div class="sticky-top" style="top: 20px;">
-                <!-- Event Details Card -->
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="card-title mb-0"><i class="fas fa-info-circle me-2"></i>Event Details</h5>
-                    </div>
-                    <div class="card-body">
-                        <ul class="list-unstyled mb-0">
-                            <li class="mb-3">
-                                <div class="d-flex">
-                                    <i class="fas fa-clock text-primary me-3 mt-1"></i>
-                                    <div>
-                                        <strong>Date & Time</strong><br>
-                                        {{ event.start_date|date:"F j, Y" }}<br>
-                                        {{ event.start_time|time:"g:i A" }}
-                                        {% if event.end_time %}
-                                        - {{ event.end_time|time:"g:i A" }}
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </li>
-                            <li class="mb-3">
-                                <div class="d-flex">
-                                    <i class="fas fa-map-marker-alt text-primary me-3 mt-1"></i>
-                                    <div>
-                                        <strong>Location</strong><br>
-                                        {{ event.location|default:"Church Premises" }}
-                                    </div>
-                                </div>
-                            </li>
-                            {% if event.speaker %}
-                            <li class="mb-3">
-                                <div class="d-flex">
-                                    <i class="fas fa-user text-primary me-3 mt-1"></i>
-                                    <div>
-                                        <strong>Speaker</strong><br>
-                                        {{ event.speaker }}
-                                    </div>
-                                </div>
-                            </li>
-                            {% endif %}
-                            {% if event.registration_deadline %}
-                            <li class="mb-3">
-                                <div class="d-flex">
-                                    <i class="fas fa-calendar-times text-primary me-3 mt-1"></i>
-                                    <div>
-                                        <strong>Registration Deadline</strong><br>
-                                        {{ event.registration_deadline|date:"F j, Y" }}
-                                    </div>
-                                </div>
-                            </li>
-                            {% endif %}
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- Registration Card -->
-                <div class="card shadow-sm">
-                    <div class="card-header {% if registration_open %}bg-success{% else %}bg-secondary{% endif %} text-white">
-                        <h5 class="card-title mb-0">
-                            <i class="fas fa-ticket-alt me-2"></i>
-                            {% if registration_open %}
-                            Registration Open
-                            {% else %}
-                            Registration
-                            {% endif %}
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        {% if user_registered %}
-                        <div class="alert alert-success mb-3">
-                            <i class="fas fa-check-circle me-2"></i>
-                            You are registered for this event!
-                        </div>
-                        {% endif %}
-                        
-                        {% if event.requires_registration %}
-                            {% if registration_open %}
-                                {% if remaining_spots == 0 %}
-                                <div class="alert alert-danger mb-3">
-                                    <i class="fas fa-times-circle me-2"></i>
-                                    This event is fully booked.
-                                </div>
-                                {% else %}
-                                <p class="mb-3">
-                                    {% if remaining_spots == "Unlimited" %}
-                                    Unlimited spots available
-                                    {% else %}
-                                    {{ remaining_spots }} spot{{ remaining_spots|pluralize }} remaining
-                                    {% endif %}
-                                </p>
-                                
-                                {% if not user_registered %}
-                                <div class="d-grid">
-                                    <a href="{% url 'core:event_register' event.slug %}" class="btn btn-success">
-                                        <i class="fas fa-user-plus me-2"></i>Register Now
-                                    </a>
-                                </div>
-                                {% endif %}
-                                {% endif %}
-                            {% else %}
-                            <div class="alert alert-info mb-0">
-                                <i class="fas fa-info-circle me-2"></i>
-                                Registration is closed for this event.
-                            </div>
+            <div class="col-lg-4">
+                <div class="content-panel mb-4">
+                    <span class="eyebrow mb-3"><i class="fas fa-ticket"></i> Registration</span>
+                    {% if user_registered %}
+                    <div class="alert alert-success">Umeshajiandikisha kwenye event hii.</div>
+                    {% endif %}
+                    {% if event.requires_registration %}
+                        {% if registration_open %}
+                            <p class="text-muted">Spots zilizobaki: <strong>{{ remaining_spots }}</strong></p>
+                            {% if not user_registered %}
+                            <a href="{% url 'core:event_register' event.slug %}" class="btn btn-primary w-100">Register Now</a>
                             {% endif %}
                         {% else %}
-                        <div class="alert alert-info mb-0">
-                            <i class="fas fa-info-circle me-2"></i>
-                            No registration required. Everyone is welcome!
-                        </div>
+                        <div class="alert alert-secondary mb-0">Registration imefungwa kwa sasa.</div>
                         {% endif %}
-                    </div>
-                    
-                    {% if event.requires_registration and user_registered %}
-                    <div class="card-footer bg-light">
-                        <small class="text-muted">
-                            <i class="fas fa-envelope me-1"></i>
-                            A confirmation email has been sent to you.
-                        </small>
-                    </div>
+                    {% else %}
+                    <div class="alert alert-info mb-0">Hakuna registration inayohitajika. Karibu wote mnakaribishwa.</div>
                     {% endif %}
                 </div>
-
-                <!-- Share Event -->
-                <div class="mt-4 text-center">
-                    <small class="text-muted mb-2 d-block">Share this event:</small>
-                    <div class="d-flex justify-content-center gap-2">
-                        <a href="#" class="btn btn-sm btn-outline-primary">
-                            <i class="fab fa-facebook-f"></i>
-                        </a>
-                        <a href="#" class="btn btn-sm btn-outline-info">
-                            <i class="fab fa-twitter"></i>
-                        </a>
-                        <a href="#" class="btn btn-sm btn-outline-success">
-                            <i class="fab fa-whatsapp"></i>
-                        </a>
-                        <a href="#" class="btn btn-sm btn-outline-secondary">
-                            <i class="fas fa-envelope"></i>
-                        </a>
+                <div class="content-panel">
+                    <span class="eyebrow mb-3"><i class="fas fa-list-check"></i> Event Info</span>
+                    <div class="info-list">
+                        <div class="info-row"><div class="info-icon"><i class="fas fa-calendar"></i></div><div><strong>Date</strong><div class="small text-muted">{{ event.start_date|date:"F d, Y" }}</div></div></div>
+                        <div class="info-row"><div class="info-icon"><i class="fas fa-clock"></i></div><div><strong>Time</strong><div class="small text-muted">{{ event.start_time|time:"g:i A" }} - {{ event.end_time|time:"g:i A" }}</div></div></div>
+                        <div class="info-row"><div class="info-icon"><i class="fas fa-location-dot"></i></div><div><strong>Location</strong><div class="small text-muted">{{ event.location }}</div></div></div>
+                        {% if event.category %}<div class="info-row"><div class="info-icon"><i class="fas fa-tag"></i></div><div><strong>Category</strong><div class="small text-muted">{{ event.category.name }}</div></div></div>{% endif %}
+                        {% if event.registration_deadline %}<div class="info-row"><div class="info-icon"><i class="fas fa-hourglass-end"></i></div><div><strong>Deadline</strong><div class="small text-muted">{{ event.registration_deadline|date:"F d, Y H:i" }}</div></div></div>{% endif %}
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
-{% endblock %}
-
-{% block extra_css %}
-<style>
-    .event-description img {
-        max-width: 100%;
-        height: auto;
-        margin: 1rem 0;
-    }
-    
-    .event-description ul,
-    .event-description ol {
-        padding-left: 1.5rem;
-        margin-bottom: 1rem;
-    }
-    
-    .badge {
-        font-size: 0.8rem;
-        padding: 0.5em 1em;
-    }
-    
-    .sticky-top {
-        z-index: 1;
-    }
-</style>
+</section>
 {% endblock %}

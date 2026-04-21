@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block title %}Officer Dashboard - {{ site_config.site_name|default:"KRT" }}{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <div class="row g-4 align-items-center">
+            <div class="col-lg-8">
+                <span class="eyebrow"><i class="fas fa-shield-heart"></i> Officer Dashboard</span>
+                <h1 class="display-5 text-white mt-3">{{ greeting }}, {{ user.get_full_name|default:user.username }}</h1>
+                <p class="lead text-white-50">Simamia usajili wa members, taarifa za profiles, viongozi, ministries, mikutano, sadaka za zaka, na ujumbe wa ofisi katika sehemu moja.</p>
+            </div>
+            <div class="col-lg-4">
+                <div class="hero-card p-4">
+                    <div class="small text-white-50 mb-2">Today</div>
+                    <div class="h4 text-white mb-0">{% now "l, F j, Y" %}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="site-section">
+    <div class="container">
+        {% include "core/includes/officer_nav.html" %}
+
+        <div class="row g-4 mb-4">
+            <div class="col-md-6 col-xl-3"><div class="metric-card card h-100"><div class="feature-icon"><i class="fas fa-users"></i></div><div class="metric-value">{{ stats.member_count }}</div><div class="metric-label">Active members</div></div></div>
+            <div class="col-md-6 col-xl-3"><div class="metric-card card h-100"><div class="feature-icon"><i class="fas fa-id-card"></i></div><div class="metric-value">{{ stats.profile_count }}</div><div class="metric-label">Member profiles</div></div></div>
+            <div class="col-md-6 col-xl-3"><div class="metric-card card h-100"><div class="feature-icon"><i class="fas fa-triangle-exclamation"></i></div><div class="metric-value">{{ stats.incomplete_profiles }}</div><div class="metric-label">Profiles needing follow-up</div></div></div>
+            <div class="col-md-6 col-xl-3"><div class="metric-card card h-100"><div class="feature-icon"><i class="fas fa-envelope-open-text"></i></div><div class="metric-value">{{ stats.new_message_count }}</div><div class="metric-label">New messages</div></div></div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-md-6 col-xl-3"><div class="metric-card card h-100"><div class="feature-icon"><i class="fas fa-hands-holding-circle"></i></div><div class="metric-value">{{ stats.ministry_count }}</div><div class="metric-label">Active ministries</div></div></div>
+            <div class="col-md-6 col-xl-3"><div class="metric-card card h-100"><div class="feature-icon"><i class="fas fa-person-chalkboard"></i></div><div class="metric-value">{{ stats.leader_count }}</div><div class="metric-label">Active leaders</div></div></div>
+            <div class="col-md-6 col-xl-3"><div class="metric-card card h-100"><div class="feature-icon"><i class="fas fa-calendar-days"></i></div><div class="metric-value">{{ stats.upcoming_event_count }}</div><div class="metric-label">Upcoming meetings/events</div></div></div>
+            <div class="col-md-6 col-xl-3"><div class="metric-card card h-100"><div class="feature-icon"><i class="fas fa-hand-holding-heart"></i></div><div class="metric-value">{{ stats.tithe_total|floatformat:0 }}</div><div class="metric-label">Paid tithe total</div></div></div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="content-panel h-100">
+                    <span class="eyebrow mb-3"><i class="fas fa-bolt"></i> Quick Management</span>
+                    <div class="feature-grid">
+                        {% for link in admin_links %}
+                        <a href="{% url link.route_name %}" class="card feature-card text-decoration-none">
+                            <div class="feature-icon"><i class="{{ link.icon }}"></i></div>
+                            <h3 class="h6">{{ link.label }}</h3>
+                            <p class="text-muted mb-0 small">{{ link.description }}</p>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="content-panel h-100">
+                    <span class="eyebrow mb-3"><i class="fas fa-user-check"></i> Recent Registered Members</span>
+                    {% for profile in recent_members %}
+                    <div class="timeline-item">
+                        <div class="fw-bold">{{ profile.user.get_full_name|default:profile.user.username }}</div>
+                        <div class="small text-muted">
+                            Joined {{ profile.joined_at|date:"M d, Y" }}
+                            {% if profile.zone %} • {{ profile.zone.name }}{% endif %}
+                            {% if profile.church_branch %} • {{ profile.church_branch }}{% endif %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state"><i class="fas fa-user-slash"></i><p class="mb-0">Hakuna member profile iliyosajiliwa bado.</p></div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-1">
+            <div class="col-lg-6">
+                <div class="content-panel h-100">
+                    <span class="eyebrow mb-3"><i class="fas fa-clipboard-list"></i> Profiles To Complete</span>
+                    {% for profile in profile_attention %}
+                    <div class="timeline-item">
+                        <div class="fw-bold">{{ profile.user.get_full_name|default:profile.user.username }}</div>
+                        <div class="small text-muted">
+                            {% if not profile.phone %}Phone missing{% endif %}
+                            {% if not profile.phone and not profile.zone %} • {% endif %}
+                            {% if not profile.zone %}Zone missing{% endif %}
+                            {% if not profile.date_of_birth %}{% if not profile.phone or not profile.zone %} • {% endif %}Date of birth missing{% endif %}
+                            {% if not profile.church_branch %}{% if not profile.phone or not profile.zone or not profile.date_of_birth %} • {% endif %}Branch missing{% endif %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state"><i class="fas fa-circle-check"></i><p class="mb-0">Profiles nyingi zimejazwa vizuri.</p></div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="content-panel h-100">
+                    <span class="eyebrow mb-3"><i class="fas fa-calendar-check"></i> Upcoming Meetings</span>
+                    {% for event in upcoming_events %}
+                    <div class="timeline-item">
+                        <div class="fw-bold">{{ event.title }}</div>
+                        <div class="small text-muted">
+                            {{ event.start_date|date:"M d, Y" }} • {{ event.start_time|time:"g:i A" }} • {{ event.location }}
+                            {% if event.category %} • {{ event.category.name }}{% endif %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state"><i class="fas fa-calendar-xmark"></i><p class="mb-0">Hakuna meeting/event iliyopangwa kwa sasa.</p></div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-1">
+            <div class="col-lg-4">
+                <div class="content-panel h-100">
+                    <span class="eyebrow mb-3"><i class="fas fa-sitemap"></i> Ministry Overview</span>
+                    {% for ministry in ministry_breakdown %}
+                    <div class="timeline-item">
+                        <div class="fw-bold">{{ ministry.name }}</div>
+                        <div class="small text-muted">
+                            {{ ministry.active_member_total }} members
+                            {% if ministry.leader %} • {{ ministry.leader.get_full_name|default:ministry.leader.username }}{% endif %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state"><i class="fas fa-hands-holding-circle"></i><p class="mb-0">Hakuna ministry active kwa sasa.</p></div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="content-panel h-100">
+                    <span class="eyebrow mb-3"><i class="fas fa-person-chalkboard"></i> Church Leaders</span>
+                    {% for leader in leaders %}
+                    <div class="timeline-item">
+                        <div class="fw-bold">{{ leader.full_name }}</div>
+                        <div class="small text-muted">{{ leader.title }} • {{ leader.get_level_display }}</div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state"><i class="fas fa-user-tie"></i><p class="mb-0">Hakuna viongozi waliowekwa bado.</p></div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="content-panel h-100">
+                    <span class="eyebrow mb-3"><i class="fas fa-inbox"></i> Recent Messages</span>
+                    {% for message in recent_messages %}
+                    <div class="timeline-item">
+                        <div class="fw-bold">{{ message.subject }}</div>
+                        <div class="small text-muted">{{ message.name }} • {{ message.created_at|date:"M d, Y H:i" }} • {{ message.get_status_display }}</div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state"><i class="fas fa-envelope"></i><p class="mb-0">Hakuna ujumbe mpya wa kuonyesha.</p></div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-1">
+            <div class="col-12">
+                <div class="content-panel">
+                    <span class="eyebrow mb-3"><i class="fas fa-receipt"></i> Recent Tithe Records</span>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Member</th>
+                                    <th>Period</th>
+                                    <th>Amount</th>
+                                    <th>Recorded By</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for tithe in recent_tithes %}
+                                <tr>
+                                    <td>{{ tithe.user.get_full_name|default:tithe.user.username }}</td>
+                                    <td>{{ tithe.get_month_display }} {{ tithe.year }}</td>
+                                    <td>{{ tithe.amount }}</td>
+                                    <td>{{ tithe.recorded_by.get_full_name|default:tithe.recorded_by.username|default:"Self" }}</td>
+                                    <td>{{ tithe.get_status_display }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="5" class="text-center text-muted py-4">Hakuna tithe records bado.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="d-flex justify-content-end mt-3">
+                        <a href="{% url 'core:admin_tithe_list' %}" class="btn btn-outline-primary">View All Tithe Records</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

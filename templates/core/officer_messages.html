@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page_title }} - {{ site_config.site_name|default:"KRT" }}{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <span class="eyebrow"><i class="fas fa-envelope-open-text"></i> Officer Portal</span>
+        <h1 class="display-5 text-white mt-3">{{ page_title }}</h1>
+        <p class="lead text-white-50">{{ page_intro }}</p>
+    </div>
+</section>
+
+<section class="site-section">
+    <div class="container">
+        {% include "core/includes/officer_nav.html" %}
+
+        <div class="row g-4 mb-4">
+            <div class="col-md-6 col-xl-3"><div class="metric-card card h-100"><div class="feature-icon"><i class="fas fa-inbox"></i></div><div class="metric-value">{{ new_count }}</div><div class="metric-label">New messages</div></div></div>
+            <div class="col-md-6 col-xl-3"><div class="metric-card card h-100"><div class="feature-icon"><i class="fas fa-reply"></i></div><div class="metric-value">{{ replied_count }}</div><div class="metric-label">Replied</div></div></div>
+        </div>
+
+        <div class="content-panel mb-4">
+            <form method="get" class="row g-3">
+                <div class="col-lg-8">
+                    <label class="form-label">Search message</label>
+                    <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Sender, email, subject, message">
+                </div>
+                <div class="col-lg-3">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="">All statuses</option>
+                        <option value="new" {% if selected_status == 'new' %}selected{% endif %}>New</option>
+                        <option value="read" {% if selected_status == 'read' %}selected{% endif %}>Read</option>
+                        <option value="replied" {% if selected_status == 'replied' %}selected{% endif %}>Replied</option>
+                        <option value="archived" {% if selected_status == 'archived' %}selected{% endif %}>Archived</option>
+                    </select>
+                </div>
+                <div class="col-lg-1 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">Go</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="content-panel">
+            {% for item in page_obj %}
+            <div class="timeline-item">
+                <div class="d-flex justify-content-between gap-3 flex-wrap">
+                    <div>
+                        <div class="fw-bold">{{ item.subject }}</div>
+                        <div class="small text-muted">{{ item.name }} • {{ item.email }} • {{ item.created_at|date:"M d, Y H:i" }}</div>
+                    </div>
+                    <div><span class="badge bg-primary">{{ item.get_status_display }}</span></div>
+                </div>
+                <p class="text-muted mb-0 mt-2">{{ item.message|truncatewords:35 }}</p>
+                <div class="d-flex flex-wrap gap-2 mt-3">
+                    <a href="{% url 'core:officer_message_edit' item.id %}" class="btn btn-outline-primary btn-sm">Edit Message</a>
+                    <form method="post" class="d-flex gap-2 flex-wrap">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="update_status">
+                        <input type="hidden" name="message_id" value="{{ item.id }}">
+                        <select name="status" class="form-select form-select-sm">
+                            <option value="new" {% if item.status == 'new' %}selected{% endif %}>New</option>
+                            <option value="read" {% if item.status == 'read' %}selected{% endif %}>Read</option>
+                            <option value="replied" {% if item.status == 'replied' %}selected{% endif %}>Replied</option>
+                            <option value="archived" {% if item.status == 'archived' %}selected{% endif %}>Archived</option>
+                        </select>
+                        <button type="submit" class="btn btn-outline-primary btn-sm">Save Status</button>
+                    </form>
+                    <form method="post" onsubmit="return confirm('Delete this message?');">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="delete_message">
+                        <input type="hidden" name="message_id" value="{{ item.id }}">
+                        <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                    </form>
+                </div>
+            </div>
+            {% empty %}
+            <div class="empty-state"><i class="fas fa-envelope"></i><p class="mb-0">Hakuna messages zilizopatikana.</p></div>
+            {% endfor %}
+
+            {% if page_obj.has_other_pages %}
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}">Previous</a></li>
+                    {% endif %}
+                    <li class="page-item active"><span class="page-link">{{ page_obj.number }}</span></li>
+                    {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}">Next</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

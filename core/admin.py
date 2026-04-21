@@ -5,7 +5,7 @@ from django.contrib import admin
 from .models import (
     SiteConfig, HeroSlide, ServiceTime, Ministry, MinistryMember,
     EventCategory, Event, EventRegistration,
-    BibleVerse, ContactMessage, GalleryImage, Testimonial
+    BibleVerse, ContactMessage, GalleryImage, Testimonial, Tithe
 )
 
 # ------------------------------
@@ -130,3 +130,18 @@ class TestimonialAdmin(admin.ModelAdmin):
     list_filter = ('is_active',)
     search_fields = ('author', 'role', 'content')
     ordering = ('order',)
+
+
+@admin.register(Tithe)
+class TitheAdmin(admin.ModelAdmin):
+    list_display = ('user', 'amount', 'month', 'year', 'status', 'payment_method', 'recorded_by', 'date_paid')
+    list_filter = ('status', 'payment_method', 'year', 'month')
+    search_fields = (
+        'user__username',
+        'user__first_name',
+        'user__last_name',
+        'user__email',
+        'reference',
+    )
+    autocomplete_fields = ('user', 'recorded_by')
+    ordering = ('-date_paid',)

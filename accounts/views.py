@@ -10,7 +10,7 @@ def signup_view(request):
      # Get site configuration
     site_config = SiteConfig.objects.first()
     if not site_config:
-            site_config = SiteConfig.objects.createt()
+            site_config = SiteConfig.objects.create()
     if request.method == 'POST':
         form = SignupForm(request.POST)
         if form.is_valid():

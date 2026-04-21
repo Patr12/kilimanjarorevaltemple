@@ -4,7 +4,18 @@
 {% block title %}Admin - All Tithes{% endblock %}
 
 {% block content %}
-<div class="container py-5">
+<section class="page-hero">
+    <div class="container">
+        <span class="eyebrow"><i class="fas fa-hand-holding-heart"></i> Officer Portal</span>
+        <h1 class="display-5 text-white mt-3">Tithe Management</h1>
+        <p class="lead text-white-50">Kagua taarifa za zaka, chuja rekodi, na fuatilia nani alirekodi kila malipo.</p>
+    </div>
+</section>
+
+<section class="site-section">
+<div class="container">
+    {% include "core/includes/officer_nav.html" %}
+
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2><i class="fas fa-chart-line me-2"></i>All Tithe Records</h2>
         <a href="{% url 'core:add_tithe' %}" class="btn btn-primary">
@@ -193,4 +204,5 @@
         </div>
     </div>
 </div>
+</section>
 {% endblock %}

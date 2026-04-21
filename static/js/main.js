@@ -5,6 +5,10 @@ class PageTransition {
         this.pageContent = document.querySelector('.page-content');
         this.curtains = document.querySelectorAll('.curtain');
         this.logo = document.querySelector('.transition-logo');
+
+        if (!this.transitionElement || !this.pageContent) {
+            return;
+        }
         
         this.init();
     }
@@ -30,11 +34,19 @@ class PageTransition {
         // Onyesha content baada ya animation
         setTimeout(() => {
             document.body.classList.add('page-ready');
+            this.transitionElement.style.pointerEvents = 'none';
         }, 800);
+
+        setTimeout(() => {
+            this.transitionElement.style.display = 'none';
+        }, 1200);
     }
     
     animateIn(url) {
         return new Promise((resolve) => {
+            this.transitionElement.style.display = 'flex';
+            this.transitionElement.style.pointerEvents = 'auto';
+
             // Funga curtains tena
             this.transitionElement.classList.remove('curtain-open');
             this.transitionElement.classList.add('curtain-close');
@@ -81,17 +93,19 @@ class PageTransition {
 // ================= BACK TO TOP BUTTON =================
 const backToTopButton = document.getElementById('backToTop');
 
-window.addEventListener('scroll', () => {
-    if (window.pageYOffset > 300) {
-        backToTopButton.style.display = 'block';
-    } else {
-        backToTopButton.style.display = 'none';
-    }
-});
+if (backToTopButton) {
+    window.addEventListener('scroll', () => {
+        if (window.pageYOffset > 300) {
+            backToTopButton.style.display = 'block';
+        } else {
+            backToTopButton.style.display = 'none';
+        }
+    });
 
-backToTopButton.addEventListener('click', () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-});
+    backToTopButton.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+}
 
 // ================= AUTO-CLOSE ALERTS =================
 document.addEventListener('DOMContentLoaded', function() {

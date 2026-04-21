@@ -1,0 +1,12 @@
+<div class="content-panel mb-4 officer-nav-shell">
+    <div class="d-flex flex-wrap gap-2">
+        <a href="{% url 'core:officer_dashboard' %}" class="btn {% if active_section == 'dashboard' %}btn-primary{% else %}btn-outline-primary{% endif %} btn-sm">Dashboard</a>
+        <a href="{% url 'core:officer_members' %}" class="btn {% if active_section == 'members' %}btn-primary{% else %}btn-outline-primary{% endif %} btn-sm">Members</a>
+        <a href="{% url 'core:officer_structure' %}" class="btn {% if active_section == 'structure' %}btn-primary{% else %}btn-outline-primary{% endif %} btn-sm">Zones & Branches</a>
+        <a href="{% url 'core:officer_ministries' %}" class="btn {% if active_section == 'ministries' %}btn-primary{% else %}btn-outline-primary{% endif %} btn-sm">Ministries</a>
+        <a href="{% url 'core:officer_leaders' %}" class="btn {% if active_section == 'leaders' %}btn-primary{% else %}btn-outline-primary{% endif %} btn-sm">Leaders</a>
+        <a href="{% url 'core:officer_events' %}" class="btn {% if active_section == 'events' %}btn-primary{% else %}btn-outline-primary{% endif %} btn-sm">Meetings & Events</a>
+        <a href="{% url 'core:officer_messages' %}" class="btn {% if active_section == 'messages' %}btn-primary{% else %}btn-outline-primary{% endif %} btn-sm">Messages</a>
+        <a href="{% url 'core:admin_tithe_list' %}" class="btn {% if active_section == 'tithes' %}btn-primary{% else %}btn-outline-primary{% endif %} btn-sm">Tithes</a>
+    </div>
+</div>

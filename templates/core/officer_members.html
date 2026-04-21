@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page_title }} - {{ site_config.site_name|default:"KRT" }}{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <span class="eyebrow"><i class="fas fa-users"></i> Officer Portal</span>
+        <h1 class="display-5 text-white mt-3">{{ page_title }}</h1>
+        <p class="lead text-white-50">{{ page_intro }}</p>
+    </div>
+</section>
+
+<section class="site-section">
+    <div class="container">
+        {% include "core/includes/officer_nav.html" %}
+
+        <div class="row g-4 mb-4">
+            <div class="col-md-6 col-xl-3"><div class="metric-card card h-100"><div class="feature-icon"><i class="fas fa-users"></i></div><div class="metric-value">{{ total_members }}</div><div class="metric-label">Profiles found</div></div></div>
+            <div class="col-md-6 col-xl-3"><div class="metric-card card h-100"><div class="feature-icon"><i class="fas fa-triangle-exclamation"></i></div><div class="metric-value">{{ incomplete_count }}</div><div class="metric-label">Need follow-up</div></div></div>
+        </div>
+
+        <div class="content-panel mb-4">
+            <span class="eyebrow mb-3"><i class="fas fa-user-plus"></i> Add Member</span>
+            <form method="post" class="row g-3">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="add_member">
+                <div class="col-md-4"><label class="form-label">Username</label>{{ member_form.username }}</div>
+                <div class="col-md-4"><label class="form-label">First name</label>{{ member_form.first_name }}</div>
+                <div class="col-md-4"><label class="form-label">Last name</label>{{ member_form.last_name }}</div>
+                <div class="col-md-4"><label class="form-label">Email</label>{{ member_form.email }}</div>
+                <div class="col-md-4"><label class="form-label">Password</label>{{ member_form.password }}</div>
+                <div class="col-md-4"><label class="form-label">Phone</label>{{ member_form.phone }}</div>
+                <div class="col-md-4"><label class="form-label">Church branch</label>{{ member_form.church_branch }}</div>
+                <div class="col-md-4"><label class="form-label">Zone</label>{{ member_form.zone }}</div>
+                <div class="col-md-4"><label class="form-label">Ministry role</label>{{ member_form.ministry_role }}</div>
+                <div class="col-md-4"><label class="form-label">Date of birth</label>{{ member_form.date_of_birth }}</div>
+                <div class="col-md-4 d-flex align-items-end"><div class="form-check">{{ member_form.is_staff }} <label class="form-check-label" for="{{ member_form.is_staff.id_for_label }}">Officer account</label></div></div>
+                <div class="col-12">{% if member_form.errors %}<div class="alert alert-danger mb-0">{{ member_form.errors }}</div>{% endif %}</div>
+                <div class="col-12"><button type="submit" class="btn btn-primary">Add Member</button></div>
+            </form>
+        </div>
+
+        <div class="content-panel mb-4">
+            <form method="get" class="row g-3">
+                <div class="col-lg-5">
+                    <label class="form-label">Search member</label>
+                    <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Name, email, phone, branch">
+                </div>
+                <div class="col-lg-3">
+                    <label class="form-label">Zone</label>
+                    <select name="zone" class="form-select">
+                        <option value="">All zones</option>
+                        {% for zone in zones %}
+                        <option value="{{ zone.id }}" {% if selected_zone == zone.id|stringformat:"s" %}selected{% endif %}>{{ zone.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-lg-3">
+                    <label class="form-label">Ministry role</label>
+                    <select name="ministry" class="form-select">
+                        <option value="">All ministries</option>
+                        {% for ministry in ministries %}
+                        <option value="{{ ministry.id }}" {% if selected_ministry == ministry.id|stringformat:"s" %}selected{% endif %}>{{ ministry.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-lg-1 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">Go</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="content-panel">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Member</th>
+                            <th>Contacts</th>
+                            <th>Zone / Branch</th>
+                            <th>Spiritual role</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for profile in page_obj %}
+                        <tr>
+                            <td>
+                                <div class="fw-bold">{{ profile.user.get_full_name|default:profile.user.username }}</div>
+                                <div class="small text-muted">{{ profile.user.email|default:"No email" }}</div>
+                            </td>
+                            <td>
+                                <div>{{ profile.phone|default:"No phone" }}</div>
+                                <div class="small text-muted">Joined {{ profile.joined_at|date:"M d, Y" }}</div>
+                            </td>
+                            <td>
+                                <div>{{ profile.zone.name|default:"No zone" }}</div>
+                                <div class="small text-muted">{{ profile.church_branch|default:"No branch" }}</div>
+                            </td>
+                            <td>
+                                <div>{{ profile.ministry_role.name|default:"Not assigned" }}</div>
+                                <div class="small text-muted">DOB: {{ profile.date_of_birth|date:"M d, Y"|default:"Not set" }}</div>
+                            </td>
+                            <td>
+                                {% if profile.phone and profile.zone and profile.church_branch and profile.date_of_birth %}
+                                <span class="badge-soft-success">Complete</span>
+                                {% else %}
+                                <span class="badge-soft-warning">Needs update</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <a href="{% url 'core:officer_member_edit' profile.id %}" class="btn btn-outline-primary btn-sm">Edit</a>
+                                    <form method="post" onsubmit="return confirm('Delete this member and profile?');">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="delete_member">
+                                        <input type="hidden" name="profile_id" value="{{ profile.id }}">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="6" class="text-center py-4 text-muted">Hakuna member profiles zilizopatikana.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if page_obj.has_other_pages %}
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selected_zone %}&zone={{ selected_zone }}{% endif %}{% if selected_ministry %}&ministry={{ selected_ministry }}{% endif %}">Previous</a></li>
+                    {% endif %}
+                    <li class="page-item active"><span class="page-link">{{ page_obj.number }}</span></li>
+                    {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selected_zone %}&zone={{ selected_zone }}{% endif %}{% if selected_ministry %}&ministry={{ selected_ministry }}{% endif %}">Next</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

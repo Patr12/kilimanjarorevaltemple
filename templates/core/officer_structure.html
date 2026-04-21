@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page_title }} - {{ site_config.site_name|default:"KRT" }}{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <span class="eyebrow"><i class="fas fa-map-location-dot"></i> Officer Portal</span>
+        <h1 class="display-5 text-white mt-3">{{ page_title }}</h1>
+        <p class="lead text-white-50">{{ page_intro }}</p>
+    </div>
+</section>
+
+<section class="site-section">
+    <div class="container">
+        {% include "core/includes/officer_nav.html" %}
+
+        <div class="row g-4 mb-4">
+            <div class="col-md-6 col-xl-3"><div class="metric-card card h-100"><div class="feature-icon"><i class="fas fa-location-dot"></i></div><div class="metric-value">{{ zone_count }}</div><div class="metric-label">Zones</div></div></div>
+            <div class="col-md-6 col-xl-3"><div class="metric-card card h-100"><div class="feature-icon"><i class="fas fa-church"></i></div><div class="metric-value">{{ branch_count }}</div><div class="metric-label">Branches</div></div></div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-lg-5">
+                <div class="content-panel h-100">
+                    <span class="eyebrow mb-3"><i class="fas fa-location-dot"></i> Add Zone</span>
+                    <form method="post" class="row g-3">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="add_zone">
+                        <div class="col-12"><label class="form-label">Zone name</label>{{ zone_form.name }}</div>
+                        <div class="col-12">{% if zone_form.errors %}<div class="alert alert-danger mb-0">{{ zone_form.errors }}</div>{% endif %}</div>
+                        <div class="col-12"><button type="submit" class="btn btn-primary">Add Zone</button></div>
+                    </form>
+                </div>
+            </div>
+            <div class="col-lg-7">
+                <div class="content-panel h-100">
+                    <span class="eyebrow mb-3"><i class="fas fa-church"></i> Add Branch</span>
+                    <form method="post" class="row g-3">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="add_branch">
+                        <div class="col-md-6"><label class="form-label">Branch name</label>{{ branch_form.name }}</div>
+                        <div class="col-md-6"><label class="form-label">Zone</label>{{ branch_form.zone }}</div>
+                        <div class="col-12">{% if branch_form.errors %}<div class="alert alert-danger mb-0">{{ branch_form.errors }}</div>{% endif %}</div>
+                        <div class="col-12"><button type="submit" class="btn btn-primary">Add Branch</button></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-panel mb-4">
+            <form method="get" class="row g-3">
+                <div class="col-lg-10">
+                    <label class="form-label">Search structure</label>
+                    <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Zone or branch name">
+                </div>
+                <div class="col-lg-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">Search</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-5">
+                <div class="content-panel h-100">
+                    <span class="eyebrow mb-3"><i class="fas fa-location-dot"></i> Zones</span>
+                    {% for zone in zones %}
+                    <div class="timeline-item">
+                        <div class="d-flex justify-content-between align-items-start gap-3">
+                            <div>
+                                <div class="fw-bold">{{ zone.name }}</div>
+                                <div class="small text-muted">{{ zone.branch_count }} branches</div>
+                            </div>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <a href="{% url 'core:officer_zone_edit' zone.id %}" class="btn btn-outline-primary btn-sm">Edit</a>
+                                <form method="post" onsubmit="return confirm('Delete this zone?');">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="delete_zone">
+                                    <input type="hidden" name="zone_id" value="{{ zone.id }}">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state"><i class="fas fa-map"></i><p class="mb-0">Hakuna zones zilizopatikana.</p></div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-lg-7">
+                <div class="content-panel h-100">
+                    <span class="eyebrow mb-3"><i class="fas fa-church"></i> Branches</span>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead><tr><th>Branch</th><th>Zone</th><th>Action</th></tr></thead>
+                            <tbody>
+                                {% for branch in branches %}
+                                <tr>
+                                    <td>{{ branch.name }}</td>
+                                    <td>{{ branch.zone.name }}</td>
+                                    <td>
+                                        <div class="d-flex gap-2 flex-wrap">
+                                            <a href="{% url 'core:officer_branch_edit' branch.id %}" class="btn btn-outline-primary btn-sm">Edit</a>
+                                            <form method="post" onsubmit="return confirm('Delete this branch?');">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="action" value="delete_branch">
+                                                <input type="hidden" name="branch_id" value="{{ branch.id }}">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="3" class="text-center py-4 text-muted">Hakuna branches zilizopatikana.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

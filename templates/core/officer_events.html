@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page_title }} - {{ site_config.site_name|default:"KRT" }}{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <span class="eyebrow"><i class="fas fa-calendar-days"></i> Officer Portal</span>
+        <h1 class="display-5 text-white mt-3">{{ page_title }}</h1>
+        <p class="lead text-white-50">{{ page_intro }}</p>
+    </div>
+</section>
+
+<section class="site-section">
+    <div class="container">
+        {% include "core/includes/officer_nav.html" %}
+
+        <div class="row g-4 mb-4">
+            <div class="col-md-6 col-xl-3"><div class="metric-card card h-100"><div class="feature-icon"><i class="fas fa-clock"></i></div><div class="metric-value">{{ upcoming_count }}</div><div class="metric-label">Upcoming</div></div></div>
+            <div class="col-md-6 col-xl-3"><div class="metric-card card h-100"><div class="feature-icon"><i class="fas fa-bullhorn"></i></div><div class="metric-value">{{ published_count }}</div><div class="metric-label">Published</div></div></div>
+        </div>
+
+        <div class="content-panel mb-4">
+            <span class="eyebrow mb-3"><i class="fas fa-calendar-plus"></i> Add Event</span>
+            <form method="post" enctype="multipart/form-data" class="row g-3">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="add_event">
+                <div class="col-md-4"><label class="form-label">Title</label>{{ event_form.title }}</div>
+                <div class="col-md-4"><label class="form-label">Event type</label>{{ event_form.event_type }}</div>
+                <div class="col-md-4"><label class="form-label">Category</label>{{ event_form.category }}</div>
+                <div class="col-md-6"><label class="form-label">Description</label>{{ event_form.description }}</div>
+                <div class="col-md-6"><label class="form-label">Short description</label>{{ event_form.short_description }}</div>
+                <div class="col-md-2"><label class="form-label">Start date</label>{{ event_form.start_date }}</div>
+                <div class="col-md-2"><label class="form-label">Start time</label>{{ event_form.start_time }}</div>
+                <div class="col-md-2"><label class="form-label">End date</label>{{ event_form.end_date }}</div>
+                <div class="col-md-2"><label class="form-label">End time</label>{{ event_form.end_time }}</div>
+                <div class="col-md-4"><label class="form-label">Location</label>{{ event_form.location }}</div>
+                <div class="col-md-4"><label class="form-label">Location details</label>{{ event_form.location_details }}</div>
+                <div class="col-md-4"><label class="form-label">Online link</label>{{ event_form.online_link }}</div>
+                <div class="col-md-3"><label class="form-label">Featured image</label>{{ event_form.featured_image }}</div>
+                <div class="col-md-2"><label class="form-label">Max attendees</label>{{ event_form.max_attendees }}</div>
+                <div class="col-md-3"><label class="form-label">Registration deadline</label>{{ event_form.registration_deadline }}</div>
+                <div class="col-md-2"><label class="form-label">Status</label>{{ event_form.status }}</div>
+                <div class="col-md-2 d-flex align-items-end"><div class="form-check">{{ event_form.requires_registration }} <label class="form-check-label" for="{{ event_form.requires_registration.id_for_label }}">Registration</label></div></div>
+                <div class="col-md-2 d-flex align-items-end"><div class="form-check">{{ event_form.is_recurring }} <label class="form-check-label" for="{{ event_form.is_recurring.id_for_label }}">Recurring</label></div></div>
+                <div class="col-md-2 d-flex align-items-end"><div class="form-check">{{ event_form.is_featured }} <label class="form-check-label" for="{{ event_form.is_featured.id_for_label }}">Featured</label></div></div>
+                <div class="col-12">{% if event_form.errors %}<div class="alert alert-danger mb-0">{{ event_form.errors }}</div>{% endif %}</div>
+                <div class="col-12"><button type="submit" class="btn btn-primary">Add Event</button></div>
+            </form>
+        </div>
+
+        <div class="content-panel mb-4">
+            <form method="get" class="row g-3">
+                <div class="col-lg-8">
+                    <label class="form-label">Search event</label>
+                    <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Title, location, description">
+                </div>
+                <div class="col-lg-3">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="">All statuses</option>
+                        <option value="draft" {% if selected_status == 'draft' %}selected{% endif %}>Draft</option>
+                        <option value="published" {% if selected_status == 'published' %}selected{% endif %}>Published</option>
+                        <option value="cancelled" {% if selected_status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                        <option value="completed" {% if selected_status == 'completed' %}selected{% endif %}>Completed</option>
+                    </select>
+                </div>
+                <div class="col-lg-1 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">Go</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="content-panel">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Event</th>
+                            <th>Date</th>
+                            <th>Location</th>
+                            <th>Registrations</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for event in page_obj %}
+                        <tr>
+                            <td>
+                                <div class="fw-bold">{{ event.title }}</div>
+                                <div class="small text-muted">{{ event.category.name|default:"No category" }}</div>
+                            </td>
+                            <td>{{ event.start_date|date:"M d, Y" }}<div class="small text-muted">{{ event.start_time|time:"g:i A" }}</div></td>
+                            <td>{{ event.location }}</td>
+                            <td>{{ event.registration_count }}</td>
+                            <td><span class="badge bg-primary">{{ event.get_status_display }}</span></td>
+                            <td>
+                                <form method="post" onsubmit="return confirm('Delete this event?');">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="delete_event">
+                                    <input type="hidden" name="event_id" value="{{ event.id }}">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                                </form>
+                                <a href="{% url 'core:officer_event_edit' event.id %}" class="btn btn-outline-primary btn-sm mt-2">Edit</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="6" class="text-center py-4 text-muted">Hakuna events zilizopatikana.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if page_obj.has_other_pages %}
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}">Previous</a></li>
+                    {% endif %}
+                    <li class="page-item active"><span class="page-link">{{ page_obj.number }}</span></li>
+                    {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}">Next</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

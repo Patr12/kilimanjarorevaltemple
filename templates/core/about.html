@@ -1,299 +1,109 @@
-<!-- templates/core/about.html -->
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}About Us{% endblock %}
+
+{% block title %}About - {{ site_config.site_name|default:"KRT" }}{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <!-- Hero Section -->
-    <div class="row align-items-center mb-5">
-        <div class="col-lg-8">
-            <h1 class="display-4 fw-bold text-primary mb-3">About Our Church</h1>
-            <p class="lead text-muted mb-4">Welcome to our church community where faith, love, and fellowship come together to create a welcoming environment for all.</p>
-        </div>
-        <div class="col-lg-4">
-            <img src="{% static 'images/logos.jpeg' %}" 
-                 alt="Our Church" 
-                 class="img-fluid rounded shadow">
-        </div>
-    </div>
-
-    <!-- Mission Statement -->
-    <div class="card border-0 shadow-lg mb-5 bg-primary text-white">
-        <div class="card-body p-5">
-            <div class="row align-items-center">
-                <div class="col-md-2 text-center mb-3 mb-md-0">
-                    <i class="bi-heart-fill display-4"></i>
-                </div>
-                <div class="col-md-10">
-                    <h2 class="card-title h3">Our Mission</h2>
-                    <p class="card-text mb-0">To spread God's love, nurture spiritual growth, and serve our community with compassion and dedication.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Statistics Section -->
-    <h2 class="text-center mb-5">Our Community at a Glance</h2>
-    <div class="row text-center mb-5">
-        <div class="col-md-4 mb-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body p-4">
-                    <div class="text-primary mb-3">
-                        <i class="bi-people-fill display-4"></i>
-                    </div>
-                    <h3 class="h2 fw-bold text-primary">{{ total_members }}</h3>
-                    <p class="text-muted mb-0">Total Members</p>
-                    <small class="text-success">+5.2% from last month</small>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-4 mb-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body p-4">
-                    <div class="text-primary mb-3">
-                        <i class="bi-house-heart-fill display-4"></i>
-                    </div>
-                    <h3 class="h2 fw-bold text-primary">{{ total_ministries }}</h3>
-                    <p class="text-muted mb-0">Active Ministries</p>
-                    <small class="text-success">Serving various community needs</small>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-4 mb-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body p-4">
-                    <div class="text-primary mb-3">
-                        <i class="bi-calendar-event-fill display-4"></i>
-                    </div>
-                    <h3 class="h2 fw-bold text-primary">{{ upcoming_events }}</h3>
-                    <p class="text-muted mb-0">Upcoming Events</p>
-                    <small class="text-warning">Join us this week!</small>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Core Values -->
-    <div class="row mb-5">
-        <div class="col-12">
-            <h2 class="text-center mb-4">Our Core Values</h2>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card text-center h-100 border-0 shadow-sm">
-                <div class="card-body">
-                    <i class="bi-heart-pulse-fill text-primary h1 mb-3"></i>
-                    <h5>Compassion</h5>
-                    <p class="small text-muted">Showing God's love through acts of kindness</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card text-center h-100 border-0 shadow-sm">
-                <div class="card-body">
-                    <i class="bi-book-fill text-primary h1 mb-3"></i>
-                    <h5>Faith</h5>
-                    <p class="small text-muted">Growing in spiritual wisdom and understanding</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card text-center h-100 border-0 shadow-sm">
-                <div class="card-body">
-                    <i class="bi-people-fill text-primary h1 mb-3"></i>
-                    <h5>Community</h5>
-                    <p class="small text-muted">Building strong, supportive relationships</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card text-center h-100 border-0 shadow-sm">
-                <div class="card-body">
-                    <i class="bi-hand-thumbs-up-fill text-primary h1 mb-3"></i>
-                    <h5>Service</h5>
-                    <p class="small text-muted">Serving others with humility and grace</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Testimonials -->
-    {% if testimonials %}
-    <div class="row mb-5">
-        <div class="col-12">
-            <h2 class="text-center mb-4">What People Say</h2>
-        </div>
-        <div class="col-12">
-            <div id="testimonialCarousel" class="carousel slide" data-bs-ride="carousel">
-                <div class="carousel-inner">
-                    {% for testimonial in testimonials %}
-                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                        <div class="card border-0 shadow-lg mx-auto" style="max-width: 800px;">
-                            <div class="card-body p-5">
-                                <div class="text-center mb-4">
-                                    <i class="bi-chat-quote-fill display-4 text-primary"></i>
-                                </div>
-                                <blockquote class="blockquote text-center">
-                                    <p class="fst-italic fs-4 mb-4">"{{ testimonial.content }}"</p>
-                                    <footer class="blockquote-footer mt-3">
-                                        <strong>{{ testimonial.author }}</strong>
-                                        {% if testimonial.role %}
-                                        <span class="text-muted">, {{ testimonial.role }}</span>
-                                        {% endif %}
-                                    </footer>
-                                </blockquote>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% if testimonials|length > 1 %}
-                <button class="carousel-control-prev" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="prev">
-                    <span class="carousel-control-prev-icon bg-primary rounded-circle p-3" aria-hidden="true"></span>
-                    <span class="visually-hidden">Previous</span>
-                </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="next">
-                    <span class="carousel-control-next-icon bg-primary rounded-circle p-3" aria-hidden="true"></span>
-                    <span class="visually-hidden">Next</span>
-                </button>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-    {% endif %}
-    <!-- uongazi wa kanisa una kaa hapa kwenye structure nzuri  -->
- <section class="church-structure py-5">
+<section class="page-hero">
     <div class="container">
-        <h2 class="text-center mb-5">Uongozi wa Kanisa</h2>
-
-        {% regroup leaders by level as leader_levels %}
-
-        <div class="tree">
-            {% for group in leader_levels %}
-                <div class="tree-level mb-5 text-center">
-                    <h3 class="level-title">{{ group.list.0.get_level_display }}</h3>
-                    <div class="d-flex flex-wrap justify-content-center gap-4">
-                        {% for leader in group.list %}
-                            <div class="tree-node card shadow position-relative" style="width: 200px;">
-                                <img src="{{ leader.photo.url }}" class="card-img-top" alt="{{ leader.full_name }}">
-                                <div class="card-body">
-                                    <h5 class="mb-1">{{ leader.full_name }}</h5>
-                                    <p class="text-muted mb-1"><small>{{ leader.title }}</small></p>
-                                    {% if leader.vision_message %}
-                                    <p class="fst-italic small text-primary" title="{{ leader.vision_message }}">💡 Vision</p>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </div>
+        <div class="row g-4 align-items-center">
+            <div class="col-lg-7">
+                <div class="section-heading">
+                    <span class="eyebrow"><i class="fas fa-church"></i> About KRT</span>
+                    <h1 class="display-5 text-white">Kanisa la uamsho lenye maono ya kugusa maisha</h1>
+                    <p class="lead text-white-50">{{ site_config.about_us|striptags|default:"Tunaamini katika ibada ya kweli, neno la Mungu, maombi na kujenga jamii yenye upendo na matumaini."|truncatechars:180 }}</p>
                 </div>
-            {% endfor %}
+            </div>
+            <div class="col-lg-5">
+                <div class="image-frame">
+                    <img src="{% static 'images/logos.jpeg' %}" alt="KRT" class="media-cover" style="height: 320px;">
+                </div>
+            </div>
         </div>
     </div>
 </section>
 
+<section class="site-section">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-4"><div class="metric-card card h-100"><div class="feature-icon"><i class="fas fa-users"></i></div><div class="metric-value">{{ total_members }}</div><div class="metric-label">Active members across ministries</div></div></div>
+            <div class="col-md-4"><div class="metric-card card h-100"><div class="feature-icon"><i class="fas fa-hands-holding-circle"></i></div><div class="metric-value">{{ total_ministries }}</div><div class="metric-label">Ministries serving different groups</div></div></div>
+            <div class="col-md-4"><div class="metric-card card h-100"><div class="feature-icon"><i class="fas fa-calendar-star"></i></div><div class="metric-value">{{ upcoming_events }}</div><div class="metric-label">Upcoming events on the calendar</div></div></div>
+        </div>
+    </div>
+</section>
 
-
-    <!-- Call to Action -->
-    <div class="card border-0 shadow-lg bg-light">
-        <div class="card-body p-5 text-center">
-            <h2 class="mb-4">Join Us This Sunday</h2>
-            <p class="lead mb-4">Experience the warmth of our community and grow in faith together.</p>
-            <div class="d-flex flex-wrap justify-content-center gap-3">
-                <a href="{% url 'core:events' %}" class="btn btn-primary btn-lg px-4">
-                    <i class="bi-calendar-check me-2"></i>View Events
-                </a>
-                <a href="{% url 'core:contact' %}" class="btn btn-outline-primary btn-lg px-4">
-                    <i class="bi-envelope me-2"></i>Contact Us
-                </a>
-                <a href="{% url 'core:ministries' %}" class="btn btn-outline-primary btn-lg px-4">
-                    <i class="bi-house-heart me-2"></i>Our Ministries
-                </a>
+<section class="site-section soft-section">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="content-panel h-100">
+                    <span class="eyebrow mb-3"><i class="fas fa-bullseye"></i> Mission</span>
+                    <h2 class="h3">Mwelekeo wetu</h2>
+                    <div class="text-muted">{{ site_config.mission|safe|default:"Kumleta mtu karibu na Mungu kupitia ibada, neno, maombi na huduma kwa jamii." }}</div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="content-panel h-100">
+                    <span class="eyebrow mb-3"><i class="fas fa-eye"></i> Vision</span>
+                    <h2 class="h3">Maono yetu</h2>
+                    <div class="text-muted">{{ site_config.vision|safe|default:"Kuona maisha yamebadilishwa, familia zikiimarishwa na jamii ikiguswa na nguvu ya Mungu." }}</div>
+                </div>
             </div>
         </div>
     </div>
-</div>
+</section>
 
-<style>
-    .card {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    
-    .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
-    }
-    
-    .carousel-control-prev,
-    .carousel-control-next {
-        width: auto;
-        opacity: 1;
-    }
-    
-    .carousel-control-prev-icon,
-    .carousel-control-next-icon {
-        background-size: 1.5rem;
-    }
-    
-    .blockquote-footer::before {
-        content: "— ";
-    }
-    .tree {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    position: relative;
-}
+{% if leaders %}
+<section class="site-section">
+    <div class="container">
+        <div class="section-heading">
+            <span class="eyebrow"><i class="fas fa-people-roof"></i> Leadership</span>
+            <h2>Uongozi wa kanisa</h2>
+            <p>Watu wanaohudumu kwa maono, usimamizi na malezi ya kiroho ndani ya KRT.</p>
+        </div>
+        {% regroup leaders by get_level_display as leader_groups %}
+        {% for group in leader_groups %}
+        <div class="mb-5">
+            <h3 class="h4 mb-3">{{ group.grouper }}</h3>
+            <div class="row g-4">
+                {% for leader in group.list %}
+                <div class="col-md-6 col-xl-3">
+                    <div class="card feature-card h-100 text-center">
+                        <img src="{{ leader.photo.url }}" alt="{{ leader.full_name }}" style="width: 96px; height: 96px; object-fit: cover; border-radius: 24px;" class="mx-auto mb-3">
+                        <h4 class="h5 mb-1">{{ leader.full_name }}</h4>
+                        <p class="text-muted small mb-3">{{ leader.title }}</p>
+                        {% if leader.vision_message %}<p class="text-muted small mb-0">{{ leader.vision_message|truncatechars:95 }}</p>{% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
 
-.tree-level {
-    position: relative;
-}
-
-.tree-level .level-title {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: #2c3e50;
-    margin-bottom: 2rem;
-}
-
-/* Lines kati ya levels */
-.tree-level:not(:first-child)::before {
-    content: '';
-    position: absolute;
-    top: -2.5rem;
-    left: 50%;
-    width: 2px;
-    height: 2.5rem;
-    background-color: #3498db;
-}
-
-/* Lines kati ya nodes */
-.tree-node {
-    position: relative;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.tree-node:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 25px rgba(0,0,0,0.15);
-}
-
-/* Optional connecting lines between nodes */
-.tree-level > .d-flex > .tree-node:not(:last-child)::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: -50%;
-    width: 100%;
-    height: 2px;
-    background-color: #3498db;
-    z-index: -1;
-}
-
-</style>
-
-<!-- Bootstrap Icons -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+{% if testimonials %}
+<section class="site-section soft-section">
+    <div class="container">
+        <div class="section-heading">
+            <span class="eyebrow"><i class="fas fa-comment-dots"></i> Community Voice</span>
+            <h2>Shuhuda za watu wetu</h2>
+            <p>Maoni na ushuhuda kutoka kwa watu walioguswa na huduma ya KRT.</p>
+        </div>
+        <div class="row g-4">
+            {% for testimonial in testimonials %}
+            <div class="col-md-6 col-xl-4">
+                <div class="card feature-card h-100">
+                    <h3 class="h5">{{ testimonial.author }}</h3>
+                    <p class="small text-muted">{{ testimonial.role|default:"Church member" }}</p>
+                    <p class="text-muted mb-0">{{ testimonial.content|truncatechars:180 }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
 {% endblock %}

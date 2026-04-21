@@ -184,8 +184,8 @@ DJANGORESIZED_DEFAULT_FORCE_FORMAT = 'WEBP'
 DJANGORESIZED_DEFAULT_FORMAT_EXTENSIONS = {'WEBP': ".webp"}
 
 # Login URLs
-LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'dashboard'
+LOGIN_URL = 'accounts:login'
+LOGIN_REDIRECT_URL = 'core:dashboard'
 LOGOUT_REDIRECT_URL = 'home'
 
 # Email Settings

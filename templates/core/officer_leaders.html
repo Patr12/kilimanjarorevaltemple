@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page_title }} - {{ site_config.site_name|default:"KRT" }}{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <span class="eyebrow"><i class="fas fa-person-chalkboard"></i> Officer Portal</span>
+        <h1 class="display-5 text-white mt-3">{{ page_title }}</h1>
+        <p class="lead text-white-50">{{ page_intro }}</p>
+    </div>
+</section>
+
+<section class="site-section">
+    <div class="container">
+        {% include "core/includes/officer_nav.html" %}
+
+        <div class="row g-4 mb-4">
+            <div class="col-md-6 col-xl-3"><div class="metric-card card h-100"><div class="feature-icon"><i class="fas fa-user-tie"></i></div><div class="metric-value">{{ leader_count }}</div><div class="metric-label">Leaders found</div></div></div>
+        </div>
+
+        <div class="content-panel mb-4">
+            <span class="eyebrow mb-3"><i class="fas fa-user-plus"></i> Add Leader</span>
+            <form method="post" enctype="multipart/form-data" class="row g-3">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="add_leader">
+                <div class="col-md-4"><label class="form-label">Full name</label>{{ leader_form.full_name }}</div>
+                <div class="col-md-4"><label class="form-label">Title</label>{{ leader_form.title }}</div>
+                <div class="col-md-2"><label class="form-label">Level</label>{{ leader_form.level }}</div>
+                <div class="col-md-2"><label class="form-label">Order</label>{{ leader_form.order }}</div>
+                <div class="col-md-4"><label class="form-label">Photo</label>{{ leader_form.photo }}</div>
+                <div class="col-md-4"><label class="form-label">Vision message</label>{{ leader_form.vision_message }}</div>
+                <div class="col-md-4"><label class="form-label">Biography</label>{{ leader_form.biography }}</div>
+                <div class="col-12 d-flex align-items-end"><div class="form-check">{{ leader_form.is_active }} <label class="form-check-label" for="{{ leader_form.is_active.id_for_label }}">Active</label></div></div>
+                <div class="col-12">{% if leader_form.errors %}<div class="alert alert-danger mb-0">{{ leader_form.errors }}</div>{% endif %}</div>
+                <div class="col-12"><button type="submit" class="btn btn-primary">Add Leader</button></div>
+            </form>
+        </div>
+
+        <div class="content-panel mb-4">
+            <form method="get" class="row g-3">
+                <div class="col-lg-9">
+                    <label class="form-label">Search leader</label>
+                    <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Name, title, or vision">
+                </div>
+                <div class="col-lg-2">
+                    <label class="form-label">Active</label>
+                    <select name="active" class="form-select">
+                        <option value="">All</option>
+                        <option value="yes" {% if selected_active == 'yes' %}selected{% endif %}>Active</option>
+                        <option value="no" {% if selected_active == 'no' %}selected{% endif %}>Inactive</option>
+                    </select>
+                </div>
+                <div class="col-lg-1 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">Go</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="row g-4">
+            {% for leader in leaders %}
+            <div class="col-lg-6">
+                <div class="content-panel h-100">
+                    <div class="d-flex justify-content-between gap-3">
+                        <div>
+                            <h3 class="h5 mb-1">{{ leader.full_name }}</h3>
+                            <div class="small text-muted">{{ leader.title }} • {{ leader.get_level_display }}</div>
+                        </div>
+                        <div>
+                            {% if leader.is_active %}
+                            <span class="badge-soft-success">Active</span>
+                            {% else %}
+                            <span class="badge-soft-warning">Inactive</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <p class="text-muted small mt-3 mb-0">{{ leader.vision_message|default:leader.biography|truncatewords:30|default:"No leadership note added yet." }}</p>
+                    <div class="d-flex gap-2 flex-wrap mt-3">
+                        <a href="{% url 'core:officer_leader_edit' leader.id %}" class="btn btn-outline-primary btn-sm">Edit Leader</a>
+                        <form method="post" onsubmit="return confirm('Delete this leader?');">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="delete_leader">
+                            <input type="hidden" name="leader_id" value="{{ leader.id }}">
+                            <button type="submit" class="btn btn-outline-danger btn-sm">Delete Leader</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12"><div class="empty-state content-panel"><i class="fas fa-user-tie"></i><p class="mb-0">Hakuna viongozi waliopatikana.</p></div></div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

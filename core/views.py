@@ -4,20 +4,75 @@ from django.shortcuts import render
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView, DetailView, TemplateView, CreateView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
+from django.core.paginator import Paginator
+from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
+from django.utils.text import slugify
 from datetime import date, timedelta
-from django.db.models import Sum
-from accounts.models import ChurchLeader, UserProfile
+from django.db.models import Count, Sum
+from accounts.models import ChurchBranch, ChurchLeader, UserProfile, Zone
 from .models import (
     EventCategory, MinistryMember, SiteConfig, HeroSlide, ServiceTime, Ministry, 
     Event, EventRegistration, BibleVerse, Testimonial, 
     GalleryImage, ContactMessage, Tithe
 )
-from .forms import ContactForm, EventRegistrationForm
+from .forms import (
+    ChurchBranchForm,
+    ChurchLeaderForm,
+    ContactForm,
+    ContactMessageStatusForm,
+    EventForm,
+    EventRegistrationForm,
+    MinistryForm,
+    OfficerMemberCreateForm,
+    ZoneForm,
+)
 from .mixins import SiteConfigMixin  # Import the mixin
+
+
+def is_staff_or_admin(user):
+    """Check whether a user can access officer/admin tools."""
+    return user.is_staff or user.is_superuser
+
+
+def get_site_config():
+    site_config = SiteConfig.objects.first()
+    if not site_config:
+        site_config = SiteConfig.objects.create()
+    return site_config
+
+
+def paginate_queryset(request, queryset, per_page=12):
+    paginator = Paginator(queryset, per_page)
+    return paginator.get_page(request.GET.get('page'))
+
+
+def generate_unique_slug(model, value, instance_id=None):
+    base_slug = slugify(value) or 'item'
+    slug = base_slug
+    counter = 1
+    queryset = model.objects.all()
+    if instance_id:
+        queryset = queryset.exclude(pk=instance_id)
+    while queryset.filter(slug=slug).exists():
+        counter += 1
+        slug = f'{base_slug}-{counter}'
+    return slug
+
+
+def build_officer_form_context(site_config, active_section, page_title, page_intro, form, cancel_url):
+    return {
+        'site_config': site_config,
+        'active_section': active_section,
+        'page_title': page_title,
+        'page_intro': page_intro,
+        'form': form,
+        'cancel_url': cancel_url,
+    }
 
 class HomeView(TemplateView):
     """Homepage view"""
@@ -138,6 +193,7 @@ class MinistryDetailView(SiteConfigMixin,DetailView):
         context.update({
             'related_events': related_events,
             'active_members': active_members,
+            'other_ministries': Ministry.objects.filter(status='active').exclude(pk=ministry.pk).order_by('order', 'name')[:5],
         })
         
         return context
@@ -327,6 +383,9 @@ class GalleryView(SiteConfigMixin,ListView):
 def dashboard(request):
     user = request.user
 
+    if is_staff_or_admin(user):
+        return redirect('core:officer_dashboard')
+
     # Greeting
     current_hour = timezone.localtime().hour
     if 5 <= current_hour < 12:
@@ -380,6 +439,560 @@ def dashboard(request):
     return render(request, 'core/dashboard.html', context)
 
 
+@login_required
+@user_passes_test(is_staff_or_admin)
+def officer_dashboard(request):
+    """Management dashboard for officers, staff, and admins."""
+    user = request.user
+    current_hour = timezone.localtime().hour
+    if 5 <= current_hour < 12:
+        greeting = "Good morning"
+    elif 12 <= current_hour < 17:
+        greeting = "Good afternoon"
+    else:
+        greeting = "Good evening"
+
+    site_config = get_site_config()
+
+    member_profiles = UserProfile.objects.select_related(
+        'user', 'zone', 'ministry_role'
+    ).order_by('-joined_at', '-id')
+    active_members = User.objects.filter(is_active=True)
+
+    profile_attention = member_profiles.filter(
+        Q(phone='') |
+        Q(church_branch='') |
+        Q(zone__isnull=True) |
+        Q(date_of_birth__isnull=True)
+    ).select_related('user', 'zone')[:8]
+
+    upcoming_events = Event.objects.filter(
+        status='published',
+        start_date__gte=date.today()
+    ).select_related('category').order_by('start_date', 'start_time')[:6]
+
+    ministry_breakdown = Ministry.objects.filter(status='active').annotate(
+        active_member_total=Count('members', filter=Q(members__is_active=True))
+    ).select_related('leader').order_by('-active_member_total', 'name')[:6]
+
+    recent_messages = ContactMessage.objects.order_by('-created_at')[:6]
+    new_messages_count = ContactMessage.objects.filter(status='new').count()
+    leaders = ChurchLeader.objects.filter(is_active=True).order_by('level', 'order')[:6]
+    recent_tithes = Tithe.objects.select_related('user', 'recorded_by').order_by('-date_paid')[:6]
+
+    context = {
+        'user': user,
+        'greeting': greeting,
+        'site_config': site_config,
+        'active_section': 'dashboard',
+        'stats': {
+            'member_count': active_members.count(),
+            'profile_count': member_profiles.count(),
+            'incomplete_profiles': member_profiles.filter(
+                Q(phone='') | Q(zone__isnull=True) | Q(date_of_birth__isnull=True)
+            ).count(),
+            'zone_count': Zone.objects.count(),
+            'branch_count': ChurchBranch.objects.count(),
+            'ministry_count': Ministry.objects.filter(status='active').count(),
+            'leader_count': ChurchLeader.objects.filter(is_active=True).count(),
+            'upcoming_event_count': Event.objects.filter(
+                status='published',
+                start_date__gte=date.today()
+            ).count(),
+            'pending_registration_count': EventRegistration.objects.filter(status='pending').count(),
+            'new_message_count': new_messages_count,
+            'tithe_total': Tithe.objects.filter(status='paid').aggregate(total=Sum('amount'))['total'] or 0,
+        },
+        'recent_members': member_profiles[:6],
+        'profile_attention': profile_attention,
+        'upcoming_events': upcoming_events,
+        'ministry_breakdown': ministry_breakdown,
+        'recent_messages': recent_messages,
+        'leaders': leaders,
+        'recent_tithes': recent_tithes,
+        'admin_links': [
+            {'label': 'Register Members', 'icon': 'fas fa-user-plus', 'route_name': 'core:officer_members', 'description': 'Angalia usajili wa members na profile zao.'},
+            {'label': 'Manage Zones & Branches', 'icon': 'fas fa-map-location-dot', 'route_name': 'core:officer_structure', 'description': 'Fuata mgao wa maeneo na matawi.'},
+            {'label': 'Manage Ministries', 'icon': 'fas fa-hands-holding-circle', 'route_name': 'core:officer_ministries', 'description': 'Kagua ministries na idadi ya members.'},
+            {'label': 'Manage Leaders', 'icon': 'fas fa-person-chalkboard', 'route_name': 'core:officer_leaders', 'description': 'Simamia viongozi wa kanisa na huduma.'},
+            {'label': 'Manage Meetings & Events', 'icon': 'fas fa-calendar-days', 'route_name': 'core:officer_events', 'description': 'Tazama mikutano, tarehe, na registrations.'},
+            {'label': 'Read Messages', 'icon': 'fas fa-envelope-open-text', 'route_name': 'core:officer_messages', 'description': 'Soma ujumbe ulioingia ofisini.'},
+            {'label': 'Manage Tithes', 'icon': 'fas fa-hand-holding-heart', 'route_name': 'core:admin_tithe_list', 'description': 'Kagua taarifa za zaka na sadaka.'},
+        ],
+    }
+    return render(request, 'core/officer_dashboard.html', context)
+
+
+@login_required
+@user_passes_test(is_staff_or_admin)
+def officer_members(request):
+    site_config = get_site_config()
+    member_form = OfficerMemberCreateForm()
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'add_member':
+            member_form = OfficerMemberCreateForm(request.POST)
+            if member_form.is_valid():
+                user = member_form.save()
+                messages.success(request, f'Member {user.get_full_name() or user.username} added successfully.')
+                return redirect('core:officer_members')
+        elif action == 'delete_member':
+            profile = get_object_or_404(UserProfile, id=request.POST.get('profile_id'))
+            username = profile.user.get_full_name() or profile.user.username
+            profile.user.delete()
+            messages.success(request, f'Member {username} deleted successfully.')
+            return redirect('core:officer_members')
+
+    query = request.GET.get('q', '').strip()
+    zone_id = request.GET.get('zone', '').strip()
+    ministry_id = request.GET.get('ministry', '').strip()
+
+    members = UserProfile.objects.select_related('user', 'zone', 'ministry_role').order_by(
+        'user__first_name', 'user__last_name', 'user__username'
+    )
+
+    if query:
+        members = members.filter(
+            Q(user__username__icontains=query) |
+            Q(user__first_name__icontains=query) |
+            Q(user__last_name__icontains=query) |
+            Q(user__email__icontains=query) |
+            Q(phone__icontains=query) |
+            Q(church_branch__icontains=query)
+        )
+    if zone_id:
+        members = members.filter(zone_id=zone_id)
+    if ministry_id:
+        members = members.filter(ministry_role_id=ministry_id)
+
+    page_obj = paginate_queryset(request, members, 12)
+    context = {
+        'site_config': site_config,
+        'page_title': 'Officer Members',
+        'page_intro': 'Usimamizi wa members waliosajiliwa na taarifa zao za msingi na kiroho ndani ya mfumo.',
+        'active_section': 'members',
+        'page_obj': page_obj,
+        'query': query,
+        'selected_zone': zone_id,
+        'selected_ministry': ministry_id,
+        'zones': Zone.objects.order_by('name'),
+        'ministries': Ministry.objects.filter(status='active').order_by('name'),
+        'total_members': members.count(),
+        'incomplete_count': members.filter(
+            Q(phone='') | Q(church_branch='') | Q(zone__isnull=True) | Q(date_of_birth__isnull=True)
+        ).count(),
+        'member_form': member_form,
+    }
+    return render(request, 'core/officer_members.html', context)
+
+
+@login_required
+@user_passes_test(is_staff_or_admin)
+def officer_structure(request):
+    site_config = get_site_config()
+    zone_form = ZoneForm()
+    branch_form = ChurchBranchForm()
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'add_zone':
+            zone_form = ZoneForm(request.POST)
+            if zone_form.is_valid():
+                zone_form.save()
+                messages.success(request, 'Zone added successfully.')
+                return redirect('core:officer_structure')
+        elif action == 'add_branch':
+            branch_form = ChurchBranchForm(request.POST)
+            if branch_form.is_valid():
+                branch_form.save()
+                messages.success(request, 'Branch added successfully.')
+                return redirect('core:officer_structure')
+        elif action == 'delete_zone':
+            zone = get_object_or_404(Zone, id=request.POST.get('zone_id'))
+            if ChurchBranch.objects.filter(zone=zone).exists() or UserProfile.objects.filter(zone=zone).exists():
+                messages.error(request, f'Zone {zone.name} still has branches or member profiles, so it cannot be deleted yet.')
+            else:
+                zone_name = zone.name
+                zone.delete()
+                messages.success(request, f'Zone {zone_name} deleted successfully.')
+            return redirect('core:officer_structure')
+        elif action == 'delete_branch':
+            branch = get_object_or_404(ChurchBranch, id=request.POST.get('branch_id'))
+            branch_name = branch.name
+            branch.delete()
+            messages.success(request, f'Branch {branch_name} deleted successfully.')
+            return redirect('core:officer_structure')
+
+    query = request.GET.get('q', '').strip()
+    zones = Zone.objects.annotate(branch_count=Count('churchbranch')).order_by('name')
+    branches = ChurchBranch.objects.select_related('zone').order_by('zone__name', 'name')
+
+    if query:
+        zones = zones.filter(name__icontains=query)
+        branches = branches.filter(Q(name__icontains=query) | Q(zone__name__icontains=query))
+
+    context = {
+        'site_config': site_config,
+        'page_title': 'Officer Structure',
+        'page_intro': 'Fuata zones na church branches zilizopo ili officer aweze kujua members wanatoka wapi.',
+        'active_section': 'structure',
+        'zones': zones,
+        'branches': branches,
+        'query': query,
+        'zone_count': zones.count(),
+        'branch_count': branches.count(),
+        'zone_form': zone_form,
+        'branch_form': branch_form,
+    }
+    return render(request, 'core/officer_structure.html', context)
+
+
+@login_required
+@user_passes_test(is_staff_or_admin)
+def officer_ministries(request):
+    site_config = get_site_config()
+    ministry_form = MinistryForm()
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'add_ministry':
+            ministry_form = MinistryForm(request.POST, request.FILES)
+            if ministry_form.is_valid():
+                ministry = ministry_form.save(commit=False)
+                ministry.slug = generate_unique_slug(Ministry, ministry.name)
+                ministry.save()
+                messages.success(request, f'Ministry {ministry.name} added successfully.')
+                return redirect('core:officer_ministries')
+        elif action == 'delete_ministry':
+            ministry = get_object_or_404(Ministry, id=request.POST.get('ministry_id'))
+            if ministry.members.exists():
+                messages.error(request, f'Ministry {ministry.name} still has members, so delete those memberships first.')
+            else:
+                ministry_name = ministry.name
+                ministry.delete()
+                messages.success(request, f'Ministry {ministry_name} deleted successfully.')
+            return redirect('core:officer_ministries')
+
+    query = request.GET.get('q', '').strip()
+    status = request.GET.get('status', '').strip()
+
+    ministries = Ministry.objects.annotate(
+        active_member_total=Count('members', filter=Q(members__is_active=True))
+    ).select_related('leader').order_by('order', 'name')
+
+    if query:
+        ministries = ministries.filter(
+            Q(name__icontains=query) |
+            Q(tagline__icontains=query) |
+            Q(meeting_location__icontains=query)
+        )
+    if status:
+        ministries = ministries.filter(status=status)
+
+    context = {
+        'site_config': site_config,
+        'page_title': 'Officer Ministries',
+        'page_intro': 'Tazama ministries, viongozi wake, ratiba, na idadi ya members hai kwa kila huduma.',
+        'active_section': 'ministries',
+        'ministries': ministries,
+        'query': query,
+        'selected_status': status,
+        'total_ministries': ministries.count(),
+        'featured_count': ministries.filter(is_featured=True).count(),
+        'ministry_form': ministry_form,
+    }
+    return render(request, 'core/officer_ministries.html', context)
+
+
+@login_required
+@user_passes_test(is_staff_or_admin)
+def officer_leaders(request):
+    site_config = get_site_config()
+    leader_form = ChurchLeaderForm()
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'add_leader':
+            leader_form = ChurchLeaderForm(request.POST, request.FILES)
+            if leader_form.is_valid():
+                leader = leader_form.save()
+                messages.success(request, f'Leader {leader.full_name} added successfully.')
+                return redirect('core:officer_leaders')
+        elif action == 'delete_leader':
+            leader = get_object_or_404(ChurchLeader, id=request.POST.get('leader_id'))
+            leader_name = leader.full_name
+            leader.delete()
+            messages.success(request, f'Leader {leader_name} deleted successfully.')
+            return redirect('core:officer_leaders')
+
+    query = request.GET.get('q', '').strip()
+    active = request.GET.get('active', '').strip()
+
+    leaders = ChurchLeader.objects.order_by('level', 'order')
+    if query:
+        leaders = leaders.filter(
+            Q(full_name__icontains=query) |
+            Q(title__icontains=query) |
+            Q(vision_message__icontains=query)
+        )
+    if active == 'yes':
+        leaders = leaders.filter(is_active=True)
+    elif active == 'no':
+        leaders = leaders.filter(is_active=False)
+
+    context = {
+        'site_config': site_config,
+        'page_title': 'Officer Leaders',
+        'page_intro': 'Simamia viongozi wa kanisa, ngazi zao, na nafasi wanazoshikilia kwenye huduma.',
+        'active_section': 'leaders',
+        'leaders': leaders,
+        'query': query,
+        'selected_active': active,
+        'leader_count': leaders.count(),
+        'leader_form': leader_form,
+    }
+    return render(request, 'core/officer_leaders.html', context)
+
+
+@login_required
+@user_passes_test(is_staff_or_admin)
+def officer_events(request):
+    site_config = get_site_config()
+    event_form = EventForm()
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'add_event':
+            event_form = EventForm(request.POST, request.FILES)
+            if event_form.is_valid():
+                event = event_form.save(commit=False)
+                event.slug = generate_unique_slug(Event, event.title)
+                event.created_by = request.user
+                if event.status == 'published':
+                    event.published_at = timezone.now()
+                event.save()
+                messages.success(request, f'Event {event.title} added successfully.')
+                return redirect('core:officer_events')
+        elif action == 'delete_event':
+            event = get_object_or_404(Event, id=request.POST.get('event_id'))
+            if event.registrations.exists():
+                messages.error(request, f'Event {event.title} has registrations, so it cannot be deleted yet.')
+            else:
+                event_name = event.title
+                event.delete()
+                messages.success(request, f'Event {event_name} deleted successfully.')
+            return redirect('core:officer_events')
+
+    query = request.GET.get('q', '').strip()
+    status = request.GET.get('status', '').strip()
+
+    events = Event.objects.annotate(
+        registration_count=Count('registrations')
+    ).select_related('category', 'created_by').order_by('-start_date', '-start_time')
+
+    if query:
+        events = events.filter(
+            Q(title__icontains=query) |
+            Q(location__icontains=query) |
+            Q(short_description__icontains=query)
+        )
+    if status:
+        events = events.filter(status=status)
+
+    page_obj = paginate_queryset(request, events, 10)
+    context = {
+        'site_config': site_config,
+        'page_title': 'Officer Events',
+        'page_intro': 'Ratibu na fuatilia mikutano, events, mahali pa kufanyika, na registrations za waumini.',
+        'active_section': 'events',
+        'page_obj': page_obj,
+        'query': query,
+        'selected_status': status,
+        'upcoming_count': events.filter(start_date__gte=date.today()).count(),
+        'published_count': events.filter(status='published').count(),
+        'event_form': event_form,
+    }
+    return render(request, 'core/officer_events.html', context)
+
+
+@login_required
+@user_passes_test(is_staff_or_admin)
+def officer_messages(request):
+    site_config = get_site_config()
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'update_status':
+            message_item = get_object_or_404(ContactMessage, id=request.POST.get('message_id'))
+            message_item.status = request.POST.get('status') or message_item.status
+            if message_item.status == 'replied' and not message_item.replied_at:
+                message_item.replied_at = timezone.now()
+            message_item.save()
+            messages.success(request, f'Message "{message_item.subject}" updated successfully.')
+            return redirect('core:officer_messages')
+        elif action == 'delete_message':
+            message_item = get_object_or_404(ContactMessage, id=request.POST.get('message_id'))
+            subject = message_item.subject
+            message_item.delete()
+            messages.success(request, f'Message "{subject}" deleted successfully.')
+            return redirect('core:officer_messages')
+
+    query = request.GET.get('q', '').strip()
+    status = request.GET.get('status', '').strip()
+
+    messages_qs = ContactMessage.objects.order_by('-created_at')
+    if query:
+        messages_qs = messages_qs.filter(
+            Q(name__icontains=query) |
+            Q(email__icontains=query) |
+            Q(subject__icontains=query) |
+            Q(message__icontains=query)
+        )
+    if status:
+        messages_qs = messages_qs.filter(status=status)
+
+    page_obj = paginate_queryset(request, messages_qs, 10)
+    context = {
+        'site_config': site_config,
+        'page_title': 'Officer Messages',
+        'page_intro': 'Soma ujumbe ulioingia, ujue hali yake, na ufuatilie mawasiliano ya ofisi.',
+        'active_section': 'messages',
+        'page_obj': page_obj,
+        'query': query,
+        'selected_status': status,
+        'new_count': messages_qs.filter(status='new').count(),
+        'replied_count': messages_qs.filter(status='replied').count(),
+    }
+    return render(request, 'core/officer_messages.html', context)
+
+
+@login_required
+@user_passes_test(is_staff_or_admin)
+def officer_member_edit(request, profile_id):
+    site_config = get_site_config()
+    profile = get_object_or_404(UserProfile.objects.select_related('user'), id=profile_id)
+    form = OfficerMemberCreateForm(
+        request.POST or None,
+        user_instance=profile.user,
+        profile_instance=profile,
+    )
+    if request.method == 'POST' and form.is_valid():
+        user = form.save()
+        messages.success(request, f'Member {user.get_full_name() or user.username} updated successfully.')
+        return redirect('core:officer_members')
+    context = build_officer_form_context(
+        site_config,
+        'members',
+        'Edit Member',
+        'Sasisha taarifa za member, profile, na role ya officer ikiwa inahitajika.',
+        form,
+        'core:officer_members',
+    )
+    return render(request, 'core/officer_form.html', context)
+
+
+@login_required
+@user_passes_test(is_staff_or_admin)
+def officer_zone_edit(request, zone_id):
+    site_config = get_site_config()
+    zone = get_object_or_404(Zone, id=zone_id)
+    form = ZoneForm(request.POST or None, instance=zone)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        messages.success(request, f'Zone {zone.name} updated successfully.')
+        return redirect('core:officer_structure')
+    context = build_officer_form_context(
+        site_config, 'structure', 'Edit Zone', 'Badilisha jina la zone ndani ya officer portal.', form, 'core:officer_structure'
+    )
+    return render(request, 'core/officer_form.html', context)
+
+
+@login_required
+@user_passes_test(is_staff_or_admin)
+def officer_branch_edit(request, branch_id):
+    site_config = get_site_config()
+    branch = get_object_or_404(ChurchBranch, id=branch_id)
+    form = ChurchBranchForm(request.POST or None, instance=branch)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        messages.success(request, f'Branch {branch.name} updated successfully.')
+        return redirect('core:officer_structure')
+    context = build_officer_form_context(
+        site_config, 'structure', 'Edit Branch', 'Sasisha taarifa za branch na zone yake.', form, 'core:officer_structure'
+    )
+    return render(request, 'core/officer_form.html', context)
+
+
+@login_required
+@user_passes_test(is_staff_or_admin)
+def officer_ministry_edit(request, ministry_id):
+    site_config = get_site_config()
+    ministry = get_object_or_404(Ministry, id=ministry_id)
+    form = MinistryForm(request.POST or None, request.FILES or None, instance=ministry)
+    if request.method == 'POST' and form.is_valid():
+        ministry = form.save(commit=False)
+        ministry.slug = generate_unique_slug(Ministry, ministry.name, instance_id=ministry.id)
+        ministry.save()
+        messages.success(request, f'Ministry {ministry.name} updated successfully.')
+        return redirect('core:officer_ministries')
+    context = build_officer_form_context(
+        site_config, 'ministries', 'Edit Ministry', 'Hariri taarifa za ministry, viongozi, na ratiba zake.', form, 'core:officer_ministries'
+    )
+    return render(request, 'core/officer_form.html', context)
+
+
+@login_required
+@user_passes_test(is_staff_or_admin)
+def officer_leader_edit(request, leader_id):
+    site_config = get_site_config()
+    leader = get_object_or_404(ChurchLeader, id=leader_id)
+    form = ChurchLeaderForm(request.POST or None, request.FILES or None, instance=leader)
+    if request.method == 'POST' and form.is_valid():
+        leader = form.save()
+        messages.success(request, f'Leader {leader.full_name} updated successfully.')
+        return redirect('core:officer_leaders')
+    context = build_officer_form_context(
+        site_config, 'leaders', 'Edit Leader', 'Hariri taarifa za kiongozi, nafasi yake, na maelezo yake.', form, 'core:officer_leaders'
+    )
+    return render(request, 'core/officer_form.html', context)
+
+
+@login_required
+@user_passes_test(is_staff_or_admin)
+def officer_event_edit(request, event_id):
+    site_config = get_site_config()
+    event = get_object_or_404(Event, id=event_id)
+    form = EventForm(request.POST or None, request.FILES or None, instance=event)
+    if request.method == 'POST' and form.is_valid():
+        event = form.save(commit=False)
+        event.slug = generate_unique_slug(Event, event.title, instance_id=event.id)
+        if event.status == 'published' and not event.published_at:
+            event.published_at = timezone.now()
+        event.save()
+        messages.success(request, f'Event {event.title} updated successfully.')
+        return redirect('core:officer_events')
+    context = build_officer_form_context(
+        site_config, 'events', 'Edit Event', 'Hariri ratiba, eneo, na maelezo ya event au mkutano.', form, 'core:officer_events'
+    )
+    return render(request, 'core/officer_form.html', context)
+
+
+@login_required
+@user_passes_test(is_staff_or_admin)
+def officer_message_edit(request, message_id):
+    site_config = get_site_config()
+    message_item = get_object_or_404(ContactMessage, id=message_id)
+    form = ContactMessageStatusForm(request.POST or None, instance=message_item)
+    if request.method == 'POST' and form.is_valid():
+        message_obj = form.save(commit=False)
+        if message_obj.status == 'replied' and not message_obj.replied_at:
+            message_obj.replied_at = timezone.now()
+        elif message_obj.status != 'replied':
+            message_obj.replied_at = None
+        message_obj.save()
+        messages.success(request, f'Message "{message_obj.subject}" updated successfully.')
+        return redirect('core:officer_messages')
+    context = build_officer_form_context(
+        site_config, 'messages', 'Edit Message', 'Sasisha ujumbe, maelezo yake, na status ya ufuatiliaji.', form, 'core:officer_messages'
+    )
+    return render(request, 'core/officer_form.html', context)
+
+
 # Profile Views
 @login_required
 def profile_view(request):
@@ -394,6 +1007,16 @@ def profile_view(request):
         'user': user,
         'profile': profile,
         'site_config': site_config,
+        'user_ministries': MinistryMember.objects.filter(
+            user=user,
+            is_active=True
+        ).select_related('ministry'),
+        'stats': {
+            'tithe_count': Tithe.objects.filter(user=user).count(),
+            'ministry_count': MinistryMember.objects.filter(user=user, is_active=True).count(),
+            'event_count': EventRegistration.objects.filter(user=user).count(),
+            'membership_years': max((timezone.now().date() - user.date_joined.date()).days // 365, 0),
+        }
     }
     return render(request, 'core/profile.html', context)
 
@@ -407,6 +1030,9 @@ def create_profile(request):
     if not site_config:
         site_config = SiteConfig.objects.create()
     
+    zones = Zone.objects.all().order_by('name')
+    ministry_roles = Ministry.objects.filter(status='active').order_by('name')
+
     # Check if profile already exists
     if UserProfile.objects.filter(user=user).exists():
         messages.info(request, 'You already have a profile.')
@@ -415,40 +1041,34 @@ def create_profile(request):
     if request.method == 'POST':
         # Get form data
         phone = request.POST.get('phone')
-        address = request.POST.get('address')
-        city = request.POST.get('city')
+        church_branch = request.POST.get('church_branch')
         date_of_birth = request.POST.get('date_of_birth')
-        gender = request.POST.get('gender')
-        marital_status = request.POST.get('marital_status')
-        occupation = request.POST.get('occupation')
-        bio = request.POST.get('bio')
-        emergency_contact_name = request.POST.get('emergency_contact_name')
-        emergency_contact_phone = request.POST.get('emergency_contact_phone')
-        
-        # Handle photo upload
-        photo = request.FILES.get('photo')
+        zone_id = request.POST.get('zone')
+        ministry_role_id = request.POST.get('ministry_role')
+        zone = Zone.objects.filter(id=zone_id).first() if zone_id else None
+        ministry_role = Ministry.objects.filter(id=ministry_role_id).first() if ministry_role_id else None
         
         # Create profile
         profile = UserProfile(
             user=user,
             phone=phone,
-            address=address,
-            city=city,
+            church_branch=church_branch,
+            zone=zone,
+            ministry_role=ministry_role,
             date_of_birth=date_of_birth if date_of_birth else None,
-            gender=gender,
-            marital_status=marital_status,
-            occupation=occupation,
-            bio=bio,
-            emergency_contact_name=emergency_contact_name,
-            emergency_contact_phone=emergency_contact_phone,
-            photo=photo
         )
         profile.save()
         
         messages.success(request, 'Profile created successfully!')
         return redirect('core:profile')
     
-    return render(request, 'core/create_profile.html')
+    return render(request, 'core/create_profile.html', {
+        'site_config': site_config,
+        'zones': zones,
+        'ministry_roles': ministry_roles,
+        'page_title': 'Create Profile',
+        'submit_label': 'Create Profile',
+    })
 
 
 @login_required
@@ -457,22 +1077,21 @@ def edit_profile(request):
     user = request.user
     profile = get_object_or_404(UserProfile, user=user)
     
+    site_config = SiteConfig.objects.first()
+    if not site_config:
+        site_config = SiteConfig.objects.create()
+    zones = Zone.objects.all().order_by('name')
+    ministry_roles = Ministry.objects.filter(status='active').order_by('name')
+
     if request.method == 'POST':
         # Update profile fields
         profile.phone = request.POST.get('phone')
-        profile.address = request.POST.get('address')
-        profile.city = request.POST.get('city')
+        profile.church_branch = request.POST.get('church_branch')
         profile.date_of_birth = request.POST.get('date_of_birth') or None
-        profile.gender = request.POST.get('gender')
-        profile.marital_status = request.POST.get('marital_status')
-        profile.occupation = request.POST.get('occupation')
-        profile.bio = request.POST.get('bio')
-        profile.emergency_contact_name = request.POST.get('emergency_contact_name')
-        profile.emergency_contact_phone = request.POST.get('emergency_contact_phone')
-        
-        # Handle photo upload
-        if request.FILES.get('photo'):
-            profile.photo = request.FILES.get('photo')
+        zone_id = request.POST.get('zone')
+        ministry_role_id = request.POST.get('ministry_role')
+        profile.zone = Zone.objects.filter(id=zone_id).first() if zone_id else None
+        profile.ministry_role = Ministry.objects.filter(id=ministry_role_id).first() if ministry_role_id else None
         
         profile.save()
         
@@ -480,9 +1099,14 @@ def edit_profile(request):
         return redirect('core:profile')
     
     context = {
-        'profile': profile
+        'profile': profile,
+        'site_config': site_config,
+        'zones': zones,
+        'ministry_roles': ministry_roles,
+        'page_title': 'Edit Profile',
+        'submit_label': 'Save Changes',
     }
-    return render(request, 'core/edit_profile.html', context)
+    return render(request, 'core/create_profile.html', context)
 
 
 # Tithe Views
@@ -537,16 +1161,6 @@ def tithe_history(request):
         'monthly_summary': monthly_summary,
     }
     return render(request, 'core/tithe_history.html', context)
-
-
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib.auth.models import User
-from django.db.models import Q
-from django.core.paginator import Paginator
-
-# Helper function to check if user is staff or admin
-def is_staff_or_admin(user):
-    return user.is_staff or user.is_superuser
 
 @login_required
 def add_tithe(request):
@@ -703,7 +1317,7 @@ def admin_tithe_list(request):
     if not site_config:
         site_config = SiteConfig.objects.create()
 
-    tithes = Tithe.objects.select_related('user').order_by('-date_paid')
+    tithes = Tithe.objects.select_related('user', 'recorded_by').order_by('-date_paid')
     
     # Apply filters
     user_id = request.GET.get('user_id')
@@ -736,6 +1350,7 @@ def admin_tithe_list(request):
         'users': users,
         'years': years,
         'site_config': site_config,
+        'active_section': 'tithes',
         'selected_user': user_id,
         'selected_month': month,
         'selected_year': year,
@@ -751,7 +1366,10 @@ def tithe_detail(request, tithe_id):
     if not site_config:
         site_config = SiteConfig.objects.create()
 
-    tithe = get_object_or_404(Tithe, id=tithe_id, user=request.user)
+    if is_staff_or_admin(request.user):
+        tithe = get_object_or_404(Tithe, id=tithe_id)
+    else:
+        tithe = get_object_or_404(Tithe, id=tithe_id, user=request.user)
     
     context = {
         'tithe': tithe,

@@ -1,268 +1,159 @@
 <!DOCTYPE html>
 {% load static %}
-<html lang="en" dir="ltr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- SEO -->
-    <meta name="description" content="Kilimanjaro Revival Temple - Kanisa la Kikristo la uamsho lililopo Moshi, Kilimanjaro Tanzania.">
-    <meta name="keywords" content="Kilimanjaro Revival Temple, church, revival, worship, Moshi, Kilimanjaro, Tanzania">
+    <meta name="description" content="Kilimanjaro Revival Temple - kanisa la uamsho, ibada, mafundisho na huduma za jamii Moshi, Kilimanjaro.">
+    <meta name="keywords" content="Kilimanjaro Revival Temple, KRT, church, Moshi, Kilimanjaro, Tanzania">
     <meta name="author" content="Kilimanjaro Revival Temple">
+    <title>{% block title %}{{ site_config.site_name|default:"Kilimanjaro Revival Temple" }}{% endblock %}</title>
 
-    <title>
-        {% block title %}Kilimanjaro Revival Temple{% endblock %}
-    </title>
-
-    <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- Google Fonts -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;500&display=swap" rel="stylesheet">
-
-    <!-- Custom CSS -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-
     {% block extra_css %}{% endblock %}
 
-    <!-- Favicon -->
     {% if site_config.site_favicon %}
-        <link rel="icon" href="{{ site_config.site_favicon.url }}">
-    {% else %}
-        <link rel="icon" href="{% static 'images/favicon.ico' %}">
+    <link rel="icon" href="{{ site_config.site_favicon.url }}">
     {% endif %}
-
-    <!-- Open Graph -->
-    <meta property="og:title" content="Kilimanjaro Revival Temple - Moshi">
-    <meta property="og:description" content="A church of revival, worship and the Word of God in Moshi, Kilimanjaro.">
-    <meta property="og:image" content="{% if site_config.site_logo %}{{ site_config.site_logo.url }}{% endif %}">
-    <meta property="og:type" content="website">
 </head>
-
 <body>
-
-<!-- ================= NAVBAR ================= -->
- <div class="page-transition curtain-close">
-    <div class="curtain left-curtain"></div>
-    <div class="curtain right-curtain"></div>
-    <div class="transition-logo">
-        {% if site_config.site_logo %}
-            <img src="{{ site_config.site_logo.url }}" alt="Church Logo">
-        {% else %}
+    <div class="page-transition curtain-close">
+        <div class="curtain left-curtain"></div>
+        <div class="curtain right-curtain"></div>
+        <div class="transition-logo">
+            {% if site_config.site_logo %}
+            <img src="{{ site_config.site_logo.url }}" alt="{{ site_config.site_name|default:'KRT' }}">
+            {% else %}
             <div class="logo-placeholder">
                 <i class="fas fa-church"></i>
             </div>
-        {% endif %}
-    </div>
-</div>
-<nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top shadow-sm">
-    <div class="container">
-        <a class="navbar-brand d-flex align-items-center" href="{% url 'core:home' %}">
-            {% if site_config.site_logo %}
-                <img src="{{ site_config.site_logo.url }}" height="50" class="me-2">
             {% endif %}
-            <div>
-                <span class="fw-bold text-primary fs-4">
-                    {{ site_config.site_name|default:"Kilimanjaro Revival Temple" }}
-                </span>
-                <small class="d-block text-muted">Moshi, Kilimanjaro</small>
-            </div>
-        </a>
-
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="navbarMain">
-    <ul class="navbar-nav ms-auto">
-        <li class="nav-item">
-            <a class="nav-link" href="{% url 'core:home' %}">Home</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{% url 'core:about' %}">About</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{% url 'core:services' %}">Services</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{% url 'core:ministries' %}">Ministries</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{% url 'core:events' %}">Events</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{% url 'core:contact' %}">Contact</a>
-        </li>
-
-        {% if user.is_authenticated %}
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'core:dashboard' %}">
-                    Dashboard
-                </a>
-            </li>
-            <li class="nav-item">
-                <form method="post" action="{% url 'accounts:logout' %}" class="d-inline">
-                    {% csrf_token %}
-                    <button type="submit" class="nav-link btn btn-link p-0">
-                        Logout
-                    </button>
-                </form>
-            </li>
-            {% if user.is_staff or user.is_superuser %}
-<li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-        <i class="fas fa-shield-alt me-1"></i>Admin
-    </a>
-    <ul class="dropdown-menu">
-        <li>
-            <a class="dropdown-item" href="{% url 'core:admin_tithe_list' %}">
-                <i class="fas fa-chart-line me-2"></i>All Tithes
-            </a>
-        </li>
-        <li>
-            <a class="dropdown-item" href="{% url 'core:add_tithe' %}">
-                <i class="fas fa-plus-circle me-2"></i>Record Tithe (Admin)
-            </a>
-        </li>
-    </ul>
-</li>
-{% endif %}
-        {% else %}
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'accounts:login' %}">
-                    Login
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link btn btn-sm btn-primary text-white ms-2 px-3"
-                   href="{% url 'accounts:signup' %}">
-                    Sign Up
-                </a>
-            </li>
-        {% endif %}
-    </ul>
-</div>
-
+        </div>
     </div>
-</nav>
 
-<!-- ================= MAIN ================= -->
-<main class="pt-5 page-content">
-    {% if messages %}
-    <div class="container mt-4">
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
-                {{ message }}
-                <button class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        {% endfor %}
-    </div>
-    {% endif %}
-
-    {% block content %}{% endblock %}
-</main>
-
-<!-- ================= FOOTER ================= -->
-<footer class="footer-blue py-5 mt-5">
-    <div class="container">
-        <div class="row g-4">
-
-            <!-- About -->
-            <div class="col-lg-4">
-                <h5 class="fw-bold mb-3">Kilimanjaro Revival Temple</h5>
-                <p class="mb-3">
-                    Kanisa la Kikristo la uamsho lililopo Moshi, likihubiri Neno la Mungu,
-                    maombi na ibada ya kweli.
-                </p>
-
-                 <!-- Social Links -->
-                <div class="social-links d-flex gap-3">
-                    <a href="#" class="btn btn-outline-dark btn-sm rounded-circle">
-                        <i class="fab fa-facebook-f"></i>
-                    </a>
-                    <a href="#" class="btn btn-outline-dark btn-sm rounded-circle">
-                        <i class="fab fa-instagram"></i>
-                    </a>
-                    <a href="#" class="btn btn-outline-dark btn-sm rounded-circle">
-                        <i class="fab fa-youtube"></i>
-                    </a>
-                    <a href="#" class="btn btn-outline-dark btn-sm rounded-circle">
-                        <i class="fab fa-whatsapp"></i>
-                    </a>
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="{% url 'core:home' %}">
+                {% if site_config.site_logo %}
+                <img src="{{ site_config.site_logo.url }}" alt="{{ site_config.site_name|default:'KRT Logo' }}">
+                {% endif %}
+                <div>
+                    <div class="navbar-brand-text">{{ site_config.site_name|default:"Kilimanjaro Revival Temple" }}</div>
+                    <div class="navbar-brand-subtitle">Moshi, Kilimanjaro</div>
                 </div>
-            </div>
+            </a>
 
-            <!-- Links -->
-            <div class="col-lg-4">
-                <h5 class="fw-bold mb-3">Quick Links</h5>
-                <ul class="list-unstyled footer-links">
-                    <li><a href="{% url 'core:home' %}">Home</a></li>
-                    <li><a href="{% url 'core:about' %}">About</a></li>
-                    <li><a href="{% url 'core:services' %}">Services</a></li>
-                    <li><a href="{% url 'core:events' %}">Events</a></li>
-                    <li><a href="{% url 'core:contact' %}">Contact</a></li>
+            <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarMain">
+                <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
+                    <li class="nav-item"><a class="nav-link" href="{% url 'core:home' %}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'core:about' %}">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'core:services' %}">Services</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'core:ministries' %}">Ministries</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'core:events' %}">Events</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'core:contact' %}">Contact</a></li>
+
+                    {% if user.is_authenticated %}
+                    <li class="nav-item"><a class="nav-link" href="{% url 'core:dashboard' %}">Dashboard</a></li>
+                    {% if user.is_staff or user.is_superuser %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-shield-alt me-1"></i> Admin
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{% url 'core:officer_dashboard' %}"><i class="fas fa-gauge-high me-2"></i> Officer Dashboard</a></li>
+                            <li><a class="dropdown-item" href="{% url 'core:admin_tithe_list' %}"><i class="fas fa-chart-line me-2"></i> Tithe Records</a></li>
+                            <li><a class="dropdown-item" href="{% url 'core:add_tithe' %}"><i class="fas fa-plus-circle me-2"></i> Record Tithe</a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item ms-lg-2">
+                        <form method="post" action="{% url 'accounts:logout' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary btn-sm px-4">Logout</button>
+                        </form>
+                    </li>
+                    {% else %}
+                    <li class="nav-item"><a class="nav-link" href="{% url 'accounts:login' %}">Login</a></li>
+                    <li class="nav-item ms-lg-2"><a class="btn btn-primary btn-sm px-4" href="{% url 'accounts:signup' %}">Join Us</a></li>
+                    {% endif %}
                 </ul>
             </div>
+        </div>
+    </nav>
 
-            <!-- Contact -->
-            <div class="col-lg-4">
-                <h5 class="fw-bold mb-3">Contact</h5>
-                <p><i class="fas fa-map-marker-alt me-2"></i>Vijana Street,SIDO Road Moshi, Kilimanjaro-Tanzania.</p>
-                <p><i class="fas fa-phone me-2"></i> +255 784 344 079</p>
-                <p><i class="fas fa-envelope me-2"></i> info@tagkrt.or.tz</p>
+    <div class="page-shell">
+        <main class="page-content">
+            {% if messages %}
+            <div class="container pt-4">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
             </div>
+            {% endif %}
 
-        </div>
+            {% block content %}{% endblock %}
+        </main>
 
-        <hr class="footer-border my-4">
+        <footer class="footer-shell">
+            <div class="container">
+                <div class="row g-4">
+                    <div class="col-lg-4">
+                        <h5 class="mb-3">{{ site_config.site_name|default:"Kilimanjaro Revival Temple" }}</h5>
+                        <p class="mb-4">Kanisa la uamsho, maombi, neno la Mungu na huduma zenye kugusa maisha ya watu wa Moshi na zaidi.</p>
+                        <div class="d-flex gap-2">
+                            {% if site_config.facebook_url %}<a class="social-link" href="{{ site_config.facebook_url }}" target="_blank" rel="noopener"><i class="fab fa-facebook-f"></i></a>{% endif %}
+                            {% if site_config.instagram_url %}<a class="social-link" href="{{ site_config.instagram_url }}" target="_blank" rel="noopener"><i class="fab fa-instagram"></i></a>{% endif %}
+                            {% if site_config.youtube_url %}<a class="social-link" href="{{ site_config.youtube_url }}" target="_blank" rel="noopener"><i class="fab fa-youtube"></i></a>{% endif %}
+                            {% if site_config.whatsapp_number %}<a class="social-link" href="https://wa.me/{{ site_config.whatsapp_number }}" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i></a>{% endif %}
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <h6 class="mb-3">Quick Links</h6>
+                        <div class="footer-links d-grid gap-2">
+                            <a href="{% url 'core:home' %}">Home</a>
+                            <a href="{% url 'core:about' %}">About</a>
+                            <a href="{% url 'core:services' %}">Service Times</a>
+                            <a href="{% url 'core:events' %}">Events</a>
+                            <a href="{% url 'core:ministries' %}">Ministries</a>
+                            <a href="{% url 'core:contact' %}">Contact</a>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <h6 class="mb-3">Contact</h6>
+                        <div class="d-grid gap-3">
+                            <div><i class="fas fa-location-dot me-2"></i>{{ site_config.address|default:"Vijana Street, SIDO Road, Moshi Kilimanjaro" }}</div>
+                            <div><i class="fas fa-phone me-2"></i>{{ site_config.contact_phone|default:"+255 784 344 079" }}</div>
+                            <div><i class="fas fa-envelope me-2"></i>{{ site_config.contact_email|default:"info@tagkrt.or.tz" }}</div>
+                        </div>
+                    </div>
+                </div>
 
-        <div class="text-center fst-italic mb-2">
-            “Sio kwa nguvu wala kwa uwezo, bali ni kwa Roho yangu, asema Bwana.”
-            <br><small>— Zekaria 4:6</small>
-        </div>
-
-        <div class="text-center small">
-            &copy; {% now "Y" %} Kilimanjaro Revival Temple. All Rights Reserved.
-        </div>
+                <div class="footer-bottom d-flex flex-column flex-md-row justify-content-between gap-2">
+                    <div class="footer-verse">"Sio kwa nguvu wala kwa uwezo, bali ni kwa Roho yangu." Zekaria 4:6</div>
+                    <div>&copy; {% now "Y" %} {{ site_config.site_name|default:"Kilimanjaro Revival Temple" }}. All rights reserved.</div>
+                </div>
+            </div>
+        </footer>
     </div>
-</footer>
 
+    <button id="backToTop" class="btn btn-primary" aria-label="Back to top">
+        <i class="fas fa-chevron-up"></i>
+    </button>
 
-<!-- Back to Top -->
-<button id="backToTop" class="btn btn-primary rounded-circle">
-    <i class="fas fa-chevron-up"></i>
-</button>
-<script>
-    window.addEventListener("load", function () {
-    const transition = document.querySelector(".page-transition");
-    const content = document.querySelector(".page-content");
-
-    // subiri kidogo logo ionekane
-    setTimeout(() => {
-        transition.classList.remove("curtain-close");
-        transition.classList.add("curtain-open");
-    }, 1200);
-
-    // baada ya pazia kufunguka → onyesha content
-    setTimeout(() => {
-        content.classList.add("page-ready");
-        transition.style.display = "none";
-    }, 2200);
-});
-
-</script>
-<!-- JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="{% static 'js/main.js' %}"></script>
-
-{% block extra_js %}
-
-{% endblock %}
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
 </body>
 </html>
