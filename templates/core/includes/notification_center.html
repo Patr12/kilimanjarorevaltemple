@@ -1,0 +1,17 @@
+{% if notifications %}
+<div class="content-panel mb-4">
+    <span class="eyebrow mb-3"><i class="fas fa-bell"></i> Notification Center</span>
+    <div class="row g-3">
+        {% for item in notifications %}
+        <div class="col-md-6 col-xl-4">
+            <a href="{% url item.url %}" class="card feature-card text-decoration-none h-100">
+                <div class="feature-icon"><i class="fas fa-circle-exclamation"></i></div>
+                <h3 class="h6">{{ item.title }}</h3>
+                <div class="metric-value">{{ item.value }}</div>
+                <p class="text-muted mb-0 small">{{ item.description }}</p>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}

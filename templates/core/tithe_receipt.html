@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Tithe Receipt - {{ site_config.site_name|default:"KRT" }}{% endblock %}
+
+{% block extra_css %}
+<style>
+@media print {
+    .navbar, .footer-shell, .btn { display: none !important; }
+    body { background: #fff; padding-top: 0; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="page-hero"><div class="container"><span class="eyebrow"><i class="fas fa-receipt"></i> Tithe Receipt</span><h1 class="display-5 text-white mt-3">Printable Zaka Receipt</h1><p class="lead text-white-50">Receipt rasmi ya zaka kwa member husika.</p></div></section>
+<section class="site-section"><div class="container">
+    <div class="content-panel">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+            <div><div class="h3 mb-1">{{ site_config.site_name|default:"KRT" }}</div><div class="text-muted">{{ site_config.contact_phone|default:"" }}</div></div>
+            <div class="text-end"><div class="small text-muted">Receipt Date</div><div class="fw-bold">{{ tithe.date_paid|date:"M d, Y H:i" }}</div></div>
+        </div>
+        <div class="row g-4 mb-4">
+            <div class="col-md-6"><div class="small text-muted">Member</div><div class="fw-bold">{{ tithe.user.get_full_name|default:tithe.user.username }}</div></div>
+            <div class="col-md-6"><div class="small text-muted">Recorded By</div><div class="fw-bold">{{ tithe.recorded_by.get_full_name|default:tithe.recorded_by.username|default:"Self" }}</div></div>
+            <div class="col-md-6"><div class="small text-muted">Period</div><div class="fw-bold">{{ tithe.get_month_display }} {{ tithe.year }}</div></div>
+            <div class="col-md-6"><div class="small text-muted">Approval</div><div class="fw-bold">{{ tithe.get_approval_status_display }}</div></div>
+        </div>
+        <div class="content-panel" style="background:#f8fafc;">
+            <div class="small text-muted">Amount Received</div>
+            <div class="display-6 fw-bold mt-2">{{ tithe.amount }}</div>
+            <div class="small text-muted mt-2">Payment method: {{ tithe.get_payment_method_display }}</div>
+            <div class="small text-muted">Reference: {{ tithe.reference|default:"N/A" }}</div>
+            <div class="small text-muted">Notes: {{ tithe.notes|default:"No notes" }}</div>
+        </div>
+        <div class="d-flex gap-2 mt-4">
+            <button class="btn btn-primary" onclick="window.print()">Print Receipt</button>
+            <a href="{% url 'core:admin_tithe_list' %}" class="btn btn-outline-primary">Back to Tithes</a>
+        </div>
+    </div>
+</div></section>
+{% endblock %}

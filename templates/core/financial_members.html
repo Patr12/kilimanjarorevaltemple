@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Finance Members - {{ site_config.site_name|default:"KRT" }}{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <span class="eyebrow"><i class="fas fa-users"></i> Financial Management</span>
+        <h1 class="display-5 text-white mt-3">Members Under Your Scope</h1>
+        <p class="lead text-white-50">Angalia members wa zone au eneo la shemasi linalokuhusu.</p>
+    </div>
+</section>
+<section class="site-section">
+    <div class="container">
+        <div class="content-panel mb-4">
+            <form method="get" class="row g-3">
+                <div class="col-lg-10"><label class="form-label">Search</label><input type="text" class="form-control" name="q" value="{{ query }}" placeholder="Name, phone, tithe card"></div>
+                <div class="col-lg-2 d-flex align-items-end"><button type="submit" class="btn btn-primary w-100">Search</button></div>
+            </form>
+        </div>
+        <div class="content-panel">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead><tr><th>Member</th><th>Zone</th><th>Deacon Group</th><th>Tithe Card</th><th>Phone</th><th>Role</th></tr></thead>
+                    <tbody>
+                        {% for item in members %}
+                        <tr>
+                            <td>{{ item.user.get_full_name|default:item.user.username }}</td>
+                            <td>{{ item.zone.name|default:"No zone" }}</td>
+                            <td>{{ item.deacon_group.name|default:"Not assigned" }}</td>
+                            <td>{{ item.tithe_card_number|default:"Not assigned" }}</td>
+                            <td>{{ item.phone|default:"No phone" }}</td>
+                            <td>{{ item.get_role_display }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="6" class="text-center py-4 text-muted">Hakuna members waliopatikana.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% if members.has_other_pages %}
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if members.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page={{ members.previous_page_number }}{% if query %}&q={{ query }}{% endif %}">Previous</a></li>
+                    {% endif %}
+                    <li class="page-item active"><span class="page-link">{{ members.number }}</span></li>
+                    {% if members.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ members.next_page_number }}{% if query %}&q={{ query }}{% endif %}">Next</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

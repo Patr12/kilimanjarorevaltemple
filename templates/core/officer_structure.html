@@ -48,6 +48,37 @@
             </div>
         </div>
 
+        <div class="row g-4 mb-4">
+            <div class="col-lg-6">
+                <div class="content-panel h-100">
+                    <span class="eyebrow mb-3"><i class="fas fa-user-shield"></i> Assign Zone Leadership</span>
+                    <form method="post" class="row g-3">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="add_zone_leadership">
+                        <div class="col-md-4"><label class="form-label">User</label>{{ leadership_form.user }}</div>
+                        <div class="col-md-4"><label class="form-label">Zone</label>{{ leadership_form.zone }}</div>
+                        <div class="col-md-4"><label class="form-label">Role</label>{{ leadership_form.role }}</div>
+                        <div class="col-12"><button type="submit" class="btn btn-primary">Assign Leadership</button></div>
+                    </form>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="content-panel h-100">
+                    <span class="eyebrow mb-3"><i class="fas fa-people-group"></i> Add Deacon Group</span>
+                    <form method="post" class="row g-3">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="add_deacon_group">
+                        <div class="col-md-6"><label class="form-label">Name</label>{{ deacon_group_form.name }}</div>
+                        <div class="col-md-6"><label class="form-label">Zone</label>{{ deacon_group_form.zone }}</div>
+                        <div class="col-md-6"><label class="form-label">Leader</label>{{ deacon_group_form.leader }}</div>
+                        <div class="col-md-6"><label class="form-label">Active</label><div class="form-check mt-2">{{ deacon_group_form.is_active }} <label class="form-check-label" for="{{ deacon_group_form.is_active.id_for_label }}">Enabled</label></div></div>
+                        <div class="col-12"><label class="form-label">Description</label>{{ deacon_group_form.description }}</div>
+                        <div class="col-12"><button type="submit" class="btn btn-primary">Save Deacon Group</button></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
         <div class="content-panel mb-4">
             <form method="get" class="row g-3">
                 <div class="col-lg-10">
@@ -69,7 +100,7 @@
                         <div class="d-flex justify-content-between align-items-start gap-3">
                             <div>
                                 <div class="fw-bold">{{ zone.name }}</div>
-                                <div class="small text-muted">{{ zone.branch_count }} branches</div>
+                                <div class="small text-muted">{{ zone.branch_count }} branches • {{ zone.member_count }} members • {{ zone.deacon_group_count }} deacon groups</div>
                             </div>
                             <div class="d-flex gap-2 flex-wrap">
                                 <a href="{% url 'core:officer_zone_edit' zone.id %}" class="btn btn-outline-primary btn-sm">Edit</a>
@@ -116,6 +147,55 @@
                             </tbody>
                         </table>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-1">
+            <div class="col-lg-6">
+                <div class="content-panel h-100">
+                    <span class="eyebrow mb-3"><i class="fas fa-user-shield"></i> Zone Leadership</span>
+                    {% for item in zone_leaderships %}
+                    <div class="timeline-item">
+                        <div class="d-flex justify-content-between gap-3 align-items-start">
+                            <div>
+                                <div class="fw-bold">{{ item.zone.name }}</div>
+                                <div class="small text-muted">{{ item.user.get_full_name|default:item.user.username }} • {{ item.get_role_display }}</div>
+                            </div>
+                            <form method="post" onsubmit="return confirm('Remove this zone leadership?');">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="delete_zone_leadership">
+                                <input type="hidden" name="leadership_id" value="{{ item.id }}">
+                                <button type="submit" class="btn btn-outline-danger btn-sm">Remove</button>
+                            </form>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state"><i class="fas fa-user-shield"></i><p class="mb-0">Hakuna zone leadership assignments bado.</p></div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="content-panel h-100">
+                    <span class="eyebrow mb-3"><i class="fas fa-people-group"></i> Deacon Groups</span>
+                    {% for item in deacon_groups %}
+                    <div class="timeline-item">
+                        <div class="d-flex justify-content-between gap-3 align-items-start">
+                            <div>
+                                <div class="fw-bold">{{ item.name }}</div>
+                                <div class="small text-muted">{{ item.zone.name }} • {{ item.leader.get_full_name|default:item.leader.username|default:"No leader" }} • {{ item.member_count }} members</div>
+                            </div>
+                            <form method="post" onsubmit="return confirm('Delete this deacon group?');">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="delete_deacon_group">
+                                <input type="hidden" name="deacon_group_id" value="{{ item.id }}">
+                                <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state"><i class="fas fa-people-group"></i><p class="mb-0">Hakuna deacon groups bado.</p></div>
+                    {% endfor %}
                 </div>
             </div>
         </div>

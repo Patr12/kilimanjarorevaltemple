@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Action Logs - {{ site_config.site_name|default:"KRT" }}{% endblock %}
+
+{% block content %}
+<section class="page-hero"><div class="container"><span class="eyebrow"><i class="fas fa-clipboard-check"></i> Approvals</span><h1 class="display-5 text-white mt-3">Action Log Dashboard</h1><p class="lead text-white-50">Historia ya nani alibadilisha role, asset, sadaka, au zaka, pamoja na approval status yake.</p></div></section>
+<section class="site-section"><div class="container">
+    <div class="content-panel mb-4">
+        <form method="get" class="row g-3">
+            <div class="col-lg-5"><label class="form-label">Search</label><input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Entity, user, description"></div>
+            <div class="col-lg-3"><label class="form-label">Area</label><select name="area" class="form-select"><option value="">All areas</option><option value="roles" {% if selected_area == 'roles' %}selected{% endif %}>Roles</option><option value="assets" {% if selected_area == 'assets' %}selected{% endif %}>Assets</option><option value="offerings" {% if selected_area == 'offerings' %}selected{% endif %}>Offerings</option><option value="tithes" {% if selected_area == 'tithes' %}selected{% endif %}>Tithes</option></select></div>
+            <div class="col-lg-2"><label class="form-label">Status</label><select name="status" class="form-select"><option value="">All status</option><option value="pending" {% if selected_status == 'pending' %}selected{% endif %}>Pending</option><option value="approved" {% if selected_status == 'approved' %}selected{% endif %}>Approved</option><option value="rejected" {% if selected_status == 'rejected' %}selected{% endif %}>Rejected</option><option value="auto_approved" {% if selected_status == 'auto_approved' %}selected{% endif %}>Auto approved</option></select></div>
+            <div class="col-lg-2 d-flex align-items-end"><button type="submit" class="btn btn-primary w-100">Filter</button></div>
+        </form>
+    </div>
+    <div class="content-panel">
+        <div class="table-responsive">
+            <table class="table">
+                <thead><tr><th>Entity</th><th>Action</th><th>Changed By</th><th>Status</th><th>Time</th><th>Approval</th></tr></thead>
+                <tbody>
+                    {% for item in logs %}
+                    <tr>
+                        <td><div class="fw-bold">{{ item.entity_label }}</div><div class="small text-muted">{{ item.entity_type }} • {{ item.get_action_area_display }}</div></td>
+                        <td><div>{{ item.get_action_type_display }}</div><div class="small text-muted">{{ item.description|default:"No description" }}</div></td>
+                        <td>{{ item.performed_by.get_full_name|default:item.performed_by.username|default:"System" }}</td>
+                        <td><span class="badge-soft-primary">{{ item.get_approval_status_display }}</span></td>
+                        <td>{{ item.created_at|date:"M d, Y H:i" }}</td>
+                        <td>
+                            {% if can_approve and item.approval_status == 'pending' %}
+                            <div class="d-flex gap-2 flex-wrap">
+                                <form method="post">{% csrf_token %}<input type="hidden" name="log_id" value="{{ item.id }}"><input type="hidden" name="decision" value="approve"><button type="submit" class="btn btn-outline-primary btn-sm">Approve</button></form>
+                                <form method="post">{% csrf_token %}<input type="hidden" name="log_id" value="{{ item.id }}"><input type="hidden" name="decision" value="reject"><button type="submit" class="btn btn-outline-danger btn-sm">Reject</button></form>
+                            </div>
+                            {% else %}
+                            <div class="small text-muted">{{ item.approved_by.get_full_name|default:item.approved_by.username|default:"Awaiting decision" }}</div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="6" class="text-center py-4 text-muted">Hakuna action logs zilizopatikana.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if logs.has_other_pages %}
+        <nav class="mt-4"><ul class="pagination justify-content-center">{% if logs.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ logs.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selected_area %}&area={{ selected_area }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}">Previous</a></li>{% endif %}<li class="page-item active"><span class="page-link">{{ logs.number }}</span></li>{% if logs.has_next %}<li class="page-item"><a class="page-link" href="?page={{ logs.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selected_area %}&area={{ selected_area }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}">Next</a></li>{% endif %}</ul></nav>
+        {% endif %}
+    </div>
+</div></section>
+{% endblock %}

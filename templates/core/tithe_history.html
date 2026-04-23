@@ -61,7 +61,7 @@
             {% if tithes %}
             <div class="table-responsive">
                 <table class="table">
-                    <thead><tr><th>Date Paid</th><th>Period</th><th>Amount</th><th>Method</th><th>Status</th></tr></thead>
+                    <thead><tr><th>Date Paid</th><th>Period</th><th>Amount</th><th>Method</th><th>Status</th><th>Approval</th><th>Receipt</th></tr></thead>
                     <tbody>
                         {% for tithe in tithes %}
                         <tr>
@@ -70,6 +70,8 @@
                             <td>{{ tithe.amount }}</td>
                             <td>{{ tithe.get_payment_method_display }}</td>
                             <td>{% if tithe.status == 'paid' %}<span class="badge-soft-success">Paid</span>{% else %}<span class="badge-soft-warning">{{ tithe.get_status_display }}</span>{% endif %}</td>
+                            <td>{{ tithe.get_approval_status_display }}</td>
+                            <td><a href="{% url 'core:tithe_detail' tithe.id %}" class="btn btn-outline-primary btn-sm">Receipt</a></td>
                         </tr>
                         {% endfor %}
                     </tbody>

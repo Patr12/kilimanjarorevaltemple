@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Assets - {{ site_config.site_name|default:"KRT" }}{% endblock %}
+
+{% block content %}
+<section class="page-hero"><div class="container"><span class="eyebrow"><i class="fas fa-boxes-stacked"></i> Resources</span><h1 class="display-5 text-white mt-3">Church Assets</h1><p class="lead text-white-50">Simamia vyombo vya muziki, magari, viti, majengo, na rasilimali nyingine za kanisa.</p></div></section>
+<section class="site-section"><div class="container">
+    {% if can_edit %}
+    <div class="content-panel mb-4">
+        <span class="eyebrow mb-3"><i class="fas fa-plus-circle"></i> Register Asset</span>
+        <form method="post" class="row g-3">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="add_asset">
+            {% for field in form %}
+            <div class="col-md-4"><label class="form-label">{{ field.label }}</label>{{ field }}</div>
+            {% endfor %}
+            <div class="col-12"><button type="submit" class="btn btn-primary">Save Asset</button></div>
+        </form>
+    </div>
+    {% endif %}
+    <div class="row g-4">
+        {% for item in assets %}
+        <div class="col-lg-6">
+            <div class="content-panel h-100">
+                <div class="d-flex justify-content-between gap-3">
+                    <div>
+                        <h3 class="h5 mb-1">{{ item.name }}</h3>
+                        <div class="small text-muted">{{ item.category.name|default:"No category" }} • {{ item.location|default:"No location" }}</div>
+                    </div>
+                    <span class="badge bg-primary">{{ item.get_status_display }}</span>
+                </div>
+                <div class="small text-muted mt-2">Qty: {{ item.quantity }} • Value: {{ item.estimated_value }} • Condition: {{ item.condition|default:"Not set" }}</div>
+                <div class="small text-muted mt-1">Approval: {{ item.get_approval_status_display }}</div>
+                {% if can_edit %}
+                <div class="d-flex gap-2 flex-wrap mt-3">
+                    <a href="{% url 'core:asset_edit' item.id %}" class="btn btn-outline-primary btn-sm">Edit</a>
+                    <form method="post" onsubmit="return confirm('Delete this asset?');">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="delete_asset">
+                        <input type="hidden" name="asset_id" value="{{ item.id }}">
+                        <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12"><div class="empty-state content-panel"><i class="fas fa-boxes-stacked"></i><p class="mb-0">Hakuna assets zilizoregisteriwa bado.</p></div></div>
+        {% endfor %}
+    </div>
+</div></section>
+{% endblock %}

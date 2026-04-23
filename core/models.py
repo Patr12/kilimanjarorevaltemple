@@ -441,6 +441,12 @@ class Testimonial(models.Model):
     
 class Tithe(models.Model):
     """Tithe records"""
+    APPROVAL_STATUS_CHOICES = [
+        ('pending', 'Pending Approval'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+        ('auto_approved', 'Auto Approved'),
+    ]
 
     PAYMENT_METHODS = [
         ('cash', 'Cash'),
@@ -483,6 +489,7 @@ class Tithe(models.Model):
         blank=True,
         related_name='recorded_tithes'
     )
+    approval_status = models.CharField(max_length=20, choices=APPROVAL_STATUS_CHOICES, default='auto_approved')
 
     class Meta:
         ordering = ['-year', '-month', '-date_paid']
@@ -510,3 +517,178 @@ class Tithe(models.Model):
             9: 'September', 10: 'October', 11: 'November', 12: 'December'
         }
         return months.get(self.month, '')
+
+
+class OfferingCategory(models.Model):
+    CATEGORY_CHOICES = [
+        ('zone', 'Zone Offering'),
+        ('sunday', 'Sunday Offering'),
+        ('friday', 'Friday Offering'),
+        ('thanksgiving', 'Thanksgiving Offering'),
+        ('children', 'Children Offering'),
+        ('adults', 'Adults Offering'),
+        ('special', 'Special Offering'),
+    ]
+
+    name = models.CharField(max_length=120)
+    category_type = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='special')
+    description = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+
+class OfferingRecord(models.Model):
+    APPROVAL_STATUS_CHOICES = Tithe.APPROVAL_STATUS_CHOICES
+    category = models.ForeignKey(OfferingCategory, on_delete=models.CASCADE, related_name='records')
+    zone = models.ForeignKey('accounts.Zone', on_delete=models.SET_NULL, null=True, blank=True, related_name='offering_records')
+    deacon_group = models.ForeignKey('accounts.DeaconGroup', on_delete=models.SET_NULL, null=True, blank=True, related_name='offering_records')
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    week_label = models.CharField(max_length=50, blank=True)
+    month = models.PositiveSmallIntegerField()
+    year = models.PositiveIntegerField()
+    service_date = models.DateField(default=timezone.now)
+    recorded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='recorded_offerings')
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    approval_status = models.CharField(max_length=20, choices=APPROVAL_STATUS_CHOICES, default='auto_approved')
+
+    class Meta:
+        ordering = ['-service_date', '-created_at']
+
+    def __str__(self):
+        return f"{self.category.name} - {self.amount} ({self.month}/{self.year})"
+
+
+class FundraisingCampaign(models.Model):
+    name = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    target_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    start_date = models.DateField()
+    end_date = models.DateField(blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['-start_date', 'name']
+
+    def __str__(self):
+        return self.name
+
+
+class FundraisingContribution(models.Model):
+    APPROVAL_STATUS_CHOICES = Tithe.APPROVAL_STATUS_CHOICES
+    campaign = models.ForeignKey(FundraisingCampaign, on_delete=models.CASCADE, related_name='contributions')
+    contributor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='fundraising_contributions')
+    zone = models.ForeignKey('accounts.Zone', on_delete=models.SET_NULL, null=True, blank=True, related_name='fundraising_contributions')
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    contribution_date = models.DateField(default=timezone.now)
+    week_label = models.CharField(max_length=50, blank=True)
+    notes = models.TextField(blank=True)
+    recorded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='recorded_fundraising_contributions')
+    approval_status = models.CharField(max_length=20, choices=APPROVAL_STATUS_CHOICES, default='auto_approved')
+
+    class Meta:
+        ordering = ['-contribution_date', '-id']
+
+    def __str__(self):
+        return f"{self.campaign.name} - {self.amount}"
+
+
+class ChurchAssetCategory(models.Model):
+    name = models.CharField(max_length=120)
+    description = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ['name']
+        verbose_name = 'Church Asset Category'
+        verbose_name_plural = 'Church Asset Categories'
+
+    def __str__(self):
+        return self.name
+
+
+class ChurchAsset(models.Model):
+    APPROVAL_STATUS_CHOICES = Tithe.APPROVAL_STATUS_CHOICES
+    STATUS_CHOICES = [
+        ('active', 'Active'),
+        ('maintenance', 'Under Maintenance'),
+        ('retired', 'Retired'),
+    ]
+
+    name = models.CharField(max_length=200)
+    category = models.ForeignKey(ChurchAssetCategory, on_delete=models.SET_NULL, null=True, blank=True, related_name='assets')
+    serial_number = models.CharField(max_length=120, blank=True)
+    quantity = models.PositiveIntegerField(default=1)
+    condition = models.CharField(max_length=120, blank=True)
+    location = models.CharField(max_length=200, blank=True)
+    purchased_on = models.DateField(blank=True, null=True)
+    estimated_value = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+    notes = models.TextField(blank=True)
+    approval_status = models.CharField(max_length=20, choices=APPROVAL_STATUS_CHOICES, default='auto_approved')
+
+    class Meta:
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+
+class ActionApprovalLog(models.Model):
+    ACTION_AREA_CHOICES = [
+        ('roles', 'Role Management'),
+        ('assets', 'Church Assets'),
+        ('offerings', 'Offerings'),
+        ('tithes', 'Tithes'),
+    ]
+
+    ACTION_TYPE_CHOICES = [
+        ('create', 'Create'),
+        ('update', 'Update'),
+        ('delete', 'Delete'),
+        ('approve', 'Approve'),
+        ('reject', 'Reject'),
+    ]
+
+    APPROVAL_STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+        ('auto_approved', 'Auto Approved'),
+    ]
+
+    action_area = models.CharField(max_length=20, choices=ACTION_AREA_CHOICES)
+    action_type = models.CharField(max_length=20, choices=ACTION_TYPE_CHOICES)
+    entity_type = models.CharField(max_length=50)
+    entity_id = models.CharField(max_length=50, blank=True)
+    entity_label = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    previous_data = models.JSONField(default=dict, blank=True)
+    new_data = models.JSONField(default=dict, blank=True)
+    performed_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='performed_action_logs',
+    )
+    approved_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='approved_action_logs',
+    )
+    approval_status = models.CharField(max_length=20, choices=APPROVAL_STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+    approved_at = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.get_action_type_display()} {self.entity_type} - {self.entity_label}"

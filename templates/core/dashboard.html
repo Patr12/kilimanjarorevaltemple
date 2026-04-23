@@ -23,11 +23,12 @@
 
 <section class="site-section">
     <div class="container">
+        {% include "core/includes/notification_center.html" %}
         <div class="row g-4 mb-4">
             <div class="col-md-6 col-xl-3"><div class="metric-card card h-100"><div class="feature-icon"><i class="fas fa-hand-holding-heart"></i></div><div class="metric-value">{{ total_tithe|floatformat:0 }}</div><div class="metric-label">Total tithe recorded</div></div></div>
             <div class="col-md-6 col-xl-3"><div class="metric-card card h-100"><div class="feature-icon"><i class="fas fa-people-group"></i></div><div class="metric-value">{{ user_ministries|length }}</div><div class="metric-label">Active ministries</div></div></div>
             <div class="col-md-6 col-xl-3"><div class="metric-card card h-100"><div class="feature-icon"><i class="fas fa-calendar-star"></i></div><div class="metric-value">{{ upcoming_events|length }}</div><div class="metric-label">Upcoming events</div></div></div>
-            <div class="col-md-6 col-xl-3"><div class="metric-card card h-100"><div class="feature-icon"><i class="fas fa-ticket"></i></div><div class="metric-value">{{ user_registrations|length }}</div><div class="metric-label">Recent registrations</div></div></div>
+            <div class="col-md-6 col-xl-3"><div class="metric-card card h-100"><div class="feature-icon"><i class="fas fa-house-user"></i></div><div class="metric-value">{{ family_count }}</div><div class="metric-label">Family members</div></div></div>
         </div>
 
         <div class="row g-4">
@@ -40,9 +41,12 @@
                         <div class="info-row"><div class="info-icon"><i class="fas fa-phone"></i></div><div><strong>Phone</strong><div class="small text-muted">{{ profile.phone|default:"Not added" }}</div></div></div>
                         <div class="info-row"><div class="info-icon"><i class="fas fa-location-dot"></i></div><div><strong>Zone</strong><div class="small text-muted">{% if profile.zone %}{{ profile.zone.name }}{% else %}Not assigned{% endif %}</div></div></div>
                         <div class="info-row"><div class="info-icon"><i class="fas fa-church"></i></div><div><strong>Branch</strong><div class="small text-muted">{{ profile.church_branch|default:"Not added" }}</div></div></div>
+                        <div class="info-row"><div class="info-icon"><i class="fas fa-ring"></i></div><div><strong>Marital status</strong><div class="small text-muted">{{ profile.get_marital_status_display|default:"Not added" }}</div></div></div>
+                        <div class="info-row"><div class="info-icon"><i class="fas fa-id-badge"></i></div><div><strong>Tithe card</strong><div class="small text-muted">{{ profile.tithe_card_number|default:"Not assigned" }}</div></div></div>
                     </div>
                     <div class="d-grid gap-2 mt-4">
                         <a href="{% url 'core:profile' %}" class="btn btn-primary">Open Profile</a>
+                        <a href="{% url 'core:family_management' %}" class="btn btn-outline-primary">Manage Family</a>
                         {% if not profile %}<a href="{% url 'core:create_profile' %}" class="btn btn-outline-primary">Create Profile</a>{% endif %}
                     </div>
                 </div>
@@ -114,11 +118,28 @@
             </div>
             <div class="col-lg-6">
                 <div class="content-panel h-100">
+                    <span class="eyebrow mb-3"><i class="fas fa-people-roof"></i> Family</span>
+                    {% for family in family_members %}
+                    <div class="timeline-item">
+                        <div class="fw-bold">{{ family.full_name }}</div>
+                        <div class="small text-muted">{{ family.get_relationship_display }}{% if family.date_of_birth %} • {{ family.date_of_birth|date:"M d, Y" }}{% endif %}</div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state"><i class="fas fa-house-user"></i><p class="mb-0">Hakuna family members waliosajiliwa bado.</p></div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-1">
+            <div class="col-lg-12">
+                <div class="content-panel h-100">
                     <span class="eyebrow mb-3"><i class="fas fa-bolt"></i> Quick Actions</span>
                     <div class="feature-grid">
                         <a href="{% url 'core:add_tithe' %}" class="card feature-card text-decoration-none"><div class="feature-icon"><i class="fas fa-plus-circle"></i></div><h3 class="h6">Record Tithe</h3><p class="text-muted mb-0 small">Ongeza taarifa ya tithe kwa haraka.</p></a>
                         <a href="{% url 'core:events' %}" class="card feature-card text-decoration-none"><div class="feature-icon"><i class="fas fa-calendar-plus"></i></div><h3 class="h6">Browse Events</h3><p class="text-muted mb-0 small">Angalia matukio mapya ya kanisa.</p></a>
                         <a href="{% url 'core:ministries' %}" class="card feature-card text-decoration-none"><div class="feature-icon"><i class="fas fa-users"></i></div><h3 class="h6">Find Ministry</h3><p class="text-muted mb-0 small">Pata ministry ya kujiunga nayo.</p></a>
+                        <a href="{% url 'core:family_management' %}" class="card feature-card text-decoration-none"><div class="feature-icon"><i class="fas fa-people-roof"></i></div><h3 class="h6">Family Members</h3><p class="text-muted mb-0 small">Sajili na simamia family yako.</p></a>
                         <a href="{% url 'core:contact' %}" class="card feature-card text-decoration-none"><div class="feature-icon"><i class="fas fa-envelope"></i></div><h3 class="h6">Contact Office</h3><p class="text-muted mb-0 small">Wasiliana na uongozi au ofisi.</p></a>
                     </div>
                 </div>

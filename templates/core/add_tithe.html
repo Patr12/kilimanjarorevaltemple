@@ -19,7 +19,12 @@
             <div class="col-lg-8">
                 <div class="content-panel">
                     {% if is_admin %}
-                    <div class="alert alert-info">Admin mode ipo wazi. Tafuta member unayetaka kumrekodia tithe kabla ya kutuma fomu.</div>
+                    <div class="alert alert-info">Finance mode ipo wazi. Unaweza kutumia card number ya zaka au kutafuta member kwa jina kabla ya kutuma fomu.</div>
+                    <div class="mb-4">
+                        <label class="form-label">Tithe Card Number</label>
+                        <input type="text" class="form-control" name="tithe_card_number" placeholder="Mfano: KRT-TC-001">
+                        <div class="small text-muted mt-2">Ukijaza card number sahihi, system itamchukua member moja kwa moja.</div>
+                    </div>
                     <div class="mb-4">
                         <label class="form-label">Search Member</label>
                         <div class="input-group">
@@ -136,9 +141,10 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     document.getElementById('titheForm').addEventListener('submit', function (e) {
-        if (!userIdInput.value) {
+        const cardInput = this.querySelector('input[name="tithe_card_number"]');
+        if (!userIdInput.value && (!cardInput || !cardInput.value.trim())) {
             e.preventDefault();
-            alert('Please search and select a member first.');
+            alert('Please enter a tithe card number or search and select a member first.');
         }
     });
 });

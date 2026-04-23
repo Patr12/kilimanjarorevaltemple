@@ -33,7 +33,9 @@
                 <div class="col-md-4"><label class="form-label">Phone</label>{{ member_form.phone }}</div>
                 <div class="col-md-4"><label class="form-label">Church branch</label>{{ member_form.church_branch }}</div>
                 <div class="col-md-4"><label class="form-label">Zone</label>{{ member_form.zone }}</div>
+                <div class="col-md-4"><label class="form-label">Deacon group</label>{{ member_form.deacon_group }}</div>
                 <div class="col-md-4"><label class="form-label">Ministry role</label>{{ member_form.ministry_role }}</div>
+                <div class="col-md-4"><label class="form-label">Tithe card</label>{{ member_form.tithe_card_number }}</div>
                 <div class="col-md-4"><label class="form-label">Date of birth</label>{{ member_form.date_of_birth }}</div>
                 <div class="col-md-4 d-flex align-items-end"><div class="form-check">{{ member_form.is_staff }} <label class="form-check-label" for="{{ member_form.is_staff.id_for_label }}">Officer account</label></div></div>
                 <div class="col-12">{% if member_form.errors %}<div class="alert alert-danger mb-0">{{ member_form.errors }}</div>{% endif %}</div>
@@ -45,9 +47,9 @@
             <form method="get" class="row g-3">
                 <div class="col-lg-5">
                     <label class="form-label">Search member</label>
-                    <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Name, email, phone, branch">
+                    <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Name, email, phone, branch, tithe card">
                 </div>
-                <div class="col-lg-3">
+                <div class="col-lg-2">
                     <label class="form-label">Zone</label>
                     <select name="zone" class="form-select">
                         <option value="">All zones</option>
@@ -56,7 +58,16 @@
                         {% endfor %}
                     </select>
                 </div>
-                <div class="col-lg-3">
+                <div class="col-lg-2">
+                    <label class="form-label">Deacon group</label>
+                    <select name="deacon_group" class="form-select">
+                        <option value="">All groups</option>
+                        {% for group in deacon_groups %}
+                        <option value="{{ group.id }}" {% if selected_deacon_group == group.id|stringformat:"s" %}selected{% endif %}>{{ group.zone.name }} - {{ group.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-lg-2">
                     <label class="form-label">Ministry role</label>
                     <select name="ministry" class="form-select">
                         <option value="">All ministries</option>
@@ -80,6 +91,7 @@
                             <th>Contacts</th>
                             <th>Zone / Branch</th>
                             <th>Spiritual role</th>
+                            <th>Hierarchy</th>
                             <th>Status</th>
                             <th>Action</th>
                         </tr>
@@ -104,6 +116,10 @@
                                 <div class="small text-muted">DOB: {{ profile.date_of_birth|date:"M d, Y"|default:"Not set" }}</div>
                             </td>
                             <td>
+                                <div>{{ profile.deacon_group.name|default:"No deacon group" }}</div>
+                                <div class="small text-muted">Card: {{ profile.tithe_card_number|default:"Not assigned" }}</div>
+                            </td>
+                            <td>
                                 {% if profile.phone and profile.zone and profile.church_branch and profile.date_of_birth %}
                                 <span class="badge-soft-success">Complete</span>
                                 {% else %}
@@ -123,7 +139,7 @@
                             </td>
                         </tr>
                         {% empty %}
-                        <tr><td colspan="6" class="text-center py-4 text-muted">Hakuna member profiles zilizopatikana.</td></tr>
+                        <tr><td colspan="7" class="text-center py-4 text-muted">Hakuna member profiles zilizopatikana.</td></tr>
                         {% endfor %}
                     </tbody>
                 </table>
@@ -133,11 +149,11 @@
             <nav class="mt-4">
                 <ul class="pagination justify-content-center">
                     {% if page_obj.has_previous %}
-                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selected_zone %}&zone={{ selected_zone }}{% endif %}{% if selected_ministry %}&ministry={{ selected_ministry }}{% endif %}">Previous</a></li>
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selected_zone %}&zone={{ selected_zone }}{% endif %}{% if selected_deacon_group %}&deacon_group={{ selected_deacon_group }}{% endif %}{% if selected_ministry %}&ministry={{ selected_ministry }}{% endif %}">Previous</a></li>
                     {% endif %}
                     <li class="page-item active"><span class="page-link">{{ page_obj.number }}</span></li>
                     {% if page_obj.has_next %}
-                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selected_zone %}&zone={{ selected_zone }}{% endif %}{% if selected_ministry %}&ministry={{ selected_ministry }}{% endif %}">Next</a></li>
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selected_zone %}&zone={{ selected_zone }}{% endif %}{% if selected_deacon_group %}&deacon_group={{ selected_deacon_group }}{% endif %}{% if selected_ministry %}&ministry={{ selected_ministry }}{% endif %}">Next</a></li>
                     {% endif %}
                 </ul>
             </nav>

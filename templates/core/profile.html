@@ -32,6 +32,8 @@
                         <div class="info-row"><div class="info-icon"><i class="fas fa-envelope"></i></div><div><strong>Email</strong><div class="small text-muted">{{ user.email|default:"Not provided" }}</div></div></div>
                         <div class="info-row"><div class="info-icon"><i class="fas fa-phone"></i></div><div><strong>Phone</strong><div class="small text-muted">{{ profile.phone|default:"Not provided" }}</div></div></div>
                         <div class="info-row"><div class="info-icon"><i class="fas fa-cake-candles"></i></div><div><strong>Date of birth</strong><div class="small text-muted">{{ profile.date_of_birth|date:"F j, Y"|default:"Not provided" }}</div></div></div>
+                        <div class="info-row"><div class="info-icon"><i class="fas fa-ring"></i></div><div><strong>Marital status</strong><div class="small text-muted">{{ profile.get_marital_status_display|default:"Not provided" }}</div></div></div>
+                        <div class="info-row"><div class="info-icon"><i class="fas fa-briefcase"></i></div><div><strong>Occupation</strong><div class="small text-muted">{{ profile.occupation|default:"Not provided" }}</div></div></div>
                     </div>
                 </div>
             </div>
@@ -42,6 +44,7 @@
                         <div class="info-row"><div class="info-icon"><i class="fas fa-map"></i></div><div><strong>Zone</strong><div class="small text-muted">{% if profile.zone %}{{ profile.zone.name }}{% else %}Not assigned{% endif %}</div></div></div>
                         <div class="info-row"><div class="info-icon"><i class="fas fa-location-dot"></i></div><div><strong>Branch</strong><div class="small text-muted">{{ profile.church_branch|default:"Not provided" }}</div></div></div>
                         <div class="info-row"><div class="info-icon"><i class="fas fa-hands-helping"></i></div><div><strong>Ministry role</strong><div class="small text-muted">{% if profile.ministry_role %}{{ profile.ministry_role.name }}{% else %}Not assigned{% endif %}</div></div></div>
+                        <div class="info-row"><div class="info-icon"><i class="fas fa-id-card"></i></div><div><strong>Tithe card number</strong><div class="small text-muted">{{ profile.tithe_card_number|default:"Not assigned" }}</div></div></div>
                         <div class="info-row"><div class="info-icon"><i class="fas fa-hourglass-start"></i></div><div><strong>Member since</strong><div class="small text-muted">{{ profile.joined_at|date:"F j, Y" }}</div></div></div>
                     </div>
                 </div>

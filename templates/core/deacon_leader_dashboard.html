@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Deacon Leader Dashboard - {{ site_config.site_name|default:"KRT" }}{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <div class="row g-4 align-items-center">
+            <div class="col-lg-8">
+                <span class="eyebrow"><i class="fas fa-people-group"></i> Deacon Leadership</span>
+                <h1 class="display-5 text-white mt-3">Deacon Leader Dashboard</h1>
+                <p class="lead text-white-50">Kundi lako la shemasi lina muonekano wake wa members, zaka, sadaka, na ufuatiliaji wa huduma.</p>
+            </div>
+            <div class="col-lg-4">
+                <div class="hero-card p-4">
+                    <div class="small text-white-50 mb-2">Deacon Group</div>
+                    <div class="h4 text-white mb-0">{{ deacon_scope.name|default:"No group" }}</div>
+                    <div class="small text-white-50 mt-2">Zone: {{ zone_scope.name|default:"No zone" }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="site-section">
+    <div class="container">
+        {% include "core/includes/notification_center.html" %}
+        <div class="row g-4 mb-4">
+            <div class="col-md-6 col-xl-3"><div class="metric-card card h-100"><div class="feature-icon"><i class="fas fa-users"></i></div><div class="metric-value">{{ stats.members }}</div><div class="metric-label">Group Members</div></div></div>
+            <div class="col-md-6 col-xl-3"><div class="metric-card card h-100"><div class="feature-icon"><i class="fas fa-hand-holding-heart"></i></div><div class="metric-value">{{ stats.tithe_total|floatformat:0 }}</div><div class="metric-label">Group Tithe</div></div></div>
+            <div class="col-md-6 col-xl-3"><div class="metric-card card h-100"><div class="feature-icon"><i class="fas fa-basket-shopping"></i></div><div class="metric-value">{{ stats.offering_total|floatformat:0 }}</div><div class="metric-label">Group Offering</div></div></div>
+            <div class="col-md-6 col-xl-3"><div class="metric-card card h-100"><div class="feature-icon"><i class="fas fa-bullhorn"></i></div><div class="metric-value">{{ active_campaigns|length }}</div><div class="metric-label">Active Campaigns</div></div></div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-5">
+                <div class="content-panel h-100">
+                    <span class="eyebrow mb-3"><i class="fas fa-bolt"></i> Group Actions</span>
+                    <div class="feature-grid">
+                        <a href="{% url 'core:financial_members' %}" class="card feature-card text-decoration-none"><div class="feature-icon"><i class="fas fa-users-viewfinder"></i></div><h3 class="h6">My Members</h3><p class="text-muted mb-0 small">Members wa deacon group yako tu.</p></a>
+                        <a href="{% url 'core:officer_members' %}" class="card feature-card text-decoration-none"><div class="feature-icon"><i class="fas fa-user-plus"></i></div><h3 class="h6">Register Member</h3><p class="text-muted mb-0 small">Sajili member wa group yako.</p></a>
+                        <a href="{% url 'core:add_tithe' %}" class="card feature-card text-decoration-none"><div class="feature-icon"><i class="fas fa-plus-circle"></i></div><h3 class="h6">Record Tithe</h3><p class="text-muted mb-0 small">Weka zaka kwa members wako.</p></a>
+                        <a href="{% url 'core:financial_reports' %}" class="card feature-card text-decoration-none"><div class="feature-icon"><i class="fas fa-chart-pie"></i></div><h3 class="h6">Group Reports</h3><p class="text-muted mb-0 small">Ripoti ya group yako na PDF.</p></a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-7">
+                <div class="content-panel h-100">
+                    <span class="eyebrow mb-3"><i class="fas fa-user-group"></i> Group Members</span>
+                    {% for item in recent_members %}
+                    <div class="timeline-item">
+                        <div class="fw-bold">{{ item.user.get_full_name|default:item.user.username }}</div>
+                        <div class="small text-muted">{{ item.phone|default:"No phone" }} • Card {{ item.tithe_card_number|default:"Not assigned" }}</div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state"><i class="fas fa-user-group"></i><p class="mb-0">Hakuna members wa deacon group bado.</p></div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-1">
+            <div class="col-lg-6">
+                <div class="content-panel h-100">
+                    <span class="eyebrow mb-3"><i class="fas fa-church"></i> Recent Offerings</span>
+                    {% for item in recent_offerings %}
+                    <div class="timeline-item"><div class="fw-bold">{{ item.category.name }}</div><div class="small text-muted">{{ item.amount }} • {{ item.service_date|date:"M d, Y" }}</div></div>
+                    {% empty %}<div class="empty-state"><i class="fas fa-basket-shopping"></i><p class="mb-0">Hakuna sadaka records bado.</p></div>{% endfor %}
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="content-panel h-100">
+                    <span class="eyebrow mb-3"><i class="fas fa-file-invoice-dollar"></i> Recent Tithes</span>
+                    {% for item in recent_tithes %}
+                    <div class="timeline-item"><div class="fw-bold">{{ item.user.get_full_name|default:item.user.username }}</div><div class="small text-muted">{{ item.get_month_display }} {{ item.year }} • {{ item.amount }}</div></div>
+                    {% empty %}<div class="empty-state"><i class="fas fa-file-invoice-dollar"></i><p class="mb-0">Hakuna tithe records bado.</p></div>{% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Role Assignment - {{ site_config.site_name|default:"KRT" }}{% endblock %}
+
+{% block content %}
+<section class="page-hero"><div class="container"><span class="eyebrow"><i class="fas fa-user-shield"></i> Management</span><h1 class="display-5 text-white mt-3">Role Assignment UI</h1><p class="lead text-white-50">Pastor na katibu wanaweza kugawa role, zone, deacon group, na scope ya mfumo hapa moja kwa moja.</p></div></section>
+<section class="site-section"><div class="container">
+    <div class="row g-4 mb-4">
+        <div class="col-md-4"><div class="metric-card card h-100"><div class="feature-icon"><i class="fas fa-users"></i></div><div class="metric-value">{{ profiles.paginator.count }}</div><div class="metric-label">Profiles</div></div></div>
+        <div class="col-md-4"><div class="metric-card card h-100"><div class="feature-icon"><i class="fas fa-map-location-dot"></i></div><div class="metric-value">{% if query %}Filtered{% else %}All{% endif %}</div><div class="metric-label">Scope View</div></div></div>
+        <div class="col-md-4"><div class="metric-card card h-100"><div class="feature-icon"><i class="fas fa-user-shield"></i></div><div class="metric-value">{{ profiles.number }}</div><div class="metric-label">Current Page</div></div></div>
+    </div>
+    <div class="content-panel mb-4">
+        <form method="get" class="row g-3">
+            <div class="col-lg-10"><label class="form-label">Search profile</label><input type="text" class="form-control" name="q" value="{{ query }}" placeholder="Name, username, role"></div>
+            <div class="col-lg-2 d-flex align-items-end"><button type="submit" class="btn btn-primary w-100">Search</button></div>
+        </form>
+    </div>
+    <div class="content-panel">
+        <div class="table-responsive">
+            <table class="table">
+                <thead><tr><th>Member</th><th>Role</th><th>Zone</th><th>Deacon Group</th><th>Tithe Card</th><th>Action</th></tr></thead>
+                <tbody>
+                    {% for item in profiles %}
+                    <tr>
+                        <td>{{ item.user.get_full_name|default:item.user.username }}</td>
+                        <td>{{ item.get_role_display }}</td>
+                        <td>{{ item.zone.name|default:"Not assigned" }}</td>
+                        <td>{{ item.deacon_group.name|default:"Not assigned" }}</td>
+                        <td>{{ item.tithe_card_number|default:"Not assigned" }}</td>
+                        <td><a href="{% url 'core:role_assignment_edit' item.id %}" class="btn btn-outline-primary btn-sm">Assign / Edit</a></td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="6" class="text-center py-4 text-muted">Hakuna profiles zilizopatikana.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if profiles.has_other_pages %}
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if profiles.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page={{ profiles.previous_page_number }}{% if query %}&q={{ query }}{% endif %}">Previous</a></li>
+                {% endif %}
+                <li class="page-item active"><span class="page-link">{{ profiles.number }}</span></li>
+                {% if profiles.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ profiles.next_page_number }}{% if query %}&q={{ query }}{% endif %}">Next</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div></section>
+{% endblock %}

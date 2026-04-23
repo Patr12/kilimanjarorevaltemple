@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Zone Leader Dashboard - {{ site_config.site_name|default:"KRT" }}{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <div class="row g-4 align-items-center">
+            <div class="col-lg-8">
+                <span class="eyebrow"><i class="fas fa-map-location-dot"></i> Zone Leadership</span>
+                <h1 class="display-5 text-white mt-3">Zone Leader Dashboard</h1>
+                <p class="lead text-white-50">Muonekano wa zone yako kwa member registration, zaka, sadaka, na ufuatiliaji wa groups.</p>
+            </div>
+            <div class="col-lg-4">
+                <div class="hero-card p-4">
+                    <div class="small text-white-50 mb-2">Assigned Zone</div>
+                    <div class="h4 text-white mb-0">{{ zone_scope.name|default:"No zone" }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="site-section">
+    <div class="container">
+        {% include "core/includes/notification_center.html" %}
+        <div class="row g-4 mb-4">
+            <div class="col-md-6 col-xl-3"><div class="metric-card card h-100"><div class="feature-icon"><i class="fas fa-users"></i></div><div class="metric-value">{{ stats.members }}</div><div class="metric-label">Zone Members</div></div></div>
+            <div class="col-md-6 col-xl-3"><div class="metric-card card h-100"><div class="feature-icon"><i class="fas fa-hand-holding-heart"></i></div><div class="metric-value">{{ stats.tithe_total|floatformat:0 }}</div><div class="metric-label">Zone Tithe</div></div></div>
+            <div class="col-md-6 col-xl-3"><div class="metric-card card h-100"><div class="feature-icon"><i class="fas fa-basket-shopping"></i></div><div class="metric-value">{{ stats.offering_total|floatformat:0 }}</div><div class="metric-label">Zone Offering</div></div></div>
+            <div class="col-md-6 col-xl-3"><div class="metric-card card h-100"><div class="feature-icon"><i class="fas fa-handshake-angle"></i></div><div class="metric-value">{{ stats.fundraising_total|floatformat:0 }}</div><div class="metric-label">Zone Contributions</div></div></div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-5">
+                <div class="content-panel h-100">
+                    <span class="eyebrow mb-3"><i class="fas fa-bolt"></i> Zone Actions</span>
+                    <div class="feature-grid">
+                        <a href="{% url 'core:financial_members' %}" class="card feature-card text-decoration-none"><div class="feature-icon"><i class="fas fa-users-viewfinder"></i></div><h3 class="h6">Zone Members</h3><p class="text-muted mb-0 small">Angalia waumini wa zone yako tu.</p></a>
+                        <a href="{% url 'core:officer_members' %}" class="card feature-card text-decoration-none"><div class="feature-icon"><i class="fas fa-user-plus"></i></div><h3 class="h6">Register Member</h3><p class="text-muted mb-0 small">Sajili waumini wa zone yako.</p></a>
+                        <a href="{% url 'core:add_tithe' %}" class="card feature-card text-decoration-none"><div class="feature-icon"><i class="fas fa-plus-circle"></i></div><h3 class="h6">Record Tithe</h3><p class="text-muted mb-0 small">Weka zaka kwa member wa zone.</p></a>
+                        <a href="{% url 'core:financial_reports' %}" class="card feature-card text-decoration-none"><div class="feature-icon"><i class="fas fa-chart-column"></i></div><h3 class="h6">Zone Reports</h3><p class="text-muted mb-0 small">Ripoti ya zone yako na PDF.</p></a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-7">
+                <div class="content-panel h-100">
+                    <span class="eyebrow mb-3"><i class="fas fa-users"></i> Recent Members</span>
+                    {% for item in recent_members %}
+                    <div class="timeline-item">
+                        <div class="fw-bold">{{ item.user.get_full_name|default:item.user.username }}</div>
+                        <div class="small text-muted">{{ item.phone|default:"No phone" }} • {{ item.church_branch|default:"No branch" }}{% if item.deacon_group %} • {{ item.deacon_group.name }}{% endif %}</div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state"><i class="fas fa-user-group"></i><p class="mb-0">Hakuna members wa zone bado.</p></div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-1">
+            <div class="col-lg-6">
+                <div class="content-panel h-100">
+                    <span class="eyebrow mb-3"><i class="fas fa-receipt"></i> Recent Tithes</span>
+                    {% for item in recent_tithes %}
+                    <div class="timeline-item"><div class="fw-bold">{{ item.user.get_full_name|default:item.user.username }}</div><div class="small text-muted">{{ item.get_month_display }} {{ item.year }} • {{ item.amount }}</div></div>
+                    {% empty %}<div class="empty-state"><i class="fas fa-file-invoice-dollar"></i><p class="mb-0">Hakuna tithe records bado.</p></div>{% endfor %}
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="content-panel h-100">
+                    <span class="eyebrow mb-3"><i class="fas fa-clipboard-check"></i> Recent Activity</span>
+                    {% for item in recent_logs %}
+                    <div class="timeline-item"><div class="fw-bold">{{ item.entity_label }}</div><div class="small text-muted">{{ item.get_action_area_display }} • {{ item.get_action_type_display }} • {{ item.get_approval_status_display }}</div></div>
+                    {% empty %}<div class="empty-state"><i class="fas fa-clipboard-check"></i><p class="mb-0">Hakuna activity ya hivi karibuni.</p></div>{% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

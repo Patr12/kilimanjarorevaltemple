@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}Management Dashboard - {{ site_config.site_name|default:"KRT" }}{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <div class="row g-4 align-items-center">
+            <div class="col-lg-8">
+                <span class="eyebrow"><i class="fas fa-chess-king"></i> Management</span>
+                <h1 class="display-5 text-white mt-3">Leadership Dashboard</h1>
+                <p class="lead text-white-50">Muonekano wa juu wa mfumo kwa pastors, assistant pastors, baraza la wazee, na wasimamizi wa taasisi.</p>
+            </div>
+            <div class="col-lg-4">
+                <div class="hero-card p-4">
+                    <div class="small text-white-50 mb-2">Role</div>
+                    <div class="h4 text-white mb-0">{{ profile.get_role_display }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="site-section">
+    <div class="container">
+        {% include "core/includes/notification_center.html" %}
+        <div class="row g-4 mb-4">
+            <div class="col-md-6 col-xl-2"><div class="metric-card card h-100"><div class="feature-icon"><i class="fas fa-users"></i></div><div class="metric-value">{{ stats.members }}</div><div class="metric-label">Members</div></div></div>
+            <div class="col-md-6 col-xl-2"><div class="metric-card card h-100"><div class="feature-icon"><i class="fas fa-location-dot"></i></div><div class="metric-value">{{ stats.zones }}</div><div class="metric-label">Zones</div></div></div>
+            <div class="col-md-6 col-xl-2"><div class="metric-card card h-100"><div class="feature-icon"><i class="fas fa-church"></i></div><div class="metric-value">{{ stats.branches }}</div><div class="metric-label">Branches</div></div></div>
+            <div class="col-md-6 col-xl-2"><div class="metric-card card h-100"><div class="feature-icon"><i class="fas fa-hands-holding-circle"></i></div><div class="metric-value">{{ stats.ministries }}</div><div class="metric-label">Ministries</div></div></div>
+            <div class="col-md-6 col-xl-2"><div class="metric-card card h-100"><div class="feature-icon"><i class="fas fa-calendar-days"></i></div><div class="metric-value">{{ stats.events }}</div><div class="metric-label">Events</div></div></div>
+            <div class="col-md-6 col-xl-2"><div class="metric-card card h-100"><div class="feature-icon"><i class="fas fa-boxes-stacked"></i></div><div class="metric-value">{{ stats.assets }}</div><div class="metric-label">Assets</div></div></div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-5">
+                <div class="content-panel h-100">
+                    <span class="eyebrow mb-3"><i class="fas fa-bolt"></i> Leadership Actions</span>
+                    <div class="feature-grid">
+                        <a href="{% url 'core:officer_members' %}" class="card feature-card text-decoration-none"><div class="feature-icon"><i class="fas fa-user-plus"></i></div><h3 class="h6">Members</h3><p class="text-muted mb-0 small">Usajili na ufuatiliaji wa waumini.</p></a>
+                        <a href="{% url 'core:officer_structure' %}" class="card feature-card text-decoration-none"><div class="feature-icon"><i class="fas fa-sitemap"></i></div><h3 class="h6">Structure</h3><p class="text-muted mb-0 small">Zones, branches, na hierarchy ya usimamizi.</p></a>
+                        <a href="{% url 'core:officer_leaders' %}" class="card feature-card text-decoration-none"><div class="feature-icon"><i class="fas fa-user-tie"></i></div><h3 class="h6">Leaders</h3><p class="text-muted mb-0 small">Viongozi wa kanisa na baraza la wazee.</p></a>
+                        <a href="{% url 'core:officer_ministries' %}" class="card feature-card text-decoration-none"><div class="feature-icon"><i class="fas fa-hands-holding-circle"></i></div><h3 class="h6">Ministries</h3><p class="text-muted mb-0 small">Huduma, ratiba, na uongozi wake.</p></a>
+                        <a href="{% url 'core:asset_management' %}" class="card feature-card text-decoration-none"><div class="feature-icon"><i class="fas fa-boxes-stacked"></i></div><h3 class="h6">Assets</h3><p class="text-muted mb-0 small">Vyombo, magari, viti, majengo, na vifaa.</p></a>
+                        <a href="{% url 'core:role_assignment_dashboard' %}" class="card feature-card text-decoration-none"><div class="feature-icon"><i class="fas fa-user-shield"></i></div><h3 class="h6">Assign Roles</h3><p class="text-muted mb-0 small">Roles, zone leaders, deacon leaders, na scope.</p></a>
+                        <a href="{% url 'core:action_log_dashboard' %}" class="card feature-card text-decoration-none"><div class="feature-icon"><i class="fas fa-clipboard-check"></i></div><h3 class="h6">Approvals & Logs</h3><p class="text-muted mb-0 small">Fuatilia nani alibadilisha nini na approve actions.</p></a>
+                    </div>
+                    {% if can_full_manage %}
+                    <div class="mt-4">
+                        <a href="{% url 'core:officer_dashboard' %}" class="btn btn-primary">Open Full Management Portal</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-7">
+                <div class="content-panel h-100">
+                    <span class="eyebrow mb-3"><i class="fas fa-calendar-check"></i> Upcoming Events</span>
+                    {% for event in upcoming_events %}
+                    <div class="timeline-item">
+                        <div class="fw-bold">{{ event.title }}</div>
+                        <div class="small text-muted">{{ event.start_date|date:"M d, Y" }} • {{ event.start_time|time:"g:i A" }} • {{ event.location }}</div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state"><i class="fas fa-calendar-xmark"></i><p class="mb-0">Hakuna events za kuonyesha kwa sasa.</p></div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-1">
+            <div class="col-lg-4">
+                <div class="content-panel h-100">
+                    <span class="eyebrow mb-3"><i class="fas fa-map-location-dot"></i> Zone Leaders</span>
+                    {% for item in zone_leaders %}
+                    <div class="timeline-item">
+                        <div class="fw-bold">{{ item.zone.name }}</div>
+                        <div class="small text-muted">{{ item.user.get_full_name|default:item.user.username }} • {{ item.get_role_display }}</div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state"><i class="fas fa-location-arrow"></i><p class="mb-0">Hakuna zone leaders waliowekwa.</p></div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="content-panel h-100">
+                    <span class="eyebrow mb-3"><i class="fas fa-people-group"></i> Deacon Groups</span>
+                    {% for item in deacon_groups %}
+                    <div class="timeline-item">
+                        <div class="fw-bold">{{ item.name }}</div>
+                        <div class="small text-muted">{{ item.zone.name }} • {{ item.leader.get_full_name|default:item.leader.username|default:"No leader" }}</div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state"><i class="fas fa-users-gear"></i><p class="mb-0">Hakuna deacon groups bado.</p></div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="content-panel h-100">
+                    <span class="eyebrow mb-3"><i class="fas fa-scale-balanced"></i> Baraza La Wazee</span>
+                    {% for elder in elders %}
+                    <div class="timeline-item">
+                        <div class="fw-bold">{{ elder.user.get_full_name|default:elder.user.username }}</div>
+                        <div class="small text-muted">{{ elder.church_branch|default:"Main branch" }}{% if elder.zone %} • {{ elder.zone.name }}{% endif %}</div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state"><i class="fas fa-user-group"></i><p class="mb-0">Hakuna baraza la wazee lililosajiliwa bado.</p></div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

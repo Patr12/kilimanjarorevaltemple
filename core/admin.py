@@ -5,7 +5,9 @@ from django.contrib import admin
 from .models import (
     SiteConfig, HeroSlide, ServiceTime, Ministry, MinistryMember,
     EventCategory, Event, EventRegistration,
-    BibleVerse, ContactMessage, GalleryImage, Testimonial, Tithe
+    BibleVerse, ContactMessage, GalleryImage, Testimonial, Tithe,
+    OfferingCategory, OfferingRecord, FundraisingCampaign, FundraisingContribution,
+    ChurchAssetCategory, ChurchAsset, ActionApprovalLog
 )
 
 # ------------------------------
@@ -134,8 +136,8 @@ class TestimonialAdmin(admin.ModelAdmin):
 
 @admin.register(Tithe)
 class TitheAdmin(admin.ModelAdmin):
-    list_display = ('user', 'amount', 'month', 'year', 'status', 'payment_method', 'recorded_by', 'date_paid')
-    list_filter = ('status', 'payment_method', 'year', 'month')
+    list_display = ('user', 'amount', 'month', 'year', 'status', 'approval_status', 'payment_method', 'recorded_by', 'date_paid')
+    list_filter = ('status', 'approval_status', 'payment_method', 'year', 'month')
     search_fields = (
         'user__username',
         'user__first_name',
@@ -145,3 +147,52 @@ class TitheAdmin(admin.ModelAdmin):
     )
     autocomplete_fields = ('user', 'recorded_by')
     ordering = ('-date_paid',)
+
+
+@admin.register(OfferingCategory)
+class OfferingCategoryAdmin(admin.ModelAdmin):
+    list_display = ('name', 'category_type', 'is_active')
+    list_filter = ('category_type', 'is_active')
+    search_fields = ('name',)
+
+
+@admin.register(OfferingRecord)
+class OfferingRecordAdmin(admin.ModelAdmin):
+    list_display = ('category', 'zone', 'deacon_group', 'amount', 'approval_status', 'service_date', 'month', 'year', 'recorded_by')
+    list_filter = ('category', 'zone', 'approval_status', 'month', 'year')
+    autocomplete_fields = ('category', 'zone', 'deacon_group', 'recorded_by')
+
+
+@admin.register(FundraisingCampaign)
+class FundraisingCampaignAdmin(admin.ModelAdmin):
+    list_display = ('name', 'target_amount', 'start_date', 'end_date', 'is_active')
+    list_filter = ('is_active',)
+    search_fields = ('name',)
+
+
+@admin.register(FundraisingContribution)
+class FundraisingContributionAdmin(admin.ModelAdmin):
+    list_display = ('campaign', 'contributor', 'zone', 'amount', 'approval_status', 'contribution_date', 'recorded_by')
+    list_filter = ('campaign', 'zone', 'approval_status', 'contribution_date')
+    autocomplete_fields = ('campaign', 'contributor', 'zone', 'recorded_by')
+
+
+@admin.register(ChurchAssetCategory)
+class ChurchAssetCategoryAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+    search_fields = ('name',)
+
+
+@admin.register(ChurchAsset)
+class ChurchAssetAdmin(admin.ModelAdmin):
+    list_display = ('name', 'category', 'quantity', 'location', 'estimated_value', 'status', 'approval_status')
+    list_filter = ('category', 'status', 'approval_status')
+    search_fields = ('name', 'serial_number', 'location')
+
+
+@admin.register(ActionApprovalLog)
+class ActionApprovalLogAdmin(admin.ModelAdmin):
+    list_display = ('action_area', 'action_type', 'entity_type', 'entity_label', 'performed_by', 'approval_status', 'approved_by', 'created_at')
+    list_filter = ('action_area', 'action_type', 'approval_status', 'created_at')
+    search_fields = ('entity_type', 'entity_label', 'description', 'performed_by__username', 'approved_by__username')
+    readonly_fields = ('created_at', 'approved_at')

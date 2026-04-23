@@ -33,6 +33,16 @@
                             <input type="text" class="form-control" name="church_branch" value="{{ profile.church_branch|default:'' }}" placeholder="Mfano: Moshi mjini">
                         </div>
                         <div class="col-md-6">
+                            <label class="form-label">Marital Status</label>
+                            <select class="form-select" name="marital_status">
+                                <option value="">Select marital status</option>
+                                <option value="single" {% if profile.marital_status == 'single' %}selected{% endif %}>Single</option>
+                                <option value="married" {% if profile.marital_status == 'married' %}selected{% endif %}>Married</option>
+                                <option value="widowed" {% if profile.marital_status == 'widowed' %}selected{% endif %}>Widowed</option>
+                                <option value="divorced" {% if profile.marital_status == 'divorced' %}selected{% endif %}>Divorced</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
                             <label class="form-label">Zone</label>
                             <select class="form-select" name="zone">
                                 <option value="">Select zone</option>
@@ -40,6 +50,14 @@
                                 <option value="{{ zone.id }}" {% if profile.zone_id == zone.id %}selected{% endif %}>{{ zone.name }}</option>
                                 {% endfor %}
                             </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Spouse Name</label>
+                            <input type="text" class="form-control" name="spouse_name" value="{{ profile.spouse_name|default:'' }}" placeholder="If married">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Occupation</label>
+                            <input type="text" class="form-control" name="occupation" value="{{ profile.occupation|default:'' }}" placeholder="Occupation or service area">
                         </div>
                         <div class="col-12">
                             <label class="form-label">Ministry Role</label>
